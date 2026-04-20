@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第七章：用什麼材料蓋房子 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html" class="active">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第七章</div>
+      <h1>用什麼材料蓋房子（技術棧推薦）</h1>
+      <p class="lead">蓋房子之前，你得知道要用鋼筋還是木頭。選對技術棧，Claude Code 才能事半功倍。</p>
+    </div>
+
+    <div class="content">
+
+      <!-- ========== A. 選擇原則 ========== -->
+      <h2>選擇原則</h2>
+
+      <p>市面上的工具和服務多到眼花撩亂。身為一個想用 Claude Code 做事的非工程師，你不需要每個都懂，但你需要知道<strong>怎麼選</strong>。三個核心原則：</p>
+
+      <ol>
+        <li>
+          <strong>有 CLI 優先</strong><br>
+          CLI（Command Line Interface）= 命令列工具。Claude Code 的母語就是 Terminal，有 CLI 代表 Claude Code 可以直接用指令操作，不用截圖找按鈕。後面會詳細解釋為什麼這很省 Token。
+        </li>
+        <li>
+          <strong>API 好接、省 Token</strong><br>
+          好的 API = 一行指令就能拿到資料。不好的 API = 要寫一大堆程式碼才能拿到同樣的東西。Claude Code 多寫一行程式碼，就多花一點 Token。
+        </li>
+        <li>
+          <strong>免費額度夠用</strong><br>
+          初期的個人專案，免費額度通常就夠了。等真的有流量再升級，不要一開始就花錢。
+        </li>
+      </ol>
+
+      <div class="box box-tip">
+        <div class="box-label">重點</div>
+        你不是在選「最厲害的工具」。你是在選「跟 Claude Code 配合最好的工具」。一個有 CLI、有好 API、有免費額度的工具，比一個功能強大但只能在網頁上操作的工具有用一萬倍。
+      </div>
+
+      <!-- ========== B. 什麼需要一直跑 ========== -->
+      <h2>什麼需要「一直跑」、什麼不用</h2>
+
+      <p>在選技術方案之前，你必須先搞懂一個根本問題：<strong>你做的東西，需不需要一台「一直開著」的機器？</strong></p>
+
+      <div class="analogy">
+        <strong>白話比喻：</strong><br><br>
+        <strong>靜態網站</strong> = 傳單。你印好放在架子上，有人來就拿走看。傳單不需要一個人一直站在那邊發。<br><br>
+        <strong>後端 API</strong> = 櫃檯人員。有人來問問題，櫃檯要有人接待。櫃檯人員得一直在。<br><br>
+        <strong>資料庫</strong> = 檔案櫃。資料要隨時可以查，檔案櫃得一直開著。
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>類型</th>
+              <th>需要機器？</th>
+              <th>白話</th>
+              <th>推薦方案</th>
+              <th>費用</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>靜態網站</strong></td>
+              <td style="color: var(--green);">不用</td>
+              <td>傳單放著就好</td>
+              <td>Cloudflare Pages</td>
+              <td>免費</td>
+            </tr>
+            <tr>
+              <td><strong>前端 App</strong><br>（SPA）</td>
+              <td style="color: var(--green);">不用</td>
+              <td>比較互動的傳單（有按鈕、有動畫）</td>
+              <td>Cloudflare Pages</td>
+              <td>免費</td>
+            </tr>
+            <tr>
+              <td><strong>後端 API</strong></td>
+              <td style="color: var(--red);">要</td>
+              <td>櫃檯人員要一直在</td>
+              <td>Supabase（Edge Functions）<br>或 GCP VM</td>
+              <td>Supabase 免費額度<br>VM 約 $5-25/月</td>
+            </tr>
+            <tr>
+              <td><strong>資料庫</strong></td>
+              <td style="color: var(--red);">要</td>
+              <td>檔案櫃要一直開著</td>
+              <td>Supabase（PostgreSQL）</td>
+              <td>免費額度 500MB</td>
+            </tr>
+            <tr>
+              <td><strong>排程 Cron Job</strong></td>
+              <td style="color: var(--yellow);">看情況</td>
+              <td>鬧鐘定時做事</td>
+              <td>Supabase Cron<br>或 GCP Cloud Scheduler</td>
+              <td>免費~幾毛</td>
+            </tr>
+            <tr>
+              <td><strong>LINE Bot</strong></td>
+              <td style="color: var(--red);">要</td>
+              <td>自動回訊息的客服，隨時待命</td>
+              <td>Supabase Edge Functions<br>或 GCP VM</td>
+              <td>免費~$10/月</td>
+            </tr>
+            <tr>
+              <td><strong>爬蟲</strong></td>
+              <td style="color: var(--yellow);">看情況</td>
+              <td>派人去別的網站抄資料，做完就閒著</td>
+              <td>GCP VM（需要時開）<br>或本機跑</td>
+              <td>免費~幾元/月</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">為什麼要在意「需不需要機器」？</div>
+        因為這直接影響你的成本和維護難度。不需要機器的東西（靜態網站、前端 App），部署到 Cloudflare Pages 就是免費、零維護。需要機器的東西，你就得選方案、付錢、監控它有沒有掛掉。
+      </div>
+
+      <!-- ========== C. 推薦組合 ========== -->
+      <h2>推薦組合</h2>
+
+      <p>以下是經過實戰驗證、跟 Claude Code 搭配最好的技術棧組合：</p>
+
+      <h3>1. 前端：React 或 Vue + Vite</h3>
+      <p><strong>React</strong> 和 <strong>Vue</strong> 是目前最主流的兩個前端框架。Vite 是讓開發速度變快的工具（你改了程式碼，瀏覽器幾乎立刻就更新）。</p>
+      <p>部署到 <strong>Cloudflare Pages</strong>：</p>
+      <ul>
+        <li>免費額度非常大方（每月 500 次建構、不限流量）</li>
+        <li>有 CLI 工具 <code>wrangler</code>，Claude Code 可以直接用指令部署</li>
+        <li>全球 CDN，速度很快</li>
+      </ul>
+
+      <h3>2. 後端 / 資料庫：Supabase</h3>
+      <p>Supabase 是一個「開箱即用」的後端服務。它底層用的是 PostgreSQL（目前最受歡迎的資料庫之一），但它幫你處理了很多複雜的設定。</p>
+      <p>為什麼特別推薦？</p>
+      <ul>
+        <li><strong>API 好接</strong>——它用 PostgREST，意思是你只要在 Supabase 裡建好資料表，它就自動幫你生成 API。不用自己寫後端程式碼</li>
+        <li><strong>View 包複雜邏輯</strong>——如果你的查詢很複雜（例如：查出「最近 7 天、金額超過 1000 元、狀態是已付款」的訂單），你可以在資料庫裡建一個 View（虛擬表），把複雜邏輯藏在裡面。前端只要簡單呼叫 View 就好</li>
+        <li><strong>有 CLI 管 Migration</strong>——Migration 是資料庫結構的版本控制。Claude Code 可以用 <code>supabase</code> CLI 來管理資料庫變更，不用你手動去網站上操作</li>
+      </ul>
+
+      <div class="analogy">
+        <strong>白話：</strong>Supabase 就像一個「自帶檔案管理員的檔案櫃」。你建好抽屜（資料表），它就自動幫你安排一個人坐在旁邊，別人來拿資料就直接給（API）。你不用自己雇一個人坐在那邊。
+      </div>
+
+      <h3>3. 版控：GitHub</h3>
+      <p>GitHub 是程式碼的管理平台（像程式碼的 Google Drive）。為什麼選它？</p>
+      <ul>
+        <li>有 <code>gh</code> CLI——Claude Code 可以直接用指令建立 Repository、發 Pull Request、管理 Issue</li>
+        <li>是業界標準，跟所有工具都能整合</li>
+        <li>免費帳號就夠用</li>
+      </ul>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>用途</th>
+              <th>推薦工具</th>
+              <th>CLI 工具</th>
+              <th>免費額度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>前端部署</td>
+              <td>Cloudflare Pages</td>
+              <td><code>wrangler</code></td>
+              <td>非常充裕</td>
+            </tr>
+            <tr>
+              <td>後端 / 資料庫</td>
+              <td>Supabase</td>
+              <td><code>supabase</code></td>
+              <td>500MB 資料庫 + 50K API calls/月</td>
+            </tr>
+            <tr>
+              <td>版控</td>
+              <td>GitHub</td>
+              <td><code>gh</code></td>
+              <td>免費（公開/私有 repo 都行）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ========== D. GCP VM 什麼時候需要 ========== -->
+      <h2>GCP VM 什麼時候需要</h2>
+
+      <h3>VM 是什麼？</h3>
+      <p>VM（Virtual Machine）= 在雲端租一台 24 小時開著的電腦。它不在你桌上，但你可以遠端連上去操作，就像遠端遙控一台電腦。</p>
+
+      <h3>VM 規格的白話翻譯</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>規格</th>
+              <th>白話</th>
+              <th>例子</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CPU</strong></td>
+              <td>腦袋聰不聰明（同時處理幾件事）</td>
+              <td>1 vCPU = 一次做一件事<br>4 vCPU = 同時做四件事</td>
+            </tr>
+            <tr>
+              <td><strong>RAM（記憶體）</strong></td>
+              <td>桌子夠不夠大（同時放幾份文件）</td>
+              <td>1GB = 小桌子，跑簡單程式<br>8GB = 大桌子，跑資料庫沒問題</td>
+            </tr>
+            <tr>
+              <td><strong>Disk（硬碟）</strong></td>
+              <td>儲藏室的容量</td>
+              <td>10GB = 放程式碼夠了<br>100GB = 可以存大量資料</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>什麼時候需要 VM？三個場景</h3>
+
+      <div class="compare">
+        <div class="compare-good">
+          <div class="compare-label">免費方案就夠的情況</div>
+          <div class="code-block">
+<strong>場景一：個人網站 + 簡單後端</strong><br><br>
+- 前端用 Cloudflare Pages（免費）<br>
+- 後端用 Supabase Edge Functions（免費）<br>
+- 資料庫用 Supabase PostgreSQL（免費 500MB）<br><br>
+月流量幾千人以內，完全不用花錢。<br><br>
+<span style="color: var(--green);">總成本：$0/月</span>
+          </div>
+        </div>
+        <div class="compare-bad">
+          <div class="compare-label">需要 VM 的情況</div>
+          <div class="code-block">
+<strong>場景二：LINE Bot + 爬蟲 + 排程</strong><br><br>
+- LINE Bot 要 24 小時待命<br>
+- 爬蟲每天定時跑<br>
+- 需要自訂的背景程式<br><br>
+這些 Supabase 免費方案做不到，<br>
+你需要一台自己的機器。<br><br>
+<span style="color: var(--yellow);">GCP e2-micro：免費~$5/月</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">場景三：正式產品上線</div>
+        當你的產品有付費使用者、需要高可靠度、需要自訂環境時，就該考慮正式的 VM 了。例如 GCP 的 e2-small 或 e2-medium，月費約 $15-25 美元。但在那之前，先用免費方案驗證你的想法值不值得花錢。
+      </div>
+
+      <!-- ========== E. CLI 省 Token 的觀念 ========== -->
+      <h2>CLI 省 Token 的觀念</h2>
+
+      <p>這是很多人忽略但<strong>極度影響成本</strong>的觀念。讓 Claude Code 操作一個服務，有兩種方式：</p>
+
+      <h3>瀏覽器操作 vs CLI 操作</h3>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">用瀏覽器操作（很花 Token）</div>
+          <div class="code-block">
+Claude Code 要做的事：<br>
+1. 截圖整個畫面 → 花 Token<br>
+2. 分析圖片找按鈕位置 → 花 Token<br>
+3. 點擊按鈕 → 花 Token<br>
+4. 等頁面載入 → 花時間<br>
+5. 再截圖確認結果 → 花 Token<br>
+6. 分析結果圖片 → 花 Token<br><br>
+一個簡單的「部署網站」動作<br>
+= 6+ 個步驟 = 大量 Token<br><br>
+<span style="color: var(--red);">Token 成本：高</span>
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">用 CLI 操作（超省 Token）</div>
+          <div class="code-block">
+Claude Code 要做的事：<br>
+1. 打一行指令<br><br>
+<code>wrangler pages deploy ./dist</code><br><br>
+結束。<br><br>
+<span style="color: var(--green);">Token 成本：極低</span>
+          </div>
+        </div>
+      </div>
+
+      <p>差距有多大？用瀏覽器操作一個動作可能要花幾千到幾萬個 Token（因為截圖轉成的 Token 量非常驚人）。用 CLI 只要幾十個 Token。<strong>差距可以到 100 倍以上</strong>。</p>
+
+      <h3>常用 CLI 工具一覽</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>CLI 工具</th>
+              <th>用途</th>
+              <th>對應服務</th>
+              <th>一行指令範例</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>wrangler</code></td>
+              <td>部署網站、管理 Workers</td>
+              <td>Cloudflare</td>
+              <td><code>wrangler pages deploy ./dist</code></td>
+            </tr>
+            <tr>
+              <td><code>gh</code></td>
+              <td>管理 GitHub repo、PR、Issue</td>
+              <td>GitHub</td>
+              <td><code>gh pr create --title "修 bug"</code></td>
+            </tr>
+            <tr>
+              <td><code>supabase</code></td>
+              <td>管理資料庫、跑 Migration</td>
+              <td>Supabase</td>
+              <td><code>supabase db push</code></td>
+            </tr>
+            <tr>
+              <td><code>gcloud</code></td>
+              <td>管理 VM、雲端資源</td>
+              <td>Google Cloud</td>
+              <td><code>gcloud compute ssh my-vm</code></td>
+            </tr>
+            <tr>
+              <td><code>vercel</code></td>
+              <td>部署前端/全端專案</td>
+              <td>Vercel</td>
+              <td><code>vercel deploy --prod</code></td>
+            </tr>
+            <tr>
+              <td><code>npm</code></td>
+              <td>管理套件、跑腳本</td>
+              <td>Node.js 生態</td>
+              <td><code>npm run build</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">選工具的鐵則</div>
+        如果一個服務沒有 CLI，Claude Code 就只能用截圖+點按鈕的方式操作，<strong>Token 成本會暴增</strong>。所以在選服務的時候，「有沒有 CLI」是最優先的考量。
+      </div>
+
+      <!-- ========== F. Computer Use 延伸 ========== -->
+      <h2>Computer Use 延伸</h2>
+
+      <p>前面說 CLI 很省 Token，那 Claude 操作瀏覽器（Computer Use）就完全不能用嗎？不是的。Computer Use 有它適合的場景。</p>
+
+      <h3>什麼是 Computer Use？</h3>
+      <p>在 Claude Desktop 上，Claude 可以直接操控你的電腦畫面——移動滑鼠、點擊按鈕、打字、滾動頁面。就像有一隻看不見的手在操作你的電腦。</p>
+
+      <h3>什麼時候適合用 Computer Use？</h3>
+      <ul>
+        <li><strong>沒有 CLI / API 的服務</strong>——有些網站或應用程式就是只有網頁介面，沒有其他選擇。例如某些政府網站、銀行後台</li>
+        <li><strong>一次性的設定工作</strong>——例如第一次設定某個服務帳號、填表單。反正只做一次，Token 多花一點也還好</li>
+        <li><strong>視覺確認</strong>——需要「看一下畫面長什麼樣」的場景。例如確認網頁排版有沒有跑版</li>
+        <li><strong>教學示範</strong>——Claude 可以一步一步在畫面上標示給你看，像一個老師在你螢幕上畫圈圈指導你</li>
+      </ul>
+
+      <div class="compare">
+        <div class="compare-good">
+          <div class="compare-label">適合 Computer Use</div>
+          <div class="code-block">
+- 在沒有 API 的網站上操作<br>
+- 一次性的帳號設定<br>
+- 確認網頁視覺效果<br>
+- 填寫線上表單<br>
+- 教學示範步驟
+          </div>
+        </div>
+        <div class="compare-bad">
+          <div class="compare-label">不適合 Computer Use</div>
+          <div class="code-block">
+- 重複執行的日常操作<br>
+  （用 CLI 取代）<br>
+- 大量資料處理<br>
+  （用 API 取代）<br>
+- 部署和版控<br>
+  （用 wrangler/gh 取代）
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">總結</div>
+        能用 CLI 就用 CLI（省 Token、快、穩定）。沒有 CLI 的時候才用 Computer Use。混合使用才是最聰明的策略。
+      </div>
+
+      <!-- Chapter Navigation -->
+      <div class="chapter-nav">
+        <a href="chapter6.html" class="prev">
+          <span class="nav-label">上一章</span>
+          <span class="nav-title">Claude Code 是什麼</span>
+        </a>
+        <a href="chapter8.html" class="next">
+          <span class="nav-label">下一章</span>
+          <span class="nav-title">API 是什麼</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

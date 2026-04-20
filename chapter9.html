@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第九章：術語快速理解 — Claude Code 指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html" class="active">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html" class="active">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第九章</div>
+      <h1>術語快速理解（字典頁）</h1>
+      <p class="lead">不用會操作，知道是什麼就好。遇到不懂的詞，來這裡查。</p>
+    </div>
+
+    <div class="content">
+
+      <div class="box box-info">
+        <div class="box-label">使用方式</div>
+        這頁是字典，不是教科書。你不需要從頭讀到尾。<br>
+        遇到看不懂的術語 → 按 <code>Ctrl+F</code>（Mac 是 <code>Cmd+F</code>）搜尋 → 看「一句話白話」就夠了。
+      </div>
+
+      <!-- A. 資料相關 -->
+      <h2>資料相關</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>一句話白話</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>SQL</code></td>
+              <td>高級 Excel，多張表可以互相查詢</td>
+              <td>檔案櫃，抽屜之間可以互相參照</td>
+            </tr>
+            <tr>
+              <td><code>NoSQL</code></td>
+              <td>不用固定格式的資料庫</td>
+              <td>百寶箱，什麼形狀都能丟進去</td>
+            </tr>
+            <tr>
+              <td><code>Migration</code></td>
+              <td>資料庫的版本控制，記錄每次結構變更</td>
+              <td>施工日誌，記錄什麼時候拆牆、什麼時候加插座</td>
+            </tr>
+            <tr>
+              <td><code>ORM</code></td>
+              <td>用程式語言操作資料庫，不用寫 SQL</td>
+              <td>翻譯官，你說中文他幫你翻成 SQL</td>
+            </tr>
+            <tr>
+              <td><code>Schema</code></td>
+              <td>資料庫的設計藍圖，定義有哪些表、哪些欄位</td>
+              <td>建築平面圖，標好幾間房、每間放什麼</td>
+            </tr>
+            <tr>
+              <td><code>CRUD</code></td>
+              <td>Create / Read / Update / Delete 四種基本操作</td>
+              <td>新增、查詢、修改、刪除 — 資料操作的四個動作</td>
+            </tr>
+            <tr>
+              <td><code>Query</code></td>
+              <td>向資料庫「問問題」的指令</td>
+              <td>去檔案櫃找一份特定的文件</td>
+            </tr>
+            <tr>
+              <td><code>Index</code></td>
+              <td>資料庫的索引，加速查詢</td>
+              <td>書本的目錄，有了目錄就不用一頁一頁翻</td>
+            </tr>
+            <tr>
+              <td><code>Cache</code></td>
+              <td>暫存常用資料，下次不用重新算</td>
+              <td>便利貼，把常查的電話號碼貼在桌上</td>
+            </tr>
+            <tr>
+              <td><code>JSON</code></td>
+              <td>一種資料格式，用大括號 {} 和方括號 []</td>
+              <td>填好的表格，程式之間用來傳資料的標準格式</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- B. AI / LLM 相關 -->
+      <h2>AI / LLM 相關</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>一句話白話</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>RAG</code></td>
+              <td>讓 AI 先翻你的資料再回答，不是只靠記憶</td>
+              <td>給 AI 一本公司手冊，讓它翻書回答</td>
+            </tr>
+            <tr>
+              <td><code>Token（LLM）</code></td>
+              <td>AI 處理文字的最小單位，講越多花越多</td>
+              <td>字數費，每個字都在跳表計費</td>
+            </tr>
+            <tr>
+              <td><code>Token（認證）</code></td>
+              <td>登入後拿到的通行證，下次不用再輸入密碼</td>
+              <td>遊樂園手環，戴著就能自由進出</td>
+            </tr>
+            <tr>
+              <td><code>Prompt</code></td>
+              <td>給 AI 的指令或問題</td>
+              <td>工作交辦事項，寫得越清楚結果越好</td>
+            </tr>
+            <tr>
+              <td><code>Fine-tuning</code></td>
+              <td>用自己的資料額外訓練 AI</td>
+              <td>新人職前訓練，讓 AI 更懂你的領域</td>
+            </tr>
+            <tr>
+              <td><code>Embedding</code></td>
+              <td>把文字轉成數字向量，讓電腦能計算語意距離</td>
+              <td>把書本內容變成地圖上的座標，相似的內容距離近</td>
+            </tr>
+            <tr>
+              <td><code>Context Window</code></td>
+              <td>AI 一次能記住多少內容的上限</td>
+              <td>桌面大小，桌面越大能同時攤開的資料越多</td>
+            </tr>
+            <tr>
+              <td><code>Hallucination</code></td>
+              <td>AI 一本正經地胡說八道</td>
+              <td>考生不會寫但硬掰一個看起來很像的答案</td>
+            </tr>
+            <tr>
+              <td><code>Agent</code></td>
+              <td>能自己規劃步驟、使用工具的 AI</td>
+              <td>不只會回答問題，還會自己動手做事的助理</td>
+            </tr>
+            <tr>
+              <td><code>MCP</code></td>
+              <td>Model Context Protocol，AI 連接外部工具的標準</td>
+              <td>USB 規格，讓 AI 能插上各種工具使用</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">注意：Token 有兩個意思</div>
+        在 AI 領域，Token 是「文字計費單位」。<br>
+        在網頁開發領域，Token 是「登入通行證」。<br>
+        看到 Token 這個詞，要看上下文判斷是哪個意思。
+      </div>
+
+      <!-- C. 部署 / 維運相關 -->
+      <h2>部署 / 維運相關</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>一句話白話</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Docker</code></td>
+              <td>把程式和它需要的環境打包成一個箱子</td>
+              <td>標準貨櫃，不管到哪個港口都能卸貨</td>
+            </tr>
+            <tr>
+              <td><code>CI/CD</code></td>
+              <td>程式碼推上去後，自動測試 + 自動部署</td>
+              <td>自動化產線，零件進去、成品出來</td>
+            </tr>
+            <tr>
+              <td><code>Cron Job</code></td>
+              <td>定時執行的任務</td>
+              <td>鬧鐘，每天固定時間叫你起床做事</td>
+            </tr>
+            <tr>
+              <td><code>Heartbeat</code></td>
+              <td>定時回報「我還活著」的機制</td>
+              <td>每 10 分鐘按一次門鈴，沒人按就代表出事了</td>
+            </tr>
+            <tr>
+              <td><code>Cold Start</code></td>
+              <td>服務休眠後重新啟動的等待時間</td>
+              <td>冬天熱車，放太久就要等引擎暖起來</td>
+            </tr>
+            <tr>
+              <td><code>Health Check</code></td>
+              <td>確認服務還活著、能正常回應</td>
+              <td>量血壓，定期確認身體機能正常</td>
+            </tr>
+            <tr>
+              <td><code>Uptime</code></td>
+              <td>服務不間斷運行的時間</td>
+              <td>連續營業天數，越長代表越穩定</td>
+            </tr>
+            <tr>
+              <td><code>Ping</code></td>
+              <td>敲一下對方看有沒有回應</td>
+              <td>打電話問「你在嗎？」有人接就代表還活著</td>
+            </tr>
+            <tr>
+              <td><code>Deploy</code></td>
+              <td>把寫好的程式放到伺服器上讓別人能用</td>
+              <td>把做好的菜端上桌，客人可以吃了</td>
+            </tr>
+            <tr>
+              <td><code>Rollback</code></td>
+              <td>發現新版有問題，退回上一個版本</td>
+              <td>菜炒壞了，趕快重做上一盤</td>
+            </tr>
+            <tr>
+              <td><code>Serverless</code></td>
+              <td>不用自己管伺服器，用多少付多少</td>
+              <td>不用自己買車養車，叫計程車就好</td>
+            </tr>
+            <tr>
+              <td><code>VM (Virtual Machine)</code></td>
+              <td>在一台電腦裡面虛擬出另一台電腦</td>
+              <td>大房子隔成小套房出租</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- D. 網路 / 安全相關 -->
+      <h2>網路 / 安全相關</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>一句話白話</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>SSL / HTTPS</code></td>
+              <td>加密連線，確保傳輸過程不被偷看</td>
+              <td>密封信封，只有收件人能打開</td>
+            </tr>
+            <tr>
+              <td><code>DNS</code></td>
+              <td>把網址翻譯成 IP 位址</td>
+              <td>電話簿，查「王小明」找到他的電話號碼</td>
+            </tr>
+            <tr>
+              <td><code>Webhook</code></td>
+              <td>有事主動通知你，不用你一直去問</td>
+              <td>快遞到了打電話叫你下來拿</td>
+            </tr>
+            <tr>
+              <td><code>env 環境變數</code></td>
+              <td>密碼和設定值，不寫在程式碼裡</td>
+              <td>保險箱密碼寫在另一張紙上，不刻在門上</td>
+            </tr>
+            <tr>
+              <td><code>CORS</code></td>
+              <td>跨網域存取限制，防止別人的網站偷你的資料</td>
+              <td>不同大樓之間的通行證，沒通行證不能進</td>
+            </tr>
+            <tr>
+              <td><code>Auth</code></td>
+              <td>身份驗證，確認「你是誰」</td>
+              <td>出示身份證，門衛確認你是本人</td>
+            </tr>
+            <tr>
+              <td><code>OAuth</code></td>
+              <td>用 Google / Facebook 帳號登入其他網站</td>
+              <td>用公司識別證進合作夥伴的辦公室</td>
+            </tr>
+            <tr>
+              <td><code>JWT</code></td>
+              <td>一種 Token 格式，裝著你的身份資訊</td>
+              <td>電子會員卡，掃一下就知道你是誰、有什麼權限</td>
+            </tr>
+            <tr>
+              <td><code>Rate Limiting</code></td>
+              <td>限制每秒能發幾次請求</td>
+              <td>排隊管制，一次只能進 10 個人</td>
+            </tr>
+            <tr>
+              <td><code>Firewall</code></td>
+              <td>網路防火牆，擋掉不該進來的流量</td>
+              <td>社區警衛室，檢查每個進出的人</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- E. 開發工具相關 -->
+      <h2>開發工具相關</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>一句話白話</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Git</code></td>
+              <td>程式碼的版本控制系統</td>
+              <td>Word 的「追蹤修訂」功能，能看到每次改了什麼</td>
+            </tr>
+            <tr>
+              <td><code>npm / pnpm</code></td>
+              <td>安裝 JavaScript 套件的工具</td>
+              <td>App Store，別人寫好的工具你直接裝來用</td>
+            </tr>
+            <tr>
+              <td><code>Lint</code></td>
+              <td>程式碼風格檢查工具</td>
+              <td>校稿，自動抓錯字和格式不一致</td>
+            </tr>
+            <tr>
+              <td><code>TypeScript</code></td>
+              <td>有型別限制的 JavaScript</td>
+              <td>填表格有格式限制的版本 — 姓名欄不能填數字</td>
+            </tr>
+            <tr>
+              <td><code>Framework</code></td>
+              <td>開發框架，提供一整套結構和規範</td>
+              <td>蓋房子的鋼骨結構，有了骨架才好往上蓋</td>
+            </tr>
+            <tr>
+              <td><code>Library</code></td>
+              <td>工具庫，需要什麼拿什麼</td>
+              <td>工具箱裡的各種工具，你挑你要的用</td>
+            </tr>
+            <tr>
+              <td><code>IDE</code></td>
+              <td>寫程式用的編輯器（如 VS Code、Cursor）</td>
+              <td>程式設計師的 Word，但功能強大很多</td>
+            </tr>
+            <tr>
+              <td><code>Terminal</code></td>
+              <td>用打字下指令操作電腦的介面</td>
+              <td>電腦的對講機，不用滑鼠，用文字跟電腦說話</td>
+            </tr>
+            <tr>
+              <td><code>Package</code></td>
+              <td>別人寫好的程式碼打包成一包</td>
+              <td>預拌粉，不用自己磨麵粉，加水就能用</td>
+            </tr>
+            <tr>
+              <td><code>Dependency</code></td>
+              <td>你的程式依賴的其他套件</td>
+              <td>食材清單，少了一樣就煮不出這道菜</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">Framework vs Library 差在哪？</div>
+        <strong>Framework</strong>（框架）= 它規定你怎麼寫，你在它的架構裡填東西。像是蓋房子先有鋼骨，你往裡面塞隔間。<br>
+        <strong>Library</strong>（工具庫）= 你需要什麼就拿什麼，主導權在你手上。像是工具箱，你決定用扳手還是螺絲起子。<br><br>
+        例：Next.js 是 Framework（規定你檔案怎麼放、路由怎麼走）；lodash 是 Library（你想用哪個函式就 import 哪個）。
+      </div>
+
+      <!-- F. 常用套件 / 概念補充 -->
+      <h2>常用套件與概念</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>一句話白話</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>i18n</code></td>
+              <td>internationalization，多國語言套件</td>
+              <td>網站的翻譯年糕，讓同一個網站能顯示不同語言</td>
+            </tr>
+            <tr>
+              <td><code>Tailwind CSS</code></td>
+              <td>用 class 名稱直接寫樣式的 CSS 工具</td>
+              <td>樂高積木式的排版，用小積木組合出畫面</td>
+            </tr>
+            <tr>
+              <td><code>Zustand / Redux</code></td>
+              <td>前端的狀態管理工具</td>
+              <td>中央控制室，所有頁面的資料都從這裡拿</td>
+            </tr>
+            <tr>
+              <td><code>Supabase</code></td>
+              <td>開源的 Firebase 替代品，提供資料庫 + 認證 + 儲存</td>
+              <td>後端懶人包，不用自己架伺服器</td>
+            </tr>
+            <tr>
+              <td><code>Prisma</code></td>
+              <td>Node.js 的 ORM 工具，用 TypeScript 操作資料庫</td>
+              <td>翻譯官的 TypeScript 版</td>
+            </tr>
+            <tr>
+              <td><code>Vercel</code></td>
+              <td>前端部署平台，推上去就能自動部署</td>
+              <td>一鍵開店平台，程式碼放上去就變成網站</td>
+            </tr>
+            <tr>
+              <td><code>Next.js</code></td>
+              <td>React 的全端框架，前後端都能做</td>
+              <td>全能廚房，從食材處理到擺盤上桌全包</td>
+            </tr>
+            <tr>
+              <td><code>React</code></td>
+              <td>最流行的前端 UI 工具庫</td>
+              <td>蓋網頁的積木系統，用元件組合出畫面</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- G. 前端 / 後端概念 -->
+      <h2>前端 / 後端概念</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>一句話白話</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Frontend（前端）</code></td>
+              <td>使用者看到的畫面</td>
+              <td>餐廳的用餐區，客人看到的一切</td>
+            </tr>
+            <tr>
+              <td><code>Backend（後端）</code></td>
+              <td>使用者看不到的邏輯和資料處理</td>
+              <td>廚房，客人看不到但真正做事的地方</td>
+            </tr>
+            <tr>
+              <td><code>Full-stack</code></td>
+              <td>前端 + 後端都會</td>
+              <td>從外場到廚房都能做的全能員工</td>
+            </tr>
+            <tr>
+              <td><code>SSR</code></td>
+              <td>Server-Side Rendering，在伺服器端先畫好頁面再送出</td>
+              <td>餐廳直接端成品，不用你自己組裝</td>
+            </tr>
+            <tr>
+              <td><code>CSR</code></td>
+              <td>Client-Side Rendering，在瀏覽器端才畫頁面</td>
+              <td>自助餐，食材送到你面前你自己夾</td>
+            </tr>
+            <tr>
+              <td><code>SPA</code></td>
+              <td>Single Page Application，整個網站只有一個 HTML 頁面</td>
+              <td>像 App 一樣順暢，不用每次換頁都重新載入</td>
+            </tr>
+            <tr>
+              <td><code>Component</code></td>
+              <td>可重複使用的 UI 零件</td>
+              <td>樂高積木塊，一個按鈕、一張卡片就是一個元件</td>
+            </tr>
+            <tr>
+              <td><code>State</code></td>
+              <td>元件的「目前狀態」</td>
+              <td>開關的「開」或「關」、購物車裡有幾件商品</td>
+            </tr>
+            <tr>
+              <td><code>Middleware</code></td>
+              <td>請求到達目的地之前經過的「關卡」</td>
+              <td>機場安檢，在你到達登機門之前先檢查一輪</td>
+            </tr>
+            <tr>
+              <td><code>Route（路由）</code></td>
+              <td>網址對應到哪個頁面或功能</td>
+              <td>門牌號碼，/about 對應「關於我們」頁面</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- H. 版本控制 / 協作 -->
+      <h2>版本控制 / 協作</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>一句話白話</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>Branch</code></td>
+              <td>程式碼的分支，讓你在不影響主線的情況下開發</td>
+              <td>平行宇宙，在另一個世界改東西不會影響本尊</td>
+            </tr>
+            <tr>
+              <td><code>Merge</code></td>
+              <td>把分支的改動合併回主線</td>
+              <td>把平行宇宙的成果搬回本尊</td>
+            </tr>
+            <tr>
+              <td><code>Pull Request (PR)</code></td>
+              <td>請求把你的分支合併到主線，讓人審核</td>
+              <td>交作業請老師批改，老師 OK 才能交卷</td>
+            </tr>
+            <tr>
+              <td><code>Commit</code></td>
+              <td>存一個版本紀錄，附上說明</td>
+              <td>存檔點，遊戲裡的 Save Point</td>
+            </tr>
+            <tr>
+              <td><code>Conflict</code></td>
+              <td>兩個人改了同一段程式碼，Git 不知道用哪個</td>
+              <td>兩個人同時改同一份文件的同一段，要人工決定留哪個</td>
+            </tr>
+            <tr>
+              <td><code>Repository (Repo)</code></td>
+              <td>專案的程式碼倉庫</td>
+              <td>一個專案的所有檔案 + 歷史紀錄的資料夾</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">本章重點</div>
+        這頁的目的不是要你全部背起來。<br><br>
+        當你跟 Claude Code 對話時看到不懂的詞，回來這裡查一下就好。<br>
+        知道「那個詞是什麼意思」，就能減少好幾輪來回對話，直接省 Token。
+      </div>
+
+      <!-- Chapter Navigation -->
+      <div class="chapter-nav">
+        <a href="chapter8.html" class="prev">
+          <span class="nav-label">上一章</span>
+          <span class="nav-title">API 是什麼（房子怎麼接水接電）</span>
+        </a>
+        <a href="chapter10.html" class="next">
+          <span class="nav-label">下一章</span>
+          <span class="nav-title">蓋大樓才會遇到的問題（進階觀念）</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第三章：正確的工作流程 — Claude Code 指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html" class="active">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html" class="active">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第三章</div>
+      <h1>正確的工作流程</h1>
+      <p class="lead">你不會跟建築師說「幫我蓋房子」就等交屋。你會先看樣品屋、討論格局、看設計圖，最後才動工。跟 AI 做專案也一樣。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <!-- 1. 新手 vs 正確做法 -->
+    <h2>新手的做法 vs 正確的做法</h2>
+
+    <p>絕大多數新手拿到 AI 工具，第一件事就是打一段話：「幫我做一個 XXX。」然後 AI 噴出 50 個檔案，你看不懂、改不動，最後砍掉重練。</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">新手的做法</div>
+        <div class="code-block">
+你：「幫我做一個 CRM 系統。」<br><br>
+AI：（生成 50 個檔案、3 個資料表、<br>
+用了你沒聽過的框架、<br>
+加了你不需要的功能）<br><br>
+你：「等等，這不是我要的......」<br>
+你：「這個拿掉、那個改掉」<br>
+你：「為什麼改了 A 功能，B 壞了？」<br>
+你：「算了，砍掉重練。」<br><br>
+<span style="color: var(--red);">花了 3 小時 + 大量 Token = 什麼都沒得到</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">正確的做法</div>
+        <div class="code-block">
+Step 1：Demo（10 分鐘）<br>
+Step 2：確認邊界（10 分鐘）<br>
+Step 3：規劃架構（20 分鐘）<br>
+Step 4：正式開始寫（省時省 Token）<br><br>
+<span style="color: var(--green);">花了 40 分鐘 + 少量 Token = 方向正確</span>
+        </div>
+      </div>
+    </div>
+
+    <p>接下來我們一步一步看，正確的流程到底怎麼做。</p>
+
+    <!-- 2. Step 1: Demo -->
+    <h2>第一步：先做 Demo（10 分鐘）</h2>
+
+    <p>任何專案的第一步，不是「開始做」，而是「先看個樣子」。</p>
+
+    <div class="analogy">
+      <strong>比喻：先看樣品屋，再討論格局</strong><br><br>
+      你要買房子，不會直接在設計圖上簽約。你會先去看樣品屋——走進去感受空間大小、看看動線、摸摸建材。看完之後你才有「感覺」：客廳太小、廚房要開放式、浴室要乾濕分離。<br><br>
+      <strong>Demo 就是你的樣品屋。</strong>它不需要完美，甚至不需要能用。它只需要讓你「看到」一個大概的樣子，這樣你才能開始說出具體的意見。
+    </div>
+
+    <p>怎麼跟 AI 要一個 Demo：</p>
+
+    <div class="code-block">
+你：「我想做一個客戶管理系統。先不要做完整版，<br>
+幫我做一個最簡單的 Demo：<br><br>
+- 一個頁面就好<br>
+- 有一個客戶列表（假資料）<br>
+- 可以點進去看客戶詳情<br>
+- 用最簡單的方式做，不用資料庫，假資料寫在程式碼裡就好<br><br>
+目的是讓我看到畫面，確認方向對不對。」
+    </div>
+
+    <p>10 分鐘後，你就有一個可以看、可以點的東西。這時候你才能真正開始思考：「這個跟我想的一不一樣？」</p>
+
+    <div class="box box-tip">
+      <div class="box-label">Demo 的關鍵</div>
+      <strong>Demo 不是最終版本。</strong>它就是一個用來「確認方向」的拋棄式原型。不要在 Demo 上修修補補變成正式版——那條路是災難。看完 Demo、確認方向後，才開始正式做。
+    </div>
+
+    <!-- 3. Step 2: 確認邊界 -->
+    <h2>第二步：看著 Demo 確認邊界</h2>
+
+    <p>有了 Demo，你現在可以做第二章講的「邊界確認」了。因為你有東西可以指著說：</p>
+
+    <ul>
+      <li>「這個列表要加<strong>搜尋</strong>功能」</li>
+      <li>「客戶詳情頁<strong>不需要</strong>編輯功能，只看就好」</li>
+      <li>「<strong>不要</strong>做刪除客戶，怕誤刪」</li>
+      <li>「列表要能<strong>按日期排序</strong>」</li>
+      <li>「手機上也要能看，<strong>RWD</strong> 是必須的」</li>
+    </ul>
+
+    <p>這些需求在看到 Demo 之前，你可能根本想不到。因為人類是視覺動物——<strong>看到東西才能反應</strong>。</p>
+
+    <div class="analogy">
+      <strong>比喻：看了樣品屋之後的對話</strong><br><br>
+      看樣品屋之前：「我想要一個舒服的家。」（模糊到不行）<br><br>
+      看樣品屋之後：「客廳太小要加大、廚房要做開放式、主臥的窗戶方向不對，冬天會西曬、浴室要有浴缸不要淋浴間。」<br><br>
+      <strong>看了之後你才知道自己要什麼、不要什麼。</strong>
+    </div>
+
+    <p>把你看完 Demo 的所有想法整理成一份清單，分成「要加的」和「不要的」。這份清單就是你的<strong>邊界文件</strong>。</p>
+
+    <!-- 4. Step 3: 規劃架構 -->
+    <h2>第三步：規劃架構（最重要的一步）</h2>
+
+    <p>確認了要做什麼、不做什麼之後，接下來不是直接開始寫程式，而是<strong>先把架構規劃好</strong>。</p>
+
+    <div class="analogy">
+      <strong>比喻：蓋房子的地基</strong><br><br>
+      地基是房子最先做、也最不起眼的部分。但地基歪了，上面蓋得再漂亮都沒用——整棟樓都是歪的。<br><br>
+      軟體的「地基」就是<strong>資料庫設計</strong>和<strong>架構決策</strong>。這些東西一旦確定了，後面要改的成本非常高。
+    </div>
+
+    <p>在這一步，你需要跟 AI 討論（不是直接叫它寫程式）的事情：</p>
+
+    <h3>3-1. 資料庫欄位設計</h3>
+
+    <p>資料庫就像你的檔案櫃。每一格抽屜放什麼、怎麼分類，一開始就要決定好。後面要改抽屜的格局，等於把所有文件搬出來重新分類。</p>
+
+    <div class="code-block">
+你：「先不要寫程式。幫我規劃客戶資料表的欄位：<br><br>
+必要欄位：姓名、電話、Email、公司名稱<br>
+可選欄位：備註、標籤<br>
+系統欄位：建立時間、最後更新時間<br><br>
+問題：<br>
+1. 一個客戶可以有多個聯絡人嗎？（如果可以，要拆成兩個表）<br>
+2. 標籤是固定選項還是自由輸入？<br>
+3. 需要記錄誰建立的嗎？（多人使用的話需要）」
+    </div>
+
+    <h3>3-2. 計算邏輯放哪裡</h3>
+
+    <p>如果你的系統有計算功能（例如：訂單總金額、庫存數量），你需要決定計算邏輯放在<strong>前端</strong>（使用者的瀏覽器）還是<strong>後端</strong>（伺服器）。</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>放前端</th>
+            <th>放後端</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>速度快、體驗好</td>
+            <td>資料準確、安全</td>
+          </tr>
+          <tr>
+            <td>但使用者可以「竄改」</td>
+            <td>但每次都要等網路</td>
+          </tr>
+          <tr>
+            <td>適合：顯示用途（即時預覽價格）</td>
+            <td>適合：金流相關（實際扣款金額）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>3-3. 耦合預告：哪些東西會互相影響</h3>
+
+    <p><strong>耦合</strong>的意思是「A 和 B 綁在一起，動了 A 就會影響 B」。在規劃階段，你需要先知道哪些功能是「綁在一起」的，這樣做的時候才不會一改就壞。</p>
+
+    <div class="analogy">
+      <strong>比喻：衣櫃跟電線</strong><br><br>
+      你在房間靠牆放了一個大衣櫃，結果衣櫃後面剛好是電線的接線盒。現在要修電線，得先把 50 公斤的衣櫃搬開。<br><br>
+      如果一開始就知道接線盒在這裡，衣櫃就不會放這個位置。<br><br>
+      <strong>耦合預告就是先標出「接線盒在哪」，避免以後搬衣櫃的痛苦。</strong>
+    </div>
+
+    <p>常見的耦合範例：</p>
+    <ul>
+      <li>使用者權限 ↔ 頁面顯示（改了權限規則，每個頁面都要跟著改）</li>
+      <li>商品價格 ↔ 訂單計算（價格欄位改了，訂單那邊也要改）</li>
+      <li>上傳功能 ↔ 儲存空間（檔案格式改了，儲存的邏輯也要改）</li>
+    </ul>
+
+    <h3>3-4. SSOT：單一真理來源在哪裡</h3>
+
+    <p><strong>SSOT</strong>（Single Source of Truth）翻譯成白話就是：<strong>同一筆資料只存在一個地方。</strong></p>
+
+    <div class="analogy">
+      <strong>比喻：公司通訊錄</strong><br><br>
+      公司有一份通訊錄。如果每個部門都各自維護一份，A 部門改了電話，B 部門不知道，就會打到舊號碼。<br><br>
+      正確做法：只有一份「正式通訊錄」放在公司系統上，所有部門都看這一份。誰改了，大家都看得到。<br><br>
+      <strong>那份「正式通訊錄」就是 SSOT。</strong>在軟體裡，某筆資料應該只存在一個地方（通常是資料庫），其他地方需要用就去那裡查，不要各自存一份。
+    </div>
+
+    <p>在規劃架構時問 AI：</p>
+
+    <div class="code-block">
+你：「這個系統的 SSOT 在哪裡？<br>
+客戶資料的唯一來源是 Supabase 的 customers 表？<br>
+還是有些資料會另外存在 localStorage？<br>
+我想確認不會出現資料不同步的問題。」
+    </div>
+
+    <!-- 5. Step 4: 正式開始寫 -->
+    <h2>第四步：正式開始寫</h2>
+
+    <p>做完前三步，你現在有了：</p>
+
+    <ol>
+      <li>一個看得到的 Demo（知道長什麼樣）</li>
+      <li>一份邊界清單（知道要什麼、不要什麼）</li>
+      <li>一份架構規劃（知道資料結構、技術選擇、耦合風險）</li>
+    </ol>
+
+    <p>現在才是正式開始寫程式的時候。而且因為前面的功課做足了，你下指令的品質會好很多：</p>
+
+    <div class="code-block">
+你：「根據我們剛才討論的架構，開始正式實作。<br><br>
+先做第一個功能：客戶列表頁<br>
+- 資料從 Supabase 的 customers 表讀取<br>
+- 欄位：姓名、公司、電話、最後聯絡日期<br>
+- 預設按最後聯絡日期排序（最近的在上面）<br>
+- 頂部有搜尋框，即時過濾（前端過濾）<br>
+- RWD，手機版用卡片式而不是表格<br>
+- 不要做分頁，先用無限滾動<br>
+- 不要做刪除功能<br><br>
+做完這個再做下一個，一次做一個功能。」
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">一次做一個功能</div>
+      不要一口氣叫 AI 做完整個系統。<strong>一次做一個功能，確認沒問題再做下一個。</strong>這樣出問題才知道是哪裡出的，也比較好修。就像蓋房子，一層一層蓋，每層驗收完才蓋下一層。
+    </div>
+
+    <!-- 6. 為什麼不能跳過 -->
+    <h2>為什麼不能跳過第二步和第三步</h2>
+
+    <div class="box box-warning">
+      <div class="box-label">警告</div>
+      <strong>如果你跳過第二步（確認邊界）和第三步（規劃架構）直接開始做，你會花更多 Token 來回修改。</strong><br><br>
+      因為你省掉的不是「時間」，而是「思考」。那些你沒想清楚的問題，不會消失——它們只會在你做到一半的時候爆出來，而且修起來的成本是事先想清楚的 5-10 倍。<br><br>
+      改設計圖只要擦掉一條線重畫。改已經蓋好的牆，要拆、要補、要重新粉刷。
+    </div>
+
+    <p>常見的「跳過就會後悔」的情境：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>跳過了什麼</th>
+            <th>後果</th>
+            <th>修復成本</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>沒確認要不要多語言</td>
+            <td>做完才加 i18n，30 個檔案全部要改</td>
+            <td>是一開始就做的 10 倍</td>
+          </tr>
+          <tr>
+            <td>沒確認權限設計</td>
+            <td>做到一半才發現「管理員跟一般使用者看到的頁面不同」，整個路由要重寫</td>
+            <td>是一開始就規劃的 5 倍</td>
+          </tr>
+          <tr>
+            <td>沒設計好資料庫</td>
+            <td>做到第三個功能才發現表格結構不對，要 migrate 還可能丟資料</td>
+            <td>是一開始就設計好的 8 倍</td>
+          </tr>
+          <tr>
+            <td>沒確認手機版需求</td>
+            <td>整個 UI 做完才說要 RWD，每個元件都要調整</td>
+            <td>是一開始就考慮 RWD 的 3 倍</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 7. 總結比喻 -->
+    <h2>本章小結：蓋房子的完整流程</h2>
+
+    <div class="analogy">
+      <strong>把整個流程用蓋房子來比喻：</strong><br><br>
+      <strong>Step 1 看樣品屋（Demo）</strong><br>
+      你走進建商的樣品屋，感受空間大小、看看格局、摸摸建材。這讓你從「我想要一個家」變成「我想要這種感覺的家」。<br><br>
+      <strong>Step 2 跟建築師討論格局（確認邊界）</strong><br>
+      你指著樣品屋說：「客廳要再大一點、廚房要開放式、不要浴缸要淋浴間、這個儲藏室不需要。」你說出了「要什麼」和「不要什麼」。<br><br>
+      <strong>Step 3 看設計圖（規劃架構）</strong><br>
+      建築師畫出設計圖、結構圖、水電配置圖。你確認地基怎麼打、管線怎麼走、承重牆在哪裡。這些一旦動工就很難改。<br><br>
+      <strong>Step 4 動工（正式開始寫）</strong><br>
+      一切確認完畢，才開始打地基、灌漿、砌牆。一層一層蓋，每層驗收。<br><br>
+      <strong>你不會跟建築師說「幫我蓋房子」就等交屋。跟 AI 做專案也一樣。</strong>
+    </div>
+
+    <p>記住這個流程：<strong>Demo → 確認 → 規劃 → 執行</strong>。看起來多花了時間，但實際上省下的是來回修改的 Token、砍掉重練的時間、以及抓不到 bug 的挫折感。</p>
+
+    <div class="box box-info">
+      <div class="box-label">給自己的提醒</div>
+      下次你打開 Claude Code 想說「幫我做一個 XXX」的時候，先停三秒鐘，改成說：<br><br>
+      <strong>「幫我做一個 XXX 的最簡單 Demo，先不用完整功能，讓我看看大概的樣子。」</strong><br><br>
+      光是這一句話的改變，就能省你好幾個小時。
+    </div>
+
+    <!-- Chapter Navigation -->
+    <div class="chapter-nav">
+      <a href="chapter2.html" class="prev">
+        <span class="nav-label">上一章</span>
+        <span class="nav-title">怎麼跟 LLM 下指令</span>
+      </a>
+      <a href="chapter4.html" class="next">
+        <span class="nav-label">下一章</span>
+        <span class="nav-title">你缺什麼知識</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

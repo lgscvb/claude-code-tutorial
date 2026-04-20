@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>附錄：常見問題 — Claude Code 指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html" class="active">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html" class="active">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">附錄</div>
+      <h1>常見問題</h1>
+      <p class="lead">這裡收錄了非工程師最常問的問題：錯誤訊息怎麼讀、密碼為什麼不能寫在程式裡、Git 到底是什麼。看完這些，你跟 AI 的溝通效率會再上一個台階。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <!-- ===== A. 錯誤訊息怎麼讀 ===== -->
+    <h2>錯誤訊息怎麼讀：不要看到紅字就慌</h2>
+
+    <p>很多非工程師看到一大片紅色的錯誤訊息就慌了。但其實，你只需要知道怎麼找<strong>三個關鍵資訊</strong>：</p>
+
+    <ol>
+      <li><strong>錯誤類型</strong>（通常在第一行或最後一行）</li>
+      <li><strong>錯誤訊息</strong>（告訴你發生了什麼事）</li>
+      <li><strong>出錯位置</strong>（在哪個檔案的第幾行）</li>
+    </ol>
+
+    <p>來看一個實際的錯誤訊息：</p>
+
+    <div class="code-block">
+<span style="color: var(--text-muted);">Traceback (most recent call last):</span><br>
+<span style="color: var(--text-muted);">  File "/app/routes/user.py", line 42, in get_user</span><br>
+<span style="color: var(--text-muted);">    result = db.query("SELECT * FROM users WHERE id = " + user_id)</span><br>
+<span style="color: var(--text-muted);">  File "/app/database.py", line 15, in query</span><br>
+<span style="color: var(--text-muted);">    cursor.execute(sql)</span><br>
+<span style="color: var(--red);"><strong>TypeError: can only concatenate str (not "int") to str</strong></span>
+    </div>
+
+    <p>拆解一下：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>部分</th>
+            <th>在哪裡</th>
+            <th>告訴你什麼</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color: var(--red);"><strong>TypeError</strong></td>
+            <td>最後一行的開頭</td>
+            <td>錯誤類型：類型錯誤（數字和文字不能直接相加）</td>
+          </tr>
+          <tr>
+            <td style="color: var(--red);"><strong>can only concatenate str...</strong></td>
+            <td>最後一行的說明</td>
+            <td>錯誤原因：你想把「字串」和「整數」接在一起</td>
+          </tr>
+          <tr>
+            <td style="color: var(--yellow);"><strong>user.py, line 42</strong></td>
+            <td>中間的 Traceback</td>
+            <td>出錯位置：user.py 檔案的第 42 行</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-muted);">Traceback 中間部分</td>
+            <td>第 2-5 行</td>
+            <td>Stack trace：從哪裡開始、經過哪裡、在哪裡爆掉</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Stack Trace = 麵包屑</h3>
+
+    <div class="analogy">
+      <strong>比喻：追蹤犯罪現場。</strong><br><br>
+      Stack trace 就像犯罪現場的監視器畫面。它告訴你：<br><br>
+      「嫌犯從 A 房間出發 → 經過 B 走廊 → 在 C 房間犯案」<br><br>
+      最上面是起點，最下面是出事的地方。通常你只需要看<strong>最下面幾行</strong>就夠了。
+    </div>
+
+    <h3>常見錯誤類型速查</h3>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>錯誤類型</th>
+            <th>白話意思</th>
+            <th>常見原因</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>TypeError</code></td>
+            <td>類型搞錯了</td>
+            <td>把數字當文字用、把空值當物件用</td>
+          </tr>
+          <tr>
+            <td><code>SyntaxError</code></td>
+            <td>語法寫錯了</td>
+            <td>少了括號、多了逗號、拼錯字</td>
+          </tr>
+          <tr>
+            <td><code>ReferenceError</code></td>
+            <td>找不到這個東西</td>
+            <td>變數名字打錯、忘了引入模組</td>
+          </tr>
+          <tr>
+            <td><code>404 Not Found</code></td>
+            <td>頁面不存在</td>
+            <td>網址打錯、檔案被刪了、路由沒設定</td>
+          </tr>
+          <tr>
+            <td><code>500 Internal Server Error</code></td>
+            <td>伺服器炸了</td>
+            <td>後端程式有 bug、資料庫連不上</td>
+          </tr>
+          <tr>
+            <td><code>403 Forbidden</code></td>
+            <td>你沒有權限</td>
+            <td>沒登入、API key 過期、IP 被擋</td>
+          </tr>
+          <tr>
+            <td><code>CORS Error</code></td>
+            <td>跨網域被擋</td>
+            <td>前端和後端網域不同，後端沒開放</td>
+          </tr>
+          <tr>
+            <td><code>ECONNREFUSED</code></td>
+            <td>連線被拒絕</td>
+            <td>服務沒啟動、port 錯誤</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">最有效的求助方式</div>
+      看到錯誤訊息？<strong>整段複製貼給 Claude。</strong>不要只說「它壞了」或「跑不動」。<br><br>
+      完整的錯誤訊息包含了 Claude 需要的所有線索：錯誤類型、出錯位置、呼叫堆疊。<br>
+      你甚至不需要看懂它——直接複製貼上就是最好的溝通方式。
+    </div>
+
+    <!-- ===== B. .env ===== -->
+    <h2>.env 環境變數：你的密碼本</h2>
+
+    <h3>為什麼密碼不能寫在程式碼裡？</h3>
+
+    <p>想像這個場景：你寫了一個程式，裡面直接寫了你的資料庫密碼。然後你把程式碼上傳到 GitHub（一個公開的程式碼平台）。</p>
+
+    <p>恭喜，<strong>全世界都看到你的密碼了</strong>。</p>
+
+    <p>這不是開玩笑。每天都有人因為把密碼上傳到 GitHub 而被駭客入侵。GitHub 上有專門的爬蟲，24 小時在掃描新上傳的 API 金鑰。</p>
+
+    <div class="analogy">
+      <strong>比喻：把保險箱密碼寫在大門上。</strong><br><br>
+      你不會把家裡保險箱的密碼寫在大門上對吧？<br><br>
+      把密碼寫在程式碼裡再上傳到 GitHub，就是在做這件事。<br>
+      程式碼是公開的 = 大門是透明的 = 所有人都看得到你的密碼。
+    </div>
+
+    <h3>.env 是什麼？</h3>
+
+    <p><code>.env</code> 就是「環境變數檔案」，白話說就是<strong>密碼本</strong>。它是一個純文字檔，裡面存放所有敏感資訊：</p>
+
+    <div class="code-block">
+<span style="color: var(--text-muted);"># .env 檔案的內容長這樣：</span><br>
+<br>
+<span style="color: var(--blue);">DATABASE_URL</span>=postgresql://user:password123@localhost:5432/mydb<br>
+<span style="color: var(--blue);">STRIPE_SECRET_KEY</span>=sk_live_abc123def456<br>
+<span style="color: var(--blue);">LINE_CHANNEL_SECRET</span>=your_channel_secret_here<br>
+<span style="color: var(--blue);">OPENAI_API_KEY</span>=sk-proj-xxxxxxxxxxx
+    </div>
+
+    <p>重點來了：<code>.env</code> 這個檔案<strong>只放在你的電腦上，絕對不上傳到 GitHub</strong>。</p>
+
+    <p>怎麼確保不上傳？在 <code>.gitignore</code>（Git 的「忽略清單」）裡加上 <code>.env</code>，Git 就會自動忽略這個檔案。</p>
+
+    <h3>.env.example 是什麼？</h3>
+
+    <p><code>.env.example</code> 是「密碼本的模板」。它告訴其他人「你需要填哪些密碼」，但不包含真實的值。</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">.env（真正的密碼本 — 不上傳）</div>
+        <div class="code-block">
+DATABASE_URL=postgresql://admin:<br>
+　realpassword@db.example.com<br>
+STRIPE_KEY=sk_live_real_key_123<br>
+API_SECRET=my_actual_secret
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">.env.example（模板 — 可以上傳）</div>
+        <div class="code-block">
+DATABASE_URL=your_database_url_here<br>
+STRIPE_KEY=your_stripe_key_here<br>
+API_SECRET=your_api_secret_here<br>
+<br>
+<span style="color: var(--green);"># 只有欄位名稱，沒有真實值</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-danger">
+      <div class="box-label">必記原則</div>
+      <strong>.env = 密碼本</strong>，只存在你的電腦上，絕不上傳。<br>
+      <strong>.env.example = 密碼本模板</strong>，告訴別人需要填什麼，可以上傳。<br><br>
+      如果 Claude 幫你寫的程式碼裡出現了 <code>sk_live_</code>、<code>password123</code> 之類的真實密碼，<strong>馬上叫它改成環境變數</strong>。
+    </div>
+
+    <!-- ===== C. Git 基礎 ===== -->
+    <h2>Git 基礎：程式碼的「追蹤修訂」</h2>
+
+    <p>如果你用過 Word 的「追蹤修訂」功能，你就已經理解 Git 的核心概念了。</p>
+
+    <div class="analogy">
+      <strong>Git = 程式碼的追蹤修訂功能。</strong><br><br>
+      想像你在寫一篇論文。每隔一段時間你就「另存新檔」：論文v1、論文v2、論文v3...。這樣如果改壞了，還可以回到之前的版本。<br><br>
+      Git 做的就是這件事，但比「另存新檔」高級一百倍：<br>
+      - 它記錄每一次修改了什麼（不是整份文件的副本）<br>
+      - 它可以讓多人同時編輯同一個專案<br>
+      - 它可以把修改上傳到雲端（GitHub）備份
+    </div>
+
+    <h3>核心概念對照表</h3>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Git 術語</th>
+            <th>白話意思</th>
+            <th>生活比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>commit</strong></td>
+            <td>存一個紀錄點</td>
+            <td>遊戲的存檔點。隨時可以回到這裡</td>
+          </tr>
+          <tr>
+            <td><strong>push</strong></td>
+            <td>上傳到雲端</td>
+            <td>把存檔上傳到雲端備份（GitHub）</td>
+          </tr>
+          <tr>
+            <td><strong>pull</strong></td>
+            <td>從雲端下載</td>
+            <td>把別人的最新存檔下載下來</td>
+          </tr>
+          <tr>
+            <td><strong>branch</strong></td>
+            <td>分支 / 平行宇宙</td>
+            <td>在分支上改東西，不影響主線。安全地實驗</td>
+          </tr>
+          <tr>
+            <td><strong>merge</strong></td>
+            <td>合併</td>
+            <td>把平行宇宙合併回主線。實驗成功了就併入</td>
+          </tr>
+          <tr>
+            <td><strong>clone</strong></td>
+            <td>複製整個專案</td>
+            <td>把別人的專案整份複製到你的電腦上</td>
+          </tr>
+          <tr>
+            <td><strong>staging</strong></td>
+            <td>準備區</td>
+            <td>把要存檔的東西先放到「待存清單」</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>最常用的 5 個 Git 指令</h3>
+
+    <div class="code-block">
+<span style="color: var(--accent-light);"># 1. 查看現在的狀態（有什麼檔案被改了？）</span><br>
+<span style="color: var(--green);">git status</span><br>
+<br>
+<span style="color: var(--accent-light);"># 2. 把修改的檔案加到「待存清單」</span><br>
+<span style="color: var(--green);">git add .</span>　　　　　<span style="color: var(--text-muted);"># 加全部</span><br>
+<span style="color: var(--green);">git add index.html</span>　<span style="color: var(--text-muted);"># 只加指定檔案</span><br>
+<br>
+<span style="color: var(--accent-light);"># 3. 存檔（建立一個存檔點）</span><br>
+<span style="color: var(--green);">git commit -m "修好了登入頁面的 bug"</span><br>
+<br>
+<span style="color: var(--accent-light);"># 4. 上傳到 GitHub</span><br>
+<span style="color: var(--green);">git push</span><br>
+<br>
+<span style="color: var(--accent-light);"># 5. 下載別人的最新修改</span><br>
+<span style="color: var(--green);">git pull</span>
+    </div>
+
+    <h3>Branch 的概念：平行宇宙</h3>
+
+    <div class="code-block">
+<strong style="color: var(--accent-light);">Branch 的運作方式</strong><br>
+<br>
+main（主線）：　A ── B ── C ── D ── E（穩定版本）<br>
+　　　　　　　　　　　　 \　　　　 /<br>
+feature/login：　　　　　 X ── Y ──（實驗新功能）<br>
+<br>
+<span style="color: var(--text-muted);">在 C 的時候，你開了一個新分支叫 feature/login</span><br>
+<span style="color: var(--text-muted);">在分支上做了 X 和 Y 兩次修改</span><br>
+<span style="color: var(--text-muted);">測試沒問題後，在 E 的位置合併回 main</span><br>
+<span style="color: var(--text-muted);">如果實驗失敗？直接刪掉分支，main 完全不受影響</span>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">你不需要手動打這些指令</div>
+      大部分時候，Claude Code 會幫你處理 Git 操作。但你需要<strong>知道這些概念</strong>，這樣當 Claude 說「我幫你建了一個 branch」或「要不要 commit 這些修改」時，你才知道它在說什麼。
+    </div>
+
+    <!-- ===== D. 常用套件速覽 ===== -->
+    <h2>常用套件速覽</h2>
+
+    <p>「套件」（Package）就是別人寫好的工具，你可以直接拿來用，不需要自己從頭寫。就像蓋房子不需要自己燒磚——去建材行買就好。</p>
+
+    <h3>i18n（國際化 / 多語言支持）</h3>
+
+    <div class="box box-warning">
+      <div class="box-label">超重要：一開始就要規劃！</div>
+      i18n 是 <strong>internationalization</strong> 的縮寫（i 和 n 之間有 18 個字母）。它讓你的網站支援多國語言。<br><br>
+      <strong>為什麼一開始就要規劃？</strong>因為如果你的網站寫了 200 頁之後才要加多語言，你得把 200 頁的文字一個一個抽出來。這是噩夢等級的工程。<br><br>
+      一開始就規劃 i18n，就是把文字全部放在翻譯檔裡面（而不是寫死在程式碼裡）。之後要加新語言，只需要新增一個翻譯檔就好。
+    </div>
+
+    <h3>常見套件列表</h3>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>套件</th>
+            <th>功能</th>
+            <th>白話說</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Tailwind CSS</strong></td>
+            <td>用 class 寫樣式</td>
+            <td>不用另外寫 CSS 檔，直接在 HTML 上寫 class 就有樣式。像是「預製傢俱」</td>
+          </tr>
+          <tr>
+            <td><strong>React</strong></td>
+            <td>前端 UI 框架</td>
+            <td>把網頁拆成一塊一塊的「元件」，重複使用。蓋積木式的網頁</td>
+          </tr>
+          <tr>
+            <td><strong>Next.js</strong></td>
+            <td>React 的加強版</td>
+            <td>React + 路由 + SSR + API，一個框架搞定全部</td>
+          </tr>
+          <tr>
+            <td><strong>Express</strong></td>
+            <td>Node.js 後端框架</td>
+            <td>用 JavaScript 寫後端 API 最常用的工具</td>
+          </tr>
+          <tr>
+            <td><strong>Prisma</strong></td>
+            <td>資料庫工具（ORM）</td>
+            <td>用 JavaScript 操作資料庫，不用寫 SQL。像是「資料庫翻譯機」</td>
+          </tr>
+          <tr>
+            <td><strong>Zod</strong></td>
+            <td>資料驗證</td>
+            <td>確保收到的資料格式正確。像是「品管員」</td>
+          </tr>
+          <tr>
+            <td><strong>next-intl / i18next</strong></td>
+            <td>多語言支持</td>
+            <td>讓你的網站支援中文、英文、日文等多國語言</td>
+          </tr>
+          <tr>
+            <td><strong>Stripe</strong></td>
+            <td>金流服務</td>
+            <td>讓你的網站能收信用卡。不用自己處理刷卡的複雜流程</td>
+          </tr>
+          <tr>
+            <td><strong>Resend / Nodemailer</strong></td>
+            <td>寄信服務</td>
+            <td>程式自動寄 email（驗證信、通知信、電子報）</td>
+          </tr>
+          <tr>
+            <td><strong>Sharp</strong></td>
+            <td>圖片處理</td>
+            <td>壓縮、裁切、轉檔圖片。讓網站載入更快</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">你不需要記住這些套件</div>
+      這張表是給你「認臉」用的。當 Claude 說「我用 Prisma 幫你寫 DB 查詢」或「要不要加 Zod 做 input validation」的時候，你至少知道它在說什麼。<br><br>
+      需要什麼套件？直接問 Claude：「我想做 XXX 功能，該用什麼套件？」
+    </div>
+
+    <!-- Chapter Nav -->
+    <div class="chapter-nav">
+      <a href="chapter11.html" class="prev">
+        <span class="nav-label">上一章</span>
+        <span class="nav-title">工具生態</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

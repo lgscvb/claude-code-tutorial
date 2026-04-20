@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第四章：你缺什麼知識 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html" class="active">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第四章</div>
+      <h1>你缺什麼知識</h1>
+      <p class="lead">根目錄、路徑、前後端、Domain、子路由——這些不是「工程師才需要知道的東西」，而是你跟 AI 溝通時的基本語言。少了這些字彙，每一句話都在燒 Token。</p>
+    </div>
+
+    <div class="content">
+
+      <!-- ===== 根目錄與路徑 ===== -->
+      <h2>根目錄與路徑：你家的地址</h2>
+
+      <div class="analogy">
+        <strong>比喻：你家的地址。</strong><br><br>
+        「根目錄」就是你家的大門。「路徑」就是從大門走到廚房怎麼走。<br><br>
+        你不會跟外送員說「就那個有桌子的地方」，你會說「三樓左轉第二間」。<br>
+        跟 AI 講話也一樣——你得告訴它「檔案在哪裡」，而不是「就那個檔案」。
+      </div>
+
+      <h3>什麼是根目錄？</h3>
+      <p>根目錄（Root Directory）就是你的專案的「家」。所有東西都住在這裡面。</p>
+      <p>在 Mac 上，一個典型的專案路徑長這樣：</p>
+      <div class="code-block">
+/Users/你的名字/Desktop/my-project/
+      </div>
+      <p>把這串路徑拆開來看：</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>片段</th>
+              <th>意思</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>/</code></td>
+              <td>整台電腦的最頂層</td>
+              <td>地球</td>
+            </tr>
+            <tr>
+              <td><code>Users/</code></td>
+              <td>所有使用者的資料夾</td>
+              <td>台灣</td>
+            </tr>
+            <tr>
+              <td><code>你的名字/</code></td>
+              <td>你自己的帳號空間</td>
+              <td>你住的城市</td>
+            </tr>
+            <tr>
+              <td><code>Desktop/</code></td>
+              <td>桌面</td>
+              <td>你家那條街</td>
+            </tr>
+            <tr>
+              <td><code>my-project/</code></td>
+              <td>你的專案資料夾（根目錄）</td>
+              <td>你家</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>所以當 AI 問你「根目錄在哪？」，它就是在問：「你家地址是什麼？」</p>
+
+      <h3>絕對路徑 vs 相對路徑</h3>
+
+      <div class="analogy">
+        <strong>絕對路徑 = 從地球開始講的完整地址</strong><br>
+        「台灣 / 台北市 / 信義區 / XX路 / 100號 / 3樓」<br><br>
+        <strong>相對路徑 = 從你現在站的位置怎麼走</strong><br>
+        「左轉 → 走到底 → 第二間」
+      </div>
+
+      <p>用電腦的語言來說：</p>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">絕對路徑（從根開始）</div>
+          <div class="code-block">
+/Users/jason/Desktop/my-project/src/index.html
+          </div>
+          <p style="margin-top:8px; font-size:14px;">不管你人在哪裡，這個地址都能找到它。</p>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">相對路徑（從你現在的位置）</div>
+          <div class="code-block">
+./src/index.html
+          </div>
+          <p style="margin-top:8px; font-size:14px;">「從我現在站的地方，走進 src 資料夾，找到 index.html」</p>
+        </div>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">小提示</div>
+        <code>./</code> 代表「現在這裡」，<code>../</code> 代表「往上走一層（回到上一個資料夾）」。<br>
+        就像你在三樓說「往樓下走一層」就是 <code>../</code>。
+      </div>
+
+      <h3>跟 Claude 溝通的範例</h3>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">模糊的說法</div>
+          <div class="code-block">
+「幫我改那個 HTML 檔案」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">精準的說法</div>
+          <div class="code-block">
+「幫我改 /src/pages/index.html<br>裡面第 30 行的標題文字」
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">Mac 使用者的路徑神技</div>
+        在 Finder 中選好你要的資料夾，按下 <strong>Command + Option + C</strong>，就能直接複製完整路徑。<br><br>
+        然後回到 Claude Code 對話框，貼上路徑，直接跟 LLM 說：<br>
+        「我的專案在 <code>/Users/xxx/Desktop/my-project/</code>，幫我修改裡面的 <code>index.html</code>」<br><br>
+        這個快捷鍵可以省掉你手動拼路徑的痛苦，也避免打錯字浪費 Token。
+      </div>
+
+      <!-- ===== 前端與後端 ===== -->
+      <h2>前端與後端：餐廳的用餐區和廚房</h2>
+
+      <div class="analogy">
+        <strong>前端 = 餐廳的用餐區</strong>（客人看到的一切：菜單、裝潢、服務生）<br><br>
+        <strong>後端 = 餐廳的廚房</strong>（客人看不到的，但出餐全靠它：廚師、爐子、備料流程）<br><br>
+        <strong>資料庫 = 冰箱</strong>（食材都存在這裡，需要的時候廚房去拿）
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>餐廳比喻</th>
+              <th>實際是什麼</th>
+              <th>常見技術</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>前端 Frontend</strong></td>
+              <td>用餐區、菜單、裝潢</td>
+              <td>你在瀏覽器看到的一切——按鈕、文字、動畫、表單</td>
+              <td>HTML、CSS、JavaScript、React、Vue</td>
+            </tr>
+            <tr>
+              <td><strong>後端 Backend</strong></td>
+              <td>廚房、廚師、備料流程</td>
+              <td>處理邏輯的伺服器——登入驗證、付款、計算</td>
+              <td>Node.js、Python、Java、Go</td>
+            </tr>
+            <tr>
+              <td><strong>資料庫 Database</strong></td>
+              <td>冰箱</td>
+              <td>存放資料的地方——使用者帳號、訂單紀錄、文章</td>
+              <td>PostgreSQL、MySQL、MongoDB</td>
+            </tr>
+            <tr>
+              <td><strong>API</strong></td>
+              <td>傳菜口</td>
+              <td>前端跟後端溝通的窗口（下一章會詳細講）</td>
+              <td>REST API、GraphQL</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>當你跟 AI 說「那個東西壞了」，它需要知道是「用餐區壞了」（前端 bug）還是「廚房壞了」（後端 bug）。差別在哪？</p>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">前端的問題（用餐區）</div>
+          <div class="code-block">
+按鈕按了沒反應<br>
+文字跑版、重疊<br>
+手機上看排版亂掉<br>
+動畫卡卡的
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">後端的問題（廚房）</div>
+          <div class="code-block">
+登入之後一直跳回登入頁<br>
+資料存了但下次打開不見了<br>
+付款成功但訂單沒建立<br>
+打開頁面等超過 10 秒
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">為什麼要分這麼清楚？</div>
+        因為前端和後端的「修理方法」完全不同。<br>
+        你跟 AI 說「按鈕按了沒反應」，它得知道——是按鈕本身壞了（前端 JavaScript），還是按鈕送出去的請求沒回來（後端 API）。<br>
+        講對方向，AI 一次就能幫你修好；講錯方向，來回三輪才找到問題。
+      </div>
+
+      <!-- ===== Domain Name ===== -->
+      <h2>Domain Name（網域）：網站的門牌號碼</h2>
+
+      <div class="analogy">
+        <strong>Domain Name 就是網站的門牌號碼。</strong><br><br>
+        <code>google.com</code> 就是 Google 的地址，就像「信義路 100 號」是某棟大樓的地址。<br>
+        你不用記住大樓的 GPS 座標（IP 位址），只要記門牌（Domain）就好。
+      </div>
+
+      <h3>Domain 的結構</h3>
+
+      <p>把 <code>mail.google.com</code> 拆開來看：</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>部分</th>
+              <th>叫什麼</th>
+              <th>比喻</th>
+              <th>例子</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.com</code></td>
+              <td>頂級域名 TLD</td>
+              <td>哪一區（商業區 / 政府區）</td>
+              <td>.com / .org / .tw / .io</td>
+            </tr>
+            <tr>
+              <td><code>google</code></td>
+              <td>主域名</td>
+              <td>哪棟大樓</td>
+              <td>google / facebook / amazon</td>
+            </tr>
+            <tr>
+              <td><code>mail</code></td>
+              <td>子網域 Subdomain</td>
+              <td>大樓裡的哪個部門</td>
+              <td>mail / docs / drive / api</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-block">
+<span style="color: var(--green);">mail</span>.<span style="color: var(--accent-light);">google</span>.<span style="color: var(--blue);">com</span><br>
+<span style="color: var(--green);">子網域</span>　<span style="color: var(--accent-light);">主域名</span>　<span style="color: var(--blue);">頂級域名</span><br><br>
+
+更多例子：<br>
+<span style="color: var(--green);">docs</span>.<span style="color: var(--accent-light);">google</span>.<span style="color: var(--blue);">com</span>　　→ Google 的文件部門<br>
+<span style="color: var(--green);">api</span>.<span style="color: var(--accent-light);">example</span>.<span style="color: var(--blue);">com</span>　 → example 的 API 入口<br>
+<span style="color: var(--green);">blog</span>.<span style="color: var(--accent-light);">mysite</span>.<span style="color: var(--blue);">com</span>　　→ 我的網站的部落格
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">你可以這樣跟 Claude 說</div>
+        「我的網站是 myapp.com，我想要加一個子網域 blog.myapp.com 放部落格。」<br>
+        「API 放在 api.myapp.com，前端放在 app.myapp.com。」
+      </div>
+
+      <!-- ===== 子路由、前綴、後綴 ===== -->
+      <h2>子路由、前綴與後綴：網站裡的走廊</h2>
+
+      <h3>路由（Route）= 網站的走廊</h3>
+
+      <div class="analogy">
+        <strong>路由就是網站裡面的門牌。</strong><br><br>
+        Domain 告訴你「哪棟大樓」，路由告訴你「大樓裡面走到哪」。<br><br>
+        <code>example.com<strong>/products</strong></code> → 走到商品區<br>
+        <code>example.com<strong>/about</strong></code> → 走到「關於我們」<br>
+        <code>example.com<strong>/products/123</strong></code> → 走到商品區，找編號 123 的商品
+      </div>
+
+      <div class="code-block">
+https://example.com/products/123<br><br>
+https://　　　　→ 通訊協定（怎麼連線的，先不管）<br>
+example.com　　 → Domain（哪棟大樓）<br>
+/products/　　　→ 路由第一層（商品區）<br>
+123　　　　　　 → 路由第二層（編號 123 的商品）
+      </div>
+
+      <h3>前綴（Prefix）和後綴（Suffix）</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>白話</th>
+              <th>在哪裡看到</th>
+              <th>例子</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>前綴 Prefix</strong></td>
+              <td>加在前面的標記</td>
+              <td>子網域、API 路徑開頭</td>
+              <td><code><span style="color:var(--green);">api</span>.example.com</code> 的 <code>api</code><br><code>example.com/<span style="color:var(--green);">v2</span>/users</code> 的 <code>v2</code></td>
+            </tr>
+            <tr>
+              <td><strong>後綴 Suffix</strong></td>
+              <td>加在後面的標記</td>
+              <td>檔案的副檔名</td>
+              <td><code>index<span style="color:var(--accent-light);">.html</span></code> / <code>style<span style="color:var(--accent-light);">.css</span></code> / <code>app<span style="color:var(--accent-light);">.js</span></code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>常見副檔名（後綴）對照表</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>副檔名</th>
+              <th>全名</th>
+              <th>白話</th>
+              <th>類比</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.html</code></td>
+              <td>HyperText Markup Language</td>
+              <td>網頁的骨架</td>
+              <td>像 Word 的 .doc</td>
+            </tr>
+            <tr>
+              <td><code>.css</code></td>
+              <td>Cascading Style Sheets</td>
+              <td>網頁的衣服（顏色、排版）</td>
+              <td>像 PowerPoint 的主題</td>
+            </tr>
+            <tr>
+              <td><code>.js</code></td>
+              <td>JavaScript</td>
+              <td>網頁的動作（互動、邏輯）</td>
+              <td>像 Excel 的巨集</td>
+            </tr>
+            <tr>
+              <td><code>.json</code></td>
+              <td>JavaScript Object Notation</td>
+              <td>資料的格式（像表格一樣存資料）</td>
+              <td>像 CSV 但更有結構</td>
+            </tr>
+            <tr>
+              <td><code>.ts</code></td>
+              <td>TypeScript</td>
+              <td>JavaScript 的加強版（多了類型檢查）</td>
+              <td>像 JS 穿了防護衣</td>
+            </tr>
+            <tr>
+              <td><code>.env</code></td>
+              <td>Environment</td>
+              <td>放密碼、金鑰的檔案</td>
+              <td>像保險箱，不能公開</td>
+            </tr>
+            <tr>
+              <td><code>.md</code></td>
+              <td>Markdown</td>
+              <td>輕量格式的文件</td>
+              <td>像精簡版的 Word</td>
+            </tr>
+            <tr>
+              <td><code>.yaml</code> / <code>.yml</code></td>
+              <td>YAML Ain't Markup Language</td>
+              <td>設定檔</td>
+              <td>像填寫表格</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">注意</div>
+        <code>.env</code> 檔案裡存的是密碼和 API 金鑰，<strong>絕對不能上傳到 GitHub</strong>。<br>
+        這就像你不會把保險箱密碼寫在大門上一樣。
+      </div>
+
+      <!-- ===== 全部整合 ===== -->
+      <h2>完整拆解一個網址</h2>
+
+      <p>把你每天都在看的網址完整拆開：</p>
+
+      <div class="code-block">
+https://api.example.com/v2/products/123?color=red<br><br>
+<span style="color: var(--blue);">https://</span>　　　 → 通訊協定（加密連線）<br>
+<span style="color: var(--green);">api</span>　　　　　　→ 子網域（前綴）：這是 API 入口<br>
+<span style="color: var(--accent-light);">example.com</span>　　→ 主域名：哪棟大樓<br>
+<span style="color: var(--yellow);">/v2</span>　　　　　　→ 路由前綴：API 第二版<br>
+<span style="color: var(--yellow);">/products</span>　　　 → 路由：商品區<br>
+<span style="color: var(--yellow);">/123</span>　　　　　　→ 路由參數：編號 123 的商品<br>
+<span style="color: var(--purple);">?color=red</span>　　　→ 查詢參數：只要紅色的
+      </div>
+
+      <h2>術語總對照表</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>白話</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>根目錄 Root Directory</td>
+              <td>專案的最上層資料夾</td>
+              <td>你家大門</td>
+            </tr>
+            <tr>
+              <td>路徑 Path</td>
+              <td>檔案在電腦裡的位置</td>
+              <td>從大門走到廚房的路線</td>
+            </tr>
+            <tr>
+              <td>絕對路徑</td>
+              <td>從最頂層開始的完整位置</td>
+              <td>完整地址（含國家、城市）</td>
+            </tr>
+            <tr>
+              <td>相對路徑</td>
+              <td>從現在位置出發的位置</td>
+              <td>「左轉第二間」</td>
+            </tr>
+            <tr>
+              <td>前端 Frontend</td>
+              <td>使用者看到的畫面</td>
+              <td>餐廳用餐區</td>
+            </tr>
+            <tr>
+              <td>後端 Backend</td>
+              <td>處理邏輯的伺服器</td>
+              <td>餐廳廚房</td>
+            </tr>
+            <tr>
+              <td>資料庫 Database</td>
+              <td>儲存資料的地方</td>
+              <td>冰箱</td>
+            </tr>
+            <tr>
+              <td>Domain 網域</td>
+              <td>網站地址</td>
+              <td>大樓門牌</td>
+            </tr>
+            <tr>
+              <td>子網域 Subdomain</td>
+              <td>主網域底下的分區</td>
+              <td>大樓裡的部門</td>
+            </tr>
+            <tr>
+              <td>路由 Route</td>
+              <td>網站裡面的頁面路徑</td>
+              <td>大樓裡的走廊</td>
+            </tr>
+            <tr>
+              <td>前綴 Prefix</td>
+              <td>加在前面的標記</td>
+              <td>路名前面的「北」「南」</td>
+            </tr>
+            <tr>
+              <td>後綴 Suffix</td>
+              <td>加在後面的標記（副檔名）</td>
+              <td>.doc = Word，.pdf = PDF</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">本章重點</div>
+        你不需要會寫這些東西，但你需要<strong>認得它們、說得出名字</strong>。<br>
+        當你能說「請幫我改 <code>/src/components/Header.tsx</code> 裡的 navbar 顏色」，<br>
+        而不是「幫我改上面那一條的顏色」——你跟 AI 的溝通效率立刻翻倍。
+      </div>
+
+      <!-- Chapter Nav -->
+      <div class="chapter-nav">
+        <a href="chapter3.html" class="prev">
+          <span class="nav-label">上一章</span>
+          <span class="nav-title">正確的工作流程</span>
+        </a>
+        <a href="chapter5.html" class="next">
+          <span class="nav-label">下一章</span>
+          <span class="nav-title">學會描述你看到的東西</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

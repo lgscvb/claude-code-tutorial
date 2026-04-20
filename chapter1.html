@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第一章：你在跟什麼東西說話 — Claude Code 指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html" class="active">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html" class="active">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第一章</div>
+      <h1>你在跟什麼東西說話</h1>
+      <p class="lead">在你開始下指令之前，你得先搞清楚：坐在螢幕另一邊的，到底是什麼東西。它不是人，也不是搜尋引擎——它是一台「文字接龍機器」。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <!-- 1. LLM 的本質 -->
+    <h2>LLM 的本質：一台超級文字接龍機器</h2>
+
+    <p>LLM 的全名是 <strong>Large Language Model</strong>（大型語言模型）。聽起來很厲害，但它做的事情本質上非常單純：<strong>根據你前面說的話，預測「下一個字」最可能是什麼。</strong></p>
+
+    <p>你跟它說「今天天氣」，它不是去查氣象局，而是根據它讀過的幾兆筆資料，判斷「今天天氣」後面最常接什麼字——可能是「很好」、「不錯」、「真熱」。然後它從這些可能的答案裡挑一個。</p>
+
+    <p>接著，它拿「今天天氣很好」這整句話，再預測下一個字。如此反覆，一個字接一個字，直到它覺得該停了。</p>
+
+    <div class="analogy">
+      <strong>比喻：讀過全世界圖書館的鸚鵡</strong><br><br>
+      想像有一隻鸚鵡，它讀過全世界所有的書、所有的網頁、所有的對話紀錄。你問它什麼，它都能說出一段聽起來很有道理的話。<br><br>
+      但是——它並不「理解」它在說什麼。它不知道「悲傷」是什麼感覺，它只知道「悲傷」這個詞後面，通常會接「難過」、「流淚」、「心痛」這些字。<br><br>
+      <strong>說出來的話很有道理，但它不真的懂。</strong>這就是 LLM 最重要的本質。
+    </div>
+
+    <p>所以，當 LLM 給你一個錯誤的答案，它不是在「騙你」——它只是接龍接錯了。就像鸚鵡不是故意說錯話，它根本不知道什麼是對什麼是錯。這個現象有個專有名詞，叫 <strong>Hallucination（幻覺）</strong>：AI 一本正經地瞎說。</p>
+
+    <div class="box box-warning">
+      <div class="box-label">重要觀念</div>
+      LLM 不會上網查資料（除非特別設計了這個功能）。它的知識全部來自「訓練資料」——也就是它被餵過的那些文字。訓練資料有截止日期，所以你問它「今天新聞」，它答的可能是半年前的事。
+    </div>
+
+    <h3>訓練資料決定一切</h3>
+
+    <p>文字接龍接得好不好，完全取決於這台機器「讀過什麼」。這就是<strong>訓練資料（Training Data）</strong>的重要性。兩個真實案例可以幫你理解：</p>
+
+    <div class="analogy">
+      <strong>案例一：白日依山盡</strong><br><br>
+      在課堂上只要講「白日依山盡」，99% 的學生都會接「黃河入海流」。為什麼？因為每個受過中文教育的人都讀過這首詩，腦中早就建立了這個連結。<br><br>
+      但如果這是一個<strong>沒有中文訓練資料的國外模型</strong>，它可能覺得「白日依山盡」後面接「早餐正好吃」也很合理——然後就這樣輸出了。它不是故意搞笑，它只是從來沒讀過唐詩，所以不知道「正確答案」是什麼。<br><br>
+      <strong>這就是訓練資料的差異。</strong>同樣的文字接龍機器，餵不同的資料，產出完全不同的結果。
+    </div>
+
+    <div class="analogy">
+      <strong>案例二：孫悟空</strong><br><br>
+      你跟亞洲人講「孫悟空」三個字，腦中自然浮現一隻猴子拿著金箍棒，背後還有一個和尚和白馬。這個畫面是「西遊記」幾百年的文化沉澱。<br><br>
+      但你跟美國人說「Son Goku」，他腦中浮現的可能是七龍珠裡那個金色頭髮的超級賽亞人——完全不同的東西。<br><br>
+      LLM 也是一樣——<strong>它「腦中浮現什麼」，完全取決於訓練資料裡有什麼。</strong>一個用日本動漫資料訓練的模型和一個用中國古典文學訓練的模型，對「孫悟空」的理解天差地別。
+    </div>
+
+    <!-- RAG 簡介 -->
+    <h3>RAG：讓 AI 從閉卷考變開書考</h3>
+
+    <p><strong>RAG</strong> 的全名是 <strong>Retrieval-Augmented Generation</strong>（檢索增強生成）。聽起來很學術，白話講就是：<strong>讓 AI 先翻你的資料，再回答問題——不是只靠它自己記住的東西。</strong></p>
+
+    <div class="analogy">
+      <strong>比喻：閉卷考 vs. 開書考</strong><br><br>
+      沒有 RAG 的 AI 就像在考閉卷考——它只能靠訓練時記住的知識來回答。如果這個知識它沒學過（比如你公司內部的 SOP、最新的法規修訂），它就只能瞎猜或說「我不知道」。<br><br>
+      有 RAG 的 AI 就像在考開書考——回答之前，它會先去翻你提供的「參考書」（可以是你的文件、資料庫、知識庫），找到相關段落之後，再根據這些資料組織答案。<br><br>
+      <strong>開書考的成績，當然比閉卷考好得多。</strong>
+    </div>
+
+    <p>RAG 跟前面講的訓練資料直接相關：AI 沒學過的東西，如果你不用 RAG 即時補充給它，它就只能用「文字接龍的直覺」去猜——而猜出來的東西，就是 Hallucination。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">白話總結</div>
+      訓練資料 = AI 的長期記憶（學校學的）。RAG = AI 的即時參考書（考試時翻的）。兩者結合，AI 才能又有基礎知識、又能處理它沒見過的新資訊。
+    </div>
+
+    <!-- 2. 各家模型比較 -->
+    <h2>各家模型有什麼不同</h2>
+
+    <p>市面上有好幾家在做 LLM，最常聽到的是 OpenAI 的 GPT、Anthropic 的 Claude、Google 的 Gemini。它們的原理差不多，都是文字接龍，但各有擅長的地方。</p>
+
+    <div class="analogy">
+      <strong>比喻：三個不同性格的顧問</strong><br><br>
+      <strong>GPT（OpenAI）</strong>像一個什麼都會一點的萬用顧問。你問什麼它都能答，生態最成熟、外掛最多，但有時候會太自信，明明不確定的事也講得斬釘截鐵。<br><br>
+      <strong>Claude（Anthropic）</strong>像一個謹慎的技術顧問。它特別擅長讀長文件、寫程式碼、做分析。它比較不會瞎掰，不確定的事會跟你說「我不確定」。Claude Code 就是基於 Claude 模型。<br><br>
+      <strong>Gemini（Google）</strong>像一個資料量很大的研究員。它背後是 Google 的搜尋引擎，擅長整合各種來源的資訊，多模態（圖片、影片、音訊）能力也很強。
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>特性</th>
+            <th>GPT (OpenAI)</th>
+            <th>Claude (Anthropic)</th>
+            <th>Gemini (Google)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>擅長</td>
+            <td>通用任務、外掛生態</td>
+            <td>長文分析、程式碼、安全性</td>
+            <td>多模態、搜尋整合</td>
+          </tr>
+          <tr>
+            <td>Context Window</td>
+            <td>128K tokens</td>
+            <td>1M tokens</td>
+            <td>1M ~ 2M tokens</td>
+          </tr>
+          <tr>
+            <td>個性</td>
+            <td>自信、什麼都敢答</td>
+            <td>謹慎、會說「我不確定」</td>
+            <td>中規中矩、偏學術</td>
+          </tr>
+          <tr>
+            <td>最適合</td>
+            <td>日常問答、創意寫作</td>
+            <td>寫程式、讀文件、技術任務</td>
+            <td>研究、整合多種來源</td>
+          </tr>
+          <tr>
+            <td>風險</td>
+            <td>容易 Hallucination</td>
+            <td>有時太保守會拒絕回答</td>
+            <td>回答有時不夠聚焦</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">白話總結</div>
+      沒有「最好」的模型，只有「最適合你當下需求」的模型。如果你是用 Claude Code 在寫程式或做專案，那 Claude 本身就是最適合的——因為它就是為這件事設計的。
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">關於本網站</div>
+      本網站內容通用於所有 LLM，不限特定廠商。案例採用 Anthropic Claude 是因為作者的使用經驗。
+    </div>
+
+    <h3>模型大小就是物理規律</h3>
+
+    <p>這個網站講的所有觀念——文字接龍、Context Window、Token——都是通用的，不管你用哪家 LLM 都適用。我們用 Anthropic 的 Claude 當案例，是因為實際使用經驗最多。</p>
+
+    <p>Anthropic（Claude）目前有幾個值得注意的特點：</p>
+
+    <ul>
+      <li><strong>1M Context Window</strong>：Claude 現在支援 100 萬 token 的上下文視窗，能一次處理的資料量非常大</li>
+      <li><strong>Computer Use 非常前沿</strong>：Anthropic 在「讓 AI 操作電腦」這件事上走得最前面，是目前真正可以落地的 AI Agent 技術</li>
+      <li><strong>權限要求極為嚴謹</strong>：Claude 對安全性的要求比其他模型高很多——這既是特色也是門檻。它會拒絕很多其他模型願意做的事，有時候會讓你覺得「怎麼這麼囉嗦」，但這是 Anthropic 的設計哲學</li>
+    </ul>
+
+    <p>但是——<strong>這不代表 Anthropic 就特別優秀。</strong></p>
+
+    <p>如果你用 Anthropic 最便宜（最小）的模型，它的效果肯定比其他家的中階模型差。這不是品牌問題，這是<strong>物理規律</strong>：模型越大，參數越多，能力越強。就像一台 2 公升引擎的車，不管品牌多好，跑不贏對手的 5 公升引擎。選模型的時候，品牌忠誠度遠不如「選對大小」來得重要。</p>
+
+    <!-- 3. Context Window -->
+    <h2>Context Window：AI 的「桌面大小」</h2>
+
+    <p><strong>Context Window</strong>（上下文視窗）是 LLM 最重要的概念之一。簡單說，它就是 AI 在一次對話中「能同時記住多少東西」的上限。</p>
+
+    <div class="analogy">
+      <strong>比喻：你的辦公桌</strong><br><br>
+      想像你在處理一個案子，你的辦公桌就這麼大。你可以攤開幾份文件、幾張圖表，同時對照著看。但如果文件太多，桌子放不下，你就得把舊的收起來，才能放新的。<br><br>
+      AI 的 Context Window 就是這張桌子。<strong>桌子越大，能同時看的資料越多，回答就越精準。桌子滿了，舊的資訊就會被推掉。</strong>
+    </div>
+
+    <p>這個「桌子」的大小用 <strong>Token</strong> 來衡量（Token 的概念我們等一下會講）。不同模型的桌子大小不同：</p>
+
+    <ul>
+      <li><strong>GPT-4o</strong>：128,000 tokens（約 9 萬字中文）</li>
+      <li><strong>Claude Sonnet/Opus</strong>：1,000,000 tokens（約 70 萬字中文）</li>
+      <li><strong>Gemini 1.5 Pro</strong>：1,000,000 tokens（約 70 萬字中文）</li>
+    </ul>
+
+    <p>聽起來很多？但實際上消耗速度比你想像的快。因為 Context Window 裝的不只是你說的話，還包括：</p>
+
+    <ol>
+      <li><strong>系統指令</strong>（System Prompt）：告訴 AI「你是誰、該怎麼行為」的背景設定</li>
+      <li><strong>你的每一句話</strong>：包括你之前所有的對話歷史</li>
+      <li><strong>AI 的每一句回覆</strong>：它自己說過的話也算</li>
+      <li><strong>程式碼、文件內容</strong>：如果你叫它讀檔案，檔案內容也會佔空間</li>
+    </ol>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">桌子快滿了的症狀</div>
+        <div class="code-block">
+AI 開始「忘記」你之前說過的事<br>
+回答變得前後矛盾<br>
+你說「照之前的格式」，它卻做出完全不同的格式<br>
+程式碼開始出現重複或遺漏
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">桌子空間充足的狀態</div>
+        <div class="code-block">
+AI 記得你之前的所有需求<br>
+回答邏輯連貫、前後一致<br>
+能引用你之前提過的細節<br>
+程式碼能正確銜接之前的架構
+        </div>
+      </div>
+    </div>
+
+    <h3>上下文壓縮與 Session Fork</h3>
+
+    <p>既然桌子會滿，有沒有辦法「自動整理桌面」？有的。Claude 有兩個機制可以幫忙：</p>
+
+    <p><strong>上下文壓縮（Context Compression）</strong>：當對話太長、快要超出 Context Window 時，Claude 會自動壓縮前面的對話內容——把不重要的細節丟掉，只保留重點摘要。就像你把桌上的文件整理成一頁摘要，騰出空間放新東西。你不需要手動觸發，它會自動判斷什麼時候該壓縮。</p>
+
+    <p><strong>Session Fork（對話分叉）</strong>：你可以從對話的某個點「分叉」出一條新的分支。就像遊戲裡的存檔點——你在第 15 輪做了一個決定，後來發現走錯了，可以回到第 15 輪的存檔，從那裡開一條新路線，而不用整個對話砍掉重來。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">實用場景</div>
+      你請 AI 用方案 A 實作了一個功能，做到一半覺得方案 B 可能更好。這時候你可以 Fork 回到「還沒開始實作」的那個點，改走方案 B，而方案 A 的對話分支還保留在那裡，隨時可以回去看。
+    </div>
+
+    <!-- 4. Context Fragmentation -->
+    <h2>Context Fragmentation：對話越長，品質越爛</h2>
+
+    <p>就算桌子還沒完全滿，AI 的表現也會隨著對話變長而下降。這個現象叫 <strong>Context Fragmentation</strong>（上下文碎片化），有些人也說 Context Degradation（上下文退化）。</p>
+
+    <div class="analogy">
+      <strong>比喻：堆滿東西的桌子</strong><br><br>
+      你的桌子雖然還有空間，但上面堆了 100 份文件。你要找其中一份的某個數字，得翻半天。就算找到了，你可能也忘了剛剛另一份文件上寫了什麼。<br><br>
+      AI 也一樣。當 Context Window 裡塞了太多東西——各種需求、修改紀錄、程式碼、錯誤訊息——它就越來越難「找到重點」。它不是忘了，而是被噪音淹沒了。
+    </div>
+
+    <p>實際的症狀包括：</p>
+
+    <ul>
+      <li>你第 3 輪提的需求，到第 20 輪它已經「沒在管了」</li>
+      <li>你明明修正過的 bug，它又做回原本有問題的版本</li>
+      <li>回答開始變得泛泛的，不夠具體</li>
+      <li>程式碼的風格、命名規則開始不一致</li>
+    </ul>
+
+    <h3>何時該開新 Session</h3>
+
+    <p>當你感覺到上面任何一個症狀，就是該開新 Session（新對話）的時候。以下是一些經驗法則：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>情境</th>
+            <th>建議</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>對話已超過 30 輪</td>
+            <td>開新 Session，把重要上下文重新貼給 AI</td>
+          </tr>
+          <tr>
+            <td>主題已經換了（從 A 功能跳到 B 功能）</td>
+            <td>開新 Session，一個 Session 只做一件事</td>
+          </tr>
+          <tr>
+            <td>AI 開始忘記之前的決定</td>
+            <td>開新 Session，在開頭摘要之前的重要決定</td>
+          </tr>
+          <tr>
+            <td>你把整份程式碼貼進對話好幾次</td>
+            <td>開新 Session，善用 CLAUDE.md 記錄長期設定</td>
+          </tr>
+          <tr>
+            <td>單純修一個小 bug</td>
+            <td>可以繼續，但如果修了 5 分鐘還沒修好，開新的</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">實用建議</div>
+      開新 Session 不代表「砍掉重練」。你可以在新 Session 的第一句話裡，把之前的重要結論、架構決定、檔案路徑整理成一段摘要貼上去。這比讓 AI 在 50 輪對話裡自己翻找有效太多了。
+    </div>
+
+    <!-- 5. Token -->
+    <h2>Token：AI 的計費單位</h2>
+
+    <p>前面一直提到 Token，到底 Token 是什麼？</p>
+
+    <p><strong>Token 是 AI 處理文字的最小單位。</strong>你可以把它想像成「AI 版的音節」。它不是一個字、也不一定是一個詞，而是 AI 自己切割文字的方式。</p>
+
+    <div class="analogy">
+      <strong>比喻：寄包裹的重量計費</strong><br><br>
+      就像寄國際包裹用「公斤」計費，AI 用 Token 計費。你寫給它的每一個字都有重量，它回覆你的每一個字也有重量。來回越多輪，包裹越重，費用越高。<br><br>
+      而且 AI 不只是秤你寄出去的（Input Token），還秤它寄回來的（Output Token）。<strong>你講的多花錢，它回的長也花錢。</strong>
+    </div>
+
+    <p>不同語言的 Token 消耗量不一樣：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>語言</th>
+            <th>「你好，世界」大約消耗</th>
+            <th>說明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>英文</td>
+            <td>4 tokens</td>
+            <td>"Hello, World" — 英文很省 token</td>
+          </tr>
+          <tr>
+            <td>中文</td>
+            <td>5~7 tokens</td>
+            <td>一個中文字可能被拆成 2-3 個 token</td>
+          </tr>
+          <tr>
+            <td>程式碼</td>
+            <td>依長度而定</td>
+            <td>程式碼通常比自然語言消耗更多 token</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>為什麼要在乎 Token？因為：</p>
+
+    <ol>
+      <li><strong>Token = 錢</strong>：大部分 AI 服務是按 Token 數量收費的。用越多 Token，花越多錢。</li>
+      <li><strong>Token = 桌子空間</strong>：前面講的 Context Window 就是用 Token 來衡量大小的。你浪費 Token 在無意義的對話上，就是在佔桌子空間。</li>
+      <li><strong>Token = 時間</strong>：Token 越多，AI 處理的時間越長，回覆越慢。</li>
+    </ol>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">浪費 Token 的做法</div>
+        <div class="code-block">
+你：「嗯......我想想看......<br>
+那個功能......就是......<br>
+你知道那種可以讓使用者......<br>
+算了我重新說好了」<br><br>
+<span style="color: var(--red);">光是這段就燒了約 80 個 token，什麼資訊也沒傳達</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">省 Token 的做法</div>
+        <div class="code-block">
+你：「新增一個會員登入功能，<br>
+用 email + 密碼驗證，<br>
+成功後導向 /dashboard」<br><br>
+<span style="color: var(--green);">約 40 個 token，資訊完整且精確</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-warning">
+      <div class="box-label">Token 省錢公式</div>
+      <strong>說清楚 + 說具體 + 一次到位 = 最省 Token。</strong><br><br>
+      每多一輪來回對話，Token 消耗是「累加」的——因為 AI 每次回覆都要重新讀一遍整個對話歷史。第 1 輪它讀 1 段，第 10 輪它讀 10 段，第 30 輪它讀 30 段。所以同樣的事情，1 輪搞定跟 10 輪搞定，Token 消耗差距是數倍甚至數十倍。
+    </div>
+
+    <h3>節省 Token 的實用工具</h3>
+
+    <p>除了養成「說清楚、說具體」的習慣之外，還有工具可以幫你自動精簡輸入：</p>
+
+    <ul>
+      <li><strong>Typeless</strong>：這個工具可以幫你自動刪除贅字、冗詞、口語化的填充詞，只留下 LLM 真正會用到的關鍵資訊。你把要傳給 AI 的文字先丟進 Typeless 處理一遍，它會幫你砍掉不必要的部分，讓同樣的意思用更少的 Token 表達。特別適合用在你要貼大段文件、需求說明、或會議紀錄給 AI 的時候。</li>
+    </ul>
+
+    <!-- 6. 本章小結 -->
+    <h2>本章小結</h2>
+
+    <p>這一章你學到了以下幾件事：</p>
+
+    <ol>
+      <li><strong>LLM 的本質是文字接龍</strong>——它不理解，它只是預測下一個字。所以它會 Hallucination（一本正經地瞎說）。</li>
+      <li><strong>訓練資料決定一切</strong>——同樣的接龍機器，餵不同資料就有不同結果。AI 沒學過的東西，就只能靠 RAG 即時補充。</li>
+      <li><strong>RAG 讓 AI 從閉卷考變開書考</strong>——讓 AI 先翻你的資料再回答，大幅減少幻覺。</li>
+      <li><strong>不同模型有不同個性</strong>——GPT 萬用但易幻覺、Claude 謹慎擅長程式碼、Gemini 多模態強但有時不聚焦。</li>
+      <li><strong>模型大小是物理規律</strong>——品牌忠誠度不如選對模型大小，小模型就是跑不贏大模型。</li>
+      <li><strong>Context Window 是 AI 的桌面</strong>——桌子有限，塞太多東西它就找不到重點。上下文壓縮和 Session Fork 可以幫忙管理。</li>
+      <li><strong>對話越長品質越差</strong>——不是 bug，是 Context Fragmentation，解決方式是開新 Session。</li>
+      <li><strong>Token 是計費單位</strong>——講越多、AI 回越多，就越花錢也越慢。善用 Typeless 等工具精簡輸入，說清楚、說具體、一次到位才省錢。</li>
+    </ol>
+
+    <p>理解了這些，你就知道為什麼不能隨便跟 AI 閒聊——<strong>每一句話都有成本</strong>。下一章，我們來學怎麼用最少的話，把最多的資訊傳達給 AI。</p>
+
+    <!-- Chapter Navigation -->
+    <div class="chapter-nav">
+      <a href="index.html" class="prev">
+        <span class="nav-label">上一頁</span>
+        <span class="nav-title">首頁</span>
+      </a>
+      <a href="chapter2.html" class="next">
+        <span class="nav-label">下一章</span>
+        <span class="nav-title">怎麼跟 LLM 下指令</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

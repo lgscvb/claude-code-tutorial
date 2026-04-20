@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html" class="active">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html" class="active">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <h1>學會這些術語<br>你跟 AI 的對話成本<span class="highlight">直接砍 80%</span></h1>
+      <p class="subtitle">
+        你不需要會寫程式。但你需要知道那些東西「叫什麼」。<br>
+        因為每多一輪對話，就是在燒你的 Token。
+      </p>
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <a href="chapter1.html" class="btn btn-primary">開始學習</a>
+        <a href="https://github.com/lgscvb/claude-code-quickstart" class="btn btn-secondary" target="_blank">Quickstart 懶人包</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- The Illusion -->
+  <section class="container" style="padding-bottom: 48px;">
+    <div class="analogy">
+      <strong>很多人以為拿到 LLM 就能言出法隨。</strong><br><br>
+      現實是：這有一個陡峭的學習曲線。你需要補充基礎知識，才能跟 AI 有效溝通。<br><br>
+      就像你去醫院不需要會開刀，但你得會說「左膝蓋內側痛」而不是「腳那邊怪怪的」。<br>
+      <strong>會描述 = 省 Token = 省錢 = 省時間。</strong>
+    </div>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">不會術語 — 8 輪對話</div>
+        <div class="code-block">
+你：「那個網站有時候很慢，要等很久」<br>
+AI：「哪個頁面？前端還是 API？」<br>
+你：「就是那個聊天的機器人」<br>
+AI：「LINE Bot？網頁 chatbot？」<br>
+你：「LINE 的，放在免費的地方」<br>
+AI：「Render？Heroku？Railway？」<br>
+你：「對對對第一個」<br>
+AI：「可能是冷啟動的問題...」
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">會術語 — 1 輪搞定</div>
+        <div class="code-block">
+你：「Render free tier 的 LINE Bot<br>
+有 cold start，幫我加一個<br>
+cron job 每 10 分鐘 ping<br>
+health endpoint」<br><br>
+AI：直接寫 code<br><br>
+<span style="color: var(--green);">Token 消耗少 8 倍以上</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chapter Grid -->
+  <section class="container" style="padding-bottom: 80px;">
+    <h2 style="text-align:center; font-size: 28px; color: var(--text-heading); margin-bottom: 8px;">章節目錄</h2>
+    <p style="text-align:center; color: var(--text-muted); margin-bottom: 32px;">從零開始，一步步建立跟 AI 溝通的能力</p>
+
+    <div class="chapter-grid">
+      <a href="chapter1.html" class="chapter-card">
+        <span class="chapter-num">第一章</span>
+        <h3>你在跟什麼東西說話</h3>
+        <p>LLM 的本質是「文字接龍」，理解它的能力邊界與 Context Window</p>
+      </a>
+
+      <a href="chapter2.html" class="chapter-card">
+        <span class="chapter-num">第二章</span>
+        <h3>怎麼跟 LLM 下指令</h3>
+        <p>目標、邊界、情境三層模型。為什麼「不要什麼」比「要什麼」更重要</p>
+      </a>
+
+      <a href="chapter3.html" class="chapter-card">
+        <span class="chapter-num">第三章</span>
+        <h3>正確的工作流程</h3>
+        <p>Demo → 確認 → 規劃 → 執行。i18n 的先後順序陷阱</p>
+      </a>
+
+      <a href="chapter4.html" class="chapter-card">
+        <span class="chapter-num">第四章</span>
+        <h3>你缺什麼知識</h3>
+        <p>根目錄、路徑、前後端、Domain、子路由——跟 LLM 溝通的基本語言</p>
+      </a>
+
+      <a href="chapter5.html" class="chapter-card">
+        <span class="chapter-num">第五章</span>
+        <h3>學會描述你看到的東西</h3>
+        <p>網頁結構、UI 元件圖鑑、CSS 基礎、瀏覽器三劍客</p>
+      </a>
+
+      <a href="chapter6.html" class="chapter-card">
+        <span class="chapter-num">第六章</span>
+        <h3>Claude Code 是什麼</h3>
+        <p>跟其他 LLM 的差別：控制整台電腦、MCP 生態、Subagent</p>
+      </a>
+
+      <a href="chapter7.html" class="chapter-card">
+        <span class="chapter-num">第七章</span>
+        <h3>用什麼材料蓋房子</h3>
+        <p>技術棧推薦：Cloudflare + Supabase + GitHub + GCP VM</p>
+      </a>
+
+      <a href="chapter8.html" class="chapter-card">
+        <span class="chapter-num">第八章</span>
+        <h3>API 是什麼</h3>
+        <p>GET / POST / PUT / DELETE——房子怎麼接水接電</p>
+      </a>
+
+      <a href="chapter9.html" class="chapter-card">
+        <span class="chapter-num">第九章</span>
+        <h3>術語快速理解</h3>
+        <p>SQL、RAG、Docker、CI/CD、Heartbeat——不用會操作，知道是什麼就好</p>
+      </a>
+
+      <a href="chapter10.html" class="chapter-card">
+        <span class="chapter-num">第十章</span>
+        <h3>蓋大樓才會遇到的問題</h3>
+        <p>異步寫入、SSOT、耦合——進階但必須知道的觀念</p>
+      </a>
+
+      <a href="chapter11.html" class="chapter-card">
+        <span class="chapter-num">第十一章</span>
+        <h3>工具生態</h3>
+        <p>Obsidian、MCP、Quickstart 懶人包——我的實際使用經驗</p>
+      </a>
+
+      <a href="appendix.html" class="chapter-card">
+        <span class="chapter-num">附錄</span>
+        <h3>常見問題</h3>
+        <p>錯誤訊息怎麼讀、.env 是什麼、Git 基礎</p>
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

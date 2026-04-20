@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第八章：API 是什麼 — Claude Code 指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html" class="active">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第八章</div>
+      <h1>API 是什麼（房子怎麼接水接電）</h1>
+      <p class="lead">你的程式要跟外界溝通，靠的就是 API。不需要會寫，但要知道它在幹嘛。</p>
+    </div>
+
+    <div class="content">
+
+      <!-- A. API 是什麼 -->
+      <h2>API 是什麼？</h2>
+
+      <div class="analogy">
+        <strong>想像你走進一間餐廳。</strong><br><br>
+        你（前端）坐下來看菜單，選好要吃什麼。<br>
+        服務生（API）把你的訂單送到廚房（後端）。<br>
+        廚房做好菜之後，服務生再端回來給你。<br><br>
+        <strong>你不需要知道廚房怎麼煮，也不用進去廚房。</strong><br>
+        你只需要知道：菜單上有什麼、怎麼點、點了之後會得到什麼。
+      </div>
+
+      <p><strong>API</strong> 的全名是 <code>Application Programming Interface</code>，翻成中文就是「程式之間的溝通介面」。</p>
+
+      <p>簡單說：</p>
+      <ul>
+        <li><strong>前端</strong>（你看到的網頁）想要資料 → 跟 API 說「我要 XXX」</li>
+        <li><strong>API</strong> 把請求送到後端 → 後端處理完 → 再透過 API 回傳結果</li>
+        <li>前端收到結果 → 顯示在畫面上</li>
+      </ul>
+
+      <div class="box box-tip">
+        <div class="box-label">為什麼要知道這個？</div>
+        當你跟 Claude Code 說「幫我做一個客戶管理系統」，它會幫你建 API。你看到 <code>GET /api/customers</code> 這種東西時，就知道這是「去拿客戶列表」的意思，而不是一臉問號。
+      </div>
+
+      <h3>API 的角色定位</h3>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">沒有 API 的世界</div>
+          <div class="code-block">
+前端直接連資料庫<br>
+→ 安全漏洞大開<br>
+→ 每個頁面自己寫查詢邏輯<br>
+→ 改一個欄位，10 個頁面都要改<br>
+→ 手機 App 跟網頁各寫一套
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">有 API 的世界</div>
+          <div class="code-block">
+前端只跟 API 溝通<br>
+→ API 統一管理權限和驗證<br>
+→ 邏輯集中在一個地方<br>
+→ 改一次，全部生效<br>
+→ 手機 / 網頁 / 第三方都用同一組 API
+          </div>
+        </div>
+      </div>
+
+      <!-- B. HTTP Methods -->
+      <h2>HTTP Methods（點菜的方式）</h2>
+
+      <p>既然 API 是「服務生」，那你跟服務生講話時，有幾種不同的「動作」。這些動作在技術上叫做 <strong>HTTP Methods</strong>（HTTP 方法）。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>方法</th>
+              <th>白話</th>
+              <th>餐廳比喻</th>
+              <th>實際例子</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>GET</code></td>
+              <td>「我要看」</td>
+              <td>看菜單 / 查目前的訂單</td>
+              <td>打開商品頁面、查訂單紀錄</td>
+            </tr>
+            <tr>
+              <td><code>POST</code></td>
+              <td>「我要新增」</td>
+              <td>下一筆新訂單</td>
+              <td>註冊帳號、送出表單、新增一筆資料</td>
+            </tr>
+            <tr>
+              <td><code>PUT</code></td>
+              <td>「我要整個換掉」</td>
+              <td>整張訂單重寫</td>
+              <td>更新個人資料（全部欄位都重新送）</td>
+            </tr>
+            <tr>
+              <td><code>PATCH</code></td>
+              <td>「我要改一部分」</td>
+              <td>只改訂單裡的一道菜</td>
+              <td>只改密碼、只改暱稱</td>
+            </tr>
+            <tr>
+              <td><code>DELETE</code></td>
+              <td>「我要刪掉」</td>
+              <td>取消訂單</td>
+              <td>刪除帳號、移除商品</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">PUT vs PATCH 差在哪？</div>
+        <strong>PUT</strong> 像是把整張考卷擦掉重寫。就算你只改一題，也要把所有答案都重填一遍。<br>
+        <strong>PATCH</strong> 像是用立可白只修一題。其他題目維持原樣。<br><br>
+        實務上大部分系統用 <code>PATCH</code> 比較多，因為「只改一個欄位」的需求比「整個重送」常見得多。
+      </div>
+
+      <!-- C. 狀態碼 -->
+      <h2>狀態碼（服務生的回覆）</h2>
+
+      <p>你跟 API 說「我要 XXX」之後，API 會回一個<strong>數字代碼</strong>告訴你結果。這就是 <strong>HTTP 狀態碼</strong>。</p>
+
+      <p>不用背，但看到的時候要知道什麼意思：</p>
+
+      <h3>成功的回覆（2xx）</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>代碼</th>
+              <th>白話</th>
+              <th>餐廳比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>200</code></td>
+              <td>成功，資料來了</td>
+              <td>「好的，菜來了」</td>
+            </tr>
+            <tr>
+              <td><code>201</code></td>
+              <td>建立成功</td>
+              <td>「訂單已成立，等候出餐」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>你的問題（4xx）</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>代碼</th>
+              <th>白話</th>
+              <th>餐廳比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>400</code></td>
+              <td>你的要求有問題</td>
+              <td>「菜單上沒這道菜」「你的格式不對」</td>
+            </tr>
+            <tr>
+              <td><code>401</code></td>
+              <td>沒有登入</td>
+              <td>「請先出示會員卡」</td>
+            </tr>
+            <tr>
+              <td><code>403</code></td>
+              <td>沒有權限</td>
+              <td>「VIP 專屬區域，你進不去」</td>
+            </tr>
+            <tr>
+              <td><code>404</code></td>
+              <td>找不到</td>
+              <td>「那道菜已經下架了」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>伺服器的問題（5xx）</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>代碼</th>
+              <th>白話</th>
+              <th>餐廳比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>500</code></td>
+              <td>伺服器壞了</td>
+              <td>「廚房失火了，我們也沒辦法」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">記住這個規則</div>
+        <strong>4xx = 你的問題</strong>（請求格式錯、沒登入、沒權限）<br>
+        <strong>5xx = 伺服器的問題</strong>（後端程式炸了、資料庫掛了）<br><br>
+        看到 4xx 先檢查自己；看到 5xx 去找後端工程師。
+      </div>
+
+      <!-- D. 實際案例 -->
+      <h2>實際案例：一個「客戶管理」的完整流程</h2>
+
+      <p>假設你請 Claude Code 幫你做一個客戶管理系統，它會建出以下這些 API。我們來走一遍完整流程：</p>
+
+      <h3>1. 新增客戶（POST）</h3>
+
+      <p>使用者在前端填好表單（姓名、電話、Email），按下「送出」。</p>
+
+      <div class="code-block">
+<span style="color: var(--green);">POST</span> /api/customers<br><br>
+送出的資料（Request Body）：<br>
+{<br>
+&nbsp;&nbsp;"name": "王小明",<br>
+&nbsp;&nbsp;"phone": "0912-345-678",<br>
+&nbsp;&nbsp;"email": "ming@example.com"<br>
+}
+      </div>
+
+      <p>後端收到 → 存進資料庫 → 回傳：</p>
+
+      <div class="code-block">
+<span style="color: var(--green);">狀態碼：201 Created</span><br><br>
+回傳的資料（Response）：<br>
+{<br>
+&nbsp;&nbsp;"id": 123,<br>
+&nbsp;&nbsp;"name": "王小明",<br>
+&nbsp;&nbsp;"phone": "0912-345-678",<br>
+&nbsp;&nbsp;"email": "ming@example.com",<br>
+&nbsp;&nbsp;"created_at": "2026-03-28T10:30:00Z"<br>
+}
+      </div>
+
+      <p>前端收到 <code>201</code> → 顯示「新增成功！」</p>
+
+      <h3>2. 列出所有客戶（GET）</h3>
+
+      <div class="code-block">
+<span style="color: var(--blue);">GET</span> /api/customers<br><br>
+<span style="color: var(--green);">狀態碼：200 OK</span><br><br>
+回傳：<br>
+[<br>
+&nbsp;&nbsp;{ "id": 123, "name": "王小明", "phone": "0912-345-678" },<br>
+&nbsp;&nbsp;{ "id": 124, "name": "李大華", "phone": "0933-456-789" },<br>
+&nbsp;&nbsp;{ "id": 125, "name": "張美玲", "phone": "0955-567-890" }<br>
+]
+      </div>
+
+      <p>前端收到資料 → 渲染成表格顯示在頁面上。</p>
+
+      <h3>3. 查看單一客戶（GET + ID）</h3>
+
+      <div class="code-block">
+<span style="color: var(--blue);">GET</span> /api/customers/123<br><br>
+<span style="color: var(--green);">狀態碼：200 OK</span><br><br>
+回傳：王小明的完整資料
+      </div>
+
+      <h3>4. 修改客戶資料（PATCH）</h3>
+
+      <p>王小明換了電話號碼，只要改這個欄位：</p>
+
+      <div class="code-block">
+<span style="color: var(--yellow);">PATCH</span> /api/customers/123<br><br>
+送出的資料：<br>
+{<br>
+&nbsp;&nbsp;"phone": "0987-654-321"<br>
+}<br><br>
+<span style="color: var(--green);">狀態碼：200 OK</span><br>
+→ 只有電話被改掉，其他欄位不動
+      </div>
+
+      <h3>5. 刪除客戶（DELETE）</h3>
+
+      <div class="code-block">
+<span style="color: var(--red);">DELETE</span> /api/customers/123<br><br>
+<span style="color: var(--green);">狀態碼：200 OK</span><br>
+→ 王小明的資料被刪除了
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">整理一下</div>
+        看出規律了嗎？同一個路徑 <code>/api/customers</code>，搭配不同的 HTTP Method，就能做不同的事：
+        <ul>
+          <li><code>GET /api/customers</code> → 看全部</li>
+          <li><code>GET /api/customers/123</code> → 看一個</li>
+          <li><code>POST /api/customers</code> → 新增</li>
+          <li><code>PATCH /api/customers/123</code> → 改一個</li>
+          <li><code>DELETE /api/customers/123</code> → 刪一個</li>
+        </ul>
+        這就是 API 設計的核心概念。
+      </div>
+
+      <!-- E. RESTful API -->
+      <h2>API 組合排列的概念（RESTful）</h2>
+
+      <p>上面那種「用 HTTP Method + 路徑」來操作資源的設計方式，有一個正式的名字叫做 <strong>RESTful API</strong>。</p>
+
+      <h3>RESTful 命名慣例</h3>
+
+      <p>好的 API 設計有一些約定俗成的規則：</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>規則</th>
+              <th>好的例子</th>
+              <th>不好的例子</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>用名詞，不用動詞</td>
+              <td><code>/api/customers</code></td>
+              <td><code>/api/getCustomers</code></td>
+            </tr>
+            <tr>
+              <td>用複數</td>
+              <td><code>/api/orders</code></td>
+              <td><code>/api/order</code></td>
+            </tr>
+            <tr>
+              <td>巢狀表示關聯</td>
+              <td><code>/api/customers/123/orders</code></td>
+              <td><code>/api/getOrdersByCustomer?id=123</code></td>
+            </tr>
+            <tr>
+              <td>版本號放前面</td>
+              <td><code>/api/v1/customers</code></td>
+              <td><code>/api/customers?version=1</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Endpoint 怎麼看</h3>
+
+      <p>當你看到一個 API 路徑，可以像看地址一樣來拆解：</p>
+
+      <div class="code-block">
+/api/v1/users/123/orders<br><br>
+拆解：<br>
+├── /api       → 表示這是 API（不是一般網頁）<br>
+├── /v1        → 版本 1<br>
+├── /users     → 資源類型：使用者<br>
+├── /123       → 特定使用者（ID = 123）<br>
+└── /orders    → 這個使用者的訂單
+      </div>
+
+      <p>白話翻譯：<strong>「API 版本 1，去找 ID 為 123 的使用者，然後拿他的訂單」</strong></p>
+
+      <div class="analogy">
+        <strong>再多幾個例子：</strong><br><br>
+        <code>GET /api/v1/products</code> → 拿所有商品列表<br>
+        <code>POST /api/v1/products</code> → 新增一個商品<br>
+        <code>GET /api/v1/products/456/reviews</code> → 看商品 456 的所有評價<br>
+        <code>DELETE /api/v1/users/123/orders/789</code> → 刪掉使用者 123 的訂單 789
+      </div>
+
+      <h3>跟 Claude Code 的關係</h3>
+
+      <p>當你對 Claude Code 說：</p>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不知道 API 概念</div>
+          <div class="code-block">
+「幫我做一個可以新增客戶<br>
+的功能，然後還要能查詢<br>
+跟刪除」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">知道 API 概念</div>
+          <div class="code-block">
+「幫我建 RESTful API：<br>
+POST/GET/PATCH/DELETE<br>
+/api/v1/customers<br>
+回傳 JSON，需要驗證」
+          </div>
+        </div>
+      </div>
+
+      <p>右邊的指令更精準，Claude Code 產出的結果也會更符合你的期待。不需要你會寫程式碼，但知道這些「菜名」就能點對菜。</p>
+
+      <div class="box box-info">
+        <div class="box-label">本章重點回顧</div>
+        <ul>
+          <li><strong>API</strong> = 程式之間溝通的介面（服務生）</li>
+          <li><strong>HTTP Methods</strong> = 你要做什麼動作（GET 看 / POST 新增 / PATCH 改 / DELETE 刪）</li>
+          <li><strong>狀態碼</strong> = 服務生的回覆（200 成功 / 4xx 你的問題 / 5xx 伺服器的問題）</li>
+          <li><strong>RESTful</strong> = API 的命名規則（用名詞、用複數、巢狀表示關聯）</li>
+          <li><strong>Endpoint</strong> = API 的地址，像 <code>/api/v1/users/123/orders</code></li>
+        </ul>
+      </div>
+
+      <!-- Chapter Navigation -->
+      <div class="chapter-nav">
+        <a href="chapter7.html" class="prev">
+          <span class="nav-label">上一章</span>
+          <span class="nav-title">用什麼材料蓋房子（技術棧）</span>
+        </a>
+        <a href="chapter9.html" class="next">
+          <span class="nav-label">下一章</span>
+          <span class="nav-title">術語快速理解（字典頁）</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

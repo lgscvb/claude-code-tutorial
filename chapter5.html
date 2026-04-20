@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第五章：學會描述你看到的東西 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html" class="active">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第五章</div>
+      <h1>學會描述你看到的東西</h1>
+      <p class="lead">這是整本指南最有「字典」功能的一章。你在網頁上看到的每一個元件、每一個行為，都有名字。學會這些名字，你就能用一句話讓 AI 精準理解你要什麼。</p>
+    </div>
+
+    <div class="content">
+
+      <!-- ===== A. 網頁結構 ===== -->
+      <h2>A. 網頁結構（骨架）</h2>
+
+      <p>一個網頁就像一棟房子，有屋頂、牆壁、地板、房間。每個部位都有專門的名字。你不會跟裝潢師傅說「那個上面的東西」，你會說「天花板」。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>白話</th>
+              <th>在哪裡</th>
+              <th>你可以這樣跟 Claude 說</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Header</strong></td>
+              <td>頁首，最上面那一條</td>
+              <td>網頁最頂部，通常放 Logo 和導覽列</td>
+              <td>「Header 的背景色改成深藍色」</td>
+            </tr>
+            <tr>
+              <td><strong>Footer</strong></td>
+              <td>頁尾，最下面那一條</td>
+              <td>網頁最底部，通常放版權、聯絡資訊</td>
+              <td>「Footer 加一個 Email 聯絡連結」</td>
+            </tr>
+            <tr>
+              <td><strong>Hero</strong></td>
+              <td>首頁最大的那塊區域</td>
+              <td>進入網站第一眼看到的大圖+大標題</td>
+              <td>「Hero 的標題改成『歡迎光臨』」</td>
+            </tr>
+            <tr>
+              <td><strong>Section</strong></td>
+              <td>一個區塊</td>
+              <td>頁面中的每個主題段落</td>
+              <td>「在『功能介紹』section 下面加一個新的 section」</td>
+            </tr>
+            <tr>
+              <td><strong>Sidebar</strong></td>
+              <td>側邊欄</td>
+              <td>頁面左側或右側的窄欄</td>
+              <td>「Sidebar 要固定不動，不跟著滾」</td>
+            </tr>
+            <tr>
+              <td><strong>Modal</strong></td>
+              <td>彈出視窗</td>
+              <td>畫面中間跳出的白色方塊，背後變暗</td>
+              <td>「按『刪除』的時候要彈一個 Modal 確認」</td>
+            </tr>
+            <tr>
+              <td><strong>Navbar</strong></td>
+              <td>導覽列</td>
+              <td>Header 裡面那排連結按鈕</td>
+              <td>「Navbar 多加一個『部落格』的連結」</td>
+            </tr>
+            <tr>
+              <td><strong>Card</strong></td>
+              <td>卡片</td>
+              <td>一個有邊框的小區塊，裡面放圖+文字</td>
+              <td>「商品列表用 Card 排列，一排三張」</td>
+            </tr>
+            <tr>
+              <td><strong>Button</strong></td>
+              <td>按鈕</td>
+              <td>你可以點擊的那個東西</td>
+              <td>「『送出』Button 改成綠色，hover 時變深綠」</td>
+            </tr>
+            <tr>
+              <td><strong>Form</strong></td>
+              <td>表單</td>
+              <td>讓你填資料的區域（輸入框+按鈕）</td>
+              <td>「聯絡 Form 加一個『手機號碼』欄位」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">記憶技巧</div>
+        Header / Footer = 頭 / 腳<br>
+        Hero = 英雄（首頁最醒目的那一塊，像英雄一樣站 C 位）<br>
+        Modal = 「強制對話框」（你不處理它，後面的東西都按不到）<br>
+        Card = 卡片（想像 Pinterest 或 IG 的方塊排列）
+      </div>
+
+      <!-- ===== B. UI 元件 ===== -->
+      <h2>B. UI 元件（互動元件圖鑑）</h2>
+
+      <p>這些是你天天在用但可能叫不出名字的東西。學會這些名字，你就能精準地告訴 AI「我要的是哪種東西」。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>你看到的</th>
+              <th>術語</th>
+              <th>白話</th>
+              <th>你可以這樣跟 Claude 說</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>三條橫線</td>
+              <td><strong>Hamburger Menu</strong>（漢堡選單）</td>
+              <td>手機版的選單按鈕，按了會展開完整選單</td>
+              <td>「手機版加一個 Hamburger Menu，點開後顯示所有連結」</td>
+            </tr>
+            <tr>
+              <td>按了往下展開的選單</td>
+              <td><strong>Dropdown</strong></td>
+              <td>下拉選單，點一下展開選項</td>
+              <td>「用 Dropdown 讓使用者選縣市」</td>
+            </tr>
+            <tr>
+              <td>左右切換的小開關</td>
+              <td><strong>Toggle / Switch</strong></td>
+              <td>開/關切換器，像電燈開關</td>
+              <td>「Dark Mode 用一個 Toggle 切換」</td>
+            </tr>
+            <tr>
+              <td>一排可以點的標籤</td>
+              <td><strong>Tab 頁籤</strong></td>
+              <td>同一個區域切換不同內容</td>
+              <td>「商品頁用 Tab 分『規格』和『評價』」</td>
+            </tr>
+            <tr>
+              <td>FAQ 展開收合的區塊</td>
+              <td><strong>Accordion（手風琴）</strong></td>
+              <td>點標題展開內容，再點收回去</td>
+              <td>「FAQ 用 Accordion，預設全部收合」</td>
+            </tr>
+            <tr>
+              <td>自動左右滑動的圖片</td>
+              <td><strong>Carousel / Slider（輪播）</strong></td>
+              <td>圖片或內容像跑馬燈一樣輪流顯示</td>
+              <td>「首頁 Banner 用 Carousel，3 秒換一張」</td>
+            </tr>
+            <tr>
+              <td>滑鼠移上去出現的小提示</td>
+              <td><strong>Tooltip（提示框）</strong></td>
+              <td>像便利貼一樣的小說明</td>
+              <td>「Icon 旁邊加 Tooltip 解釋功能」</td>
+            </tr>
+            <tr>
+              <td>右下角的圓形聊天按鈕</td>
+              <td><strong>Chat Widget / FAB</strong></td>
+              <td>浮動在右下角的圓形按鈕（FAB = Floating Action Button）</td>
+              <td>「右下角加一個 FAB，點了打開客服聊天室」</td>
+            </tr>
+            <tr>
+              <td>上方或下方滑出的通知條</td>
+              <td><strong>Banner / Toast</strong></td>
+              <td>Banner = 固定在最上面的通知條<br>Toast = 短暫出現幾秒後消失的提示</td>
+              <td>「存檔成功後顯示一個綠色 Toast」</td>
+            </tr>
+            <tr>
+              <td>轉圈圈的讀取動畫</td>
+              <td><strong>Spinner / Loading</strong></td>
+              <td>「等一下，東西還在載入」的視覺提示</td>
+              <td>「API 載入時顯示 Spinner，載完再顯示資料」</td>
+            </tr>
+            <tr>
+              <td>滑到底自動載入更多</td>
+              <td><strong>Infinite Scroll（無限滾動）</strong></td>
+              <td>滑到底部自動載入下一批內容（像 FB 動態牆）</td>
+              <td>「文章列表用 Infinite Scroll 取代分頁」</td>
+            </tr>
+            <tr>
+              <td>底部的 1 2 3 ... 下一頁</td>
+              <td><strong>Pagination（分頁）</strong></td>
+              <td>把內容分成多頁，底部有頁碼可以跳</td>
+              <td>「搜尋結果用 Pagination，每頁 20 筆」</td>
+            </tr>
+            <tr>
+              <td>方框打勾 / 圓形選一個</td>
+              <td><strong>Checkbox / Radio Button</strong></td>
+              <td>Checkbox = 可以多選（方框）<br>Radio = 只能選一個（圓形）</td>
+              <td>「興趣欄位用 Checkbox（可多選），性別用 Radio」</td>
+            </tr>
+            <tr>
+              <td>拖拉橫桿調整數值</td>
+              <td><strong>Slider / Range</strong></td>
+              <td>用拖拉的方式選數值範圍（像音量條）</td>
+              <td>「價格篩選用 Slider，範圍 0 到 10000」</td>
+            </tr>
+            <tr>
+              <td>「確定要刪除嗎？」的彈窗</td>
+              <td><strong>Dialog / Modal</strong></td>
+              <td>強制你回應的彈出視窗</td>
+              <td>「刪除前彈一個確認 Dialog」</td>
+            </tr>
+            <tr>
+              <td>從側邊滑出的面板</td>
+              <td><strong>Drawer（抽屜）</strong></td>
+              <td>從螢幕左邊或右邊滑出來的面板</td>
+              <td>「購物車用 Drawer，從右邊滑出」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===== 互動 Demo 區域 ===== -->
+      <style>
+        /* Demo 共用容器 */
+        .demo-container {
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius);
+          padding: 24px;
+          margin: 20px 0;
+          background: var(--bg-card);
+          position: relative;
+        }
+        .demo-container::before {
+          content: attr(data-demo-title);
+          position: absolute;
+          top: -11px;
+          left: 16px;
+          background: var(--bg-card);
+          padding: 0 8px;
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--accent);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        .demo-label {
+          font-size: 13px;
+          color: var(--text-muted);
+          margin-bottom: 16px;
+        }
+
+        /* 1. Hamburger Menu Demo */
+        .demo-hamburger-btn {
+          width: 44px;
+          height: 44px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          gap: 5px;
+          padding: 10px;
+          transition: background 0.2s;
+        }
+        .demo-hamburger-btn:hover { background: var(--bg-card-hover); }
+        .demo-hamburger-btn span {
+          display: block;
+          width: 22px;
+          height: 2px;
+          background: var(--text);
+          border-radius: 2px;
+          transition: all 0.3s ease;
+        }
+        .demo-hamburger-btn.demo-active span:nth-child(1) {
+          transform: rotate(45deg) translate(5px, 5px);
+        }
+        .demo-hamburger-btn.demo-active span:nth-child(2) { opacity: 0; }
+        .demo-hamburger-btn.demo-active span:nth-child(3) {
+          transform: rotate(-45deg) translate(5px, -5px);
+        }
+        .demo-hamburger-menu {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+          background: var(--bg);
+          border-radius: var(--radius-sm);
+          margin-top: 8px;
+          border: 1px solid transparent;
+        }
+        .demo-hamburger-menu.demo-active {
+          max-height: 200px;
+          border-color: var(--border-light);
+        }
+        .demo-hamburger-menu a {
+          display: block;
+          padding: 10px 16px;
+          color: var(--text);
+          text-decoration: none;
+          font-size: 14px;
+          transition: background 0.2s;
+          border-bottom: 1px solid var(--border);
+        }
+        .demo-hamburger-menu a:last-child { border-bottom: none; }
+        .demo-hamburger-menu a:hover { background: var(--bg-card-hover); color: var(--accent); }
+
+        /* 2. Dropdown Demo */
+        .demo-dropdown-wrap { position: relative; display: inline-block; }
+        .demo-dropdown-btn {
+          padding: 10px 20px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          color: var(--text);
+          cursor: pointer;
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          transition: border-color 0.2s;
+        }
+        .demo-dropdown-btn:hover { border-color: var(--accent); }
+        .demo-dropdown-btn .demo-arrow {
+          transition: transform 0.3s;
+          font-size: 10px;
+        }
+        .demo-dropdown-btn.demo-active .demo-arrow { transform: rotate(180deg); }
+        .demo-dropdown-list {
+          position: absolute;
+          top: calc(100% + 4px);
+          left: 0;
+          min-width: 180px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease, opacity 0.3s;
+          opacity: 0;
+          z-index: 10;
+        }
+        .demo-dropdown-list.demo-active {
+          max-height: 200px;
+          opacity: 1;
+        }
+        .demo-dropdown-list div {
+          padding: 10px 16px;
+          color: var(--text);
+          font-size: 14px;
+          cursor: pointer;
+          transition: background 0.2s;
+          border-bottom: 1px solid var(--border);
+        }
+        .demo-dropdown-list div:last-child { border-bottom: none; }
+        .demo-dropdown-list div:hover { background: var(--bg-card-hover); color: var(--accent); }
+
+        /* 3. Toggle/Switch Demo */
+        .demo-toggle-row { display: flex; align-items: center; gap: 12px; }
+        .demo-toggle {
+          width: 48px;
+          height: 26px;
+          background: var(--border-light);
+          border-radius: 13px;
+          cursor: pointer;
+          position: relative;
+          transition: background 0.3s;
+          border: none;
+          padding: 0;
+        }
+        .demo-toggle::after {
+          content: '';
+          position: absolute;
+          top: 3px;
+          left: 3px;
+          width: 20px;
+          height: 20px;
+          background: var(--text);
+          border-radius: 50%;
+          transition: all 0.3s;
+        }
+        .demo-toggle.demo-active {
+          background: var(--accent);
+        }
+        .demo-toggle.demo-active::after {
+          left: 25px;
+          background: #fff;
+        }
+        .demo-toggle-label {
+          font-size: 14px;
+          color: var(--text);
+          user-select: none;
+        }
+
+        /* 4. Tab Demo */
+        .demo-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border-light); margin-bottom: 16px; }
+        .demo-tab-btn {
+          padding: 10px 20px;
+          background: none;
+          border: none;
+          color: var(--text-muted);
+          font-size: 14px;
+          cursor: pointer;
+          border-bottom: 2px solid transparent;
+          transition: all 0.2s;
+          margin-bottom: -1px;
+        }
+        .demo-tab-btn:hover { color: var(--text); }
+        .demo-tab-btn.demo-active {
+          color: var(--accent);
+          border-bottom-color: var(--accent);
+        }
+        .demo-tab-content {
+          display: none;
+          font-size: 14px;
+          color: var(--text);
+          padding: 12px 4px;
+          animation: demo-fadeIn 0.3s;
+        }
+        .demo-tab-content.demo-active { display: block; }
+        @keyframes demo-fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 5. Accordion Demo */
+        .demo-accordion-item {
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          margin-bottom: 8px;
+          overflow: hidden;
+        }
+        .demo-accordion-header {
+          padding: 12px 16px;
+          background: var(--bg);
+          color: var(--text);
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border: none;
+          width: 100%;
+          text-align: left;
+          transition: background 0.2s;
+        }
+        .demo-accordion-header:hover { background: var(--bg-card-hover); }
+        .demo-accordion-icon {
+          transition: transform 0.3s;
+          font-size: 12px;
+          color: var(--text-muted);
+        }
+        .demo-accordion-header.demo-active .demo-accordion-icon { transform: rotate(180deg); }
+        .demo-accordion-body {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+          background: var(--bg);
+        }
+        .demo-accordion-body-inner {
+          padding: 12px 16px;
+          font-size: 14px;
+          color: var(--text-muted);
+          border-top: 1px solid var(--border);
+        }
+
+        /* 6. Tooltip Demo */
+        .demo-tooltip-wrap { position: relative; display: inline-block; }
+        .demo-tooltip-trigger {
+          padding: 10px 20px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          color: var(--text);
+          cursor: default;
+          font-size: 14px;
+          transition: border-color 0.2s;
+        }
+        .demo-tooltip-trigger:hover { border-color: var(--accent); }
+        .demo-tooltip-bubble {
+          position: absolute;
+          bottom: calc(100% + 8px);
+          left: 50%;
+          transform: translateX(-50%) translateY(4px);
+          background: var(--text);
+          color: var(--bg);
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 12px;
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: all 0.2s;
+        }
+        .demo-tooltip-bubble::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border: 5px solid transparent;
+          border-top-color: var(--text);
+        }
+        .demo-tooltip-wrap:hover .demo-tooltip-bubble {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+
+        /* 7. Modal Demo */
+        .demo-modal-overlay {
+          display: none;
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.6);
+          z-index: 1000;
+          justify-content: center;
+          align-items: center;
+          animation: demo-fadeIn 0.2s;
+        }
+        .demo-modal-overlay.demo-active { display: flex; }
+        .demo-modal-box {
+          background: var(--bg-card);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius);
+          padding: 28px;
+          max-width: 380px;
+          width: 90%;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+        }
+        .demo-modal-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--text-heading);
+          margin-bottom: 12px;
+        }
+        .demo-modal-body {
+          font-size: 14px;
+          color: var(--text-muted);
+          margin-bottom: 20px;
+          line-height: 1.6;
+        }
+        .demo-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .demo-modal-btn {
+          padding: 8px 20px;
+          border-radius: var(--radius-sm);
+          font-size: 14px;
+          cursor: pointer;
+          border: none;
+          transition: all 0.2s;
+        }
+        .demo-modal-cancel {
+          background: var(--bg);
+          color: var(--text);
+          border: 1px solid var(--border-light);
+        }
+        .demo-modal-cancel:hover { border-color: var(--accent); }
+        .demo-modal-confirm {
+          background: var(--accent);
+          color: #fff;
+        }
+        .demo-modal-confirm:hover { background: var(--accent-light); }
+        .demo-open-modal {
+          padding: 10px 20px;
+          background: var(--accent);
+          color: #fff;
+          border: none;
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          font-size: 14px;
+          transition: background 0.2s;
+        }
+        .demo-open-modal:hover { background: var(--accent-light); }
+
+        /* 8. Spinner Demo */
+        .demo-spinner {
+          width: 36px;
+          height: 36px;
+          border: 3px solid var(--border-light);
+          border-top-color: var(--accent);
+          border-radius: 50%;
+          animation: demo-spin 0.8s linear infinite;
+        }
+        @keyframes demo-spin { to { transform: rotate(360deg); } }
+        .demo-spinner-row { display: flex; align-items: center; gap: 16px; }
+        .demo-spinner-text { font-size: 14px; color: var(--text-muted); }
+
+        /* 9. Toast Demo */
+        .demo-toast-btn {
+          padding: 10px 20px;
+          background: var(--accent);
+          color: #fff;
+          border: none;
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          font-size: 14px;
+          transition: background 0.2s;
+        }
+        .demo-toast-btn:hover { background: var(--accent-light); }
+        .demo-toast-area {
+          position: relative;
+          min-height: 50px;
+          margin-top: 12px;
+        }
+        .demo-toast {
+          display: none;
+          padding: 12px 20px;
+          background: var(--green);
+          color: #0f0f0f;
+          border-radius: var(--radius-sm);
+          font-size: 14px;
+          font-weight: 600;
+          animation: demo-toastIn 0.3s ease;
+          position: relative;
+        }
+        .demo-toast.demo-active { display: inline-block; }
+        @keyframes demo-toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .demo-toast-exit { animation: demo-toastOut 0.3s ease forwards; }
+        @keyframes demo-toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+
+        /* 10. Carousel Demo */
+        .demo-carousel { position: relative; overflow: hidden; border-radius: var(--radius-sm); }
+        .demo-carousel-track {
+          display: flex;
+          transition: transform 0.4s ease;
+        }
+        .demo-carousel-slide {
+          min-width: 100%;
+          padding: 32px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--text-heading);
+          min-height: 100px;
+        }
+        .demo-carousel-slide:nth-child(1) { background: rgba(212,132,90,0.15); }
+        .demo-carousel-slide:nth-child(2) { background: rgba(96,165,250,0.15); }
+        .demo-carousel-slide:nth-child(3) { background: rgba(74,222,128,0.15); }
+        .demo-carousel-controls {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 16px;
+          margin-top: 12px;
+        }
+        .demo-carousel-btn {
+          width: 32px;
+          height: 32px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: 50%;
+          color: var(--text);
+          cursor: pointer;
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+        .demo-carousel-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-carousel-dots { display: flex; gap: 6px; }
+        .demo-carousel-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--border-light);
+          border: none;
+          cursor: pointer;
+          transition: background 0.2s;
+          padding: 0;
+        }
+        .demo-carousel-dot.demo-active { background: var(--accent); }
+
+        /* 11. Checkbox/Radio Demo */
+        .demo-check-group { display: flex; flex-direction: column; gap: 10px; }
+        .demo-check-row { display: flex; gap: 24px; flex-wrap: wrap; }
+        .demo-check-label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          font-size: 14px;
+          color: var(--text);
+          user-select: none;
+        }
+        .demo-check-label input[type="checkbox"],
+        .demo-check-label input[type="radio"] {
+          appearance: none;
+          -webkit-appearance: none;
+          width: 18px;
+          height: 18px;
+          border: 2px solid var(--border-light);
+          background: var(--bg);
+          cursor: pointer;
+          position: relative;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+        .demo-check-label input[type="checkbox"] { border-radius: 4px; }
+        .demo-check-label input[type="radio"] { border-radius: 50%; }
+        .demo-check-label input[type="checkbox"]:checked {
+          background: var(--accent);
+          border-color: var(--accent);
+        }
+        .demo-check-label input[type="checkbox"]:checked::after {
+          content: '';
+          position: absolute;
+          left: 5px;
+          top: 1px;
+          width: 5px;
+          height: 10px;
+          border: solid #fff;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+        .demo-check-label input[type="radio"]:checked {
+          border-color: var(--accent);
+        }
+        .demo-check-label input[type="radio"]:checked::after {
+          content: '';
+          position: absolute;
+          top: 3px;
+          left: 3px;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--accent);
+        }
+        .demo-section-label {
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 4px;
+        }
+
+        /* 12. Range Slider Demo */
+        .demo-range-row { display: flex; align-items: center; gap: 16px; }
+        .demo-range {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 200px;
+          height: 6px;
+          background: var(--border-light);
+          border-radius: 3px;
+          outline: none;
+          cursor: pointer;
+        }
+        .demo-range::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 20px;
+          height: 20px;
+          background: var(--accent);
+          border-radius: 50%;
+          cursor: pointer;
+          border: 2px solid var(--bg-card);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          transition: background 0.2s;
+        }
+        .demo-range::-webkit-slider-thumb:hover { background: var(--accent-light); }
+        .demo-range::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          background: var(--accent);
+          border-radius: 50%;
+          cursor: pointer;
+          border: 2px solid var(--bg-card);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .demo-range-value {
+          font-size: 14px;
+          color: var(--accent);
+          font-weight: 700;
+          min-width: 40px;
+          text-align: center;
+        }
+        .demo-range-label-text { font-size: 14px; color: var(--text); }
+      </style>
+
+      <h3>互動 Demo</h3>
+      <p>以下是上方表格所有互動型元件的即時 demo，你可以直接操作看看每個元件的行為。</p>
+
+      <!-- Demo 1: Hamburger Menu -->
+      <div class="demo-container" data-demo-title="互動 Demo — Hamburger Menu">
+        <div class="demo-label">點擊漢堡按鈕，三條線會變成 X，下方展開選單。</div>
+        <button class="demo-hamburger-btn" id="demoHamburger" aria-label="Demo 漢堡選單">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="demo-hamburger-menu" id="demoHamburgerMenu">
+          <a href="javascript:void(0)">首頁</a>
+          <a href="javascript:void(0)">關於我們</a>
+          <a href="javascript:void(0)">產品服務</a>
+          <a href="javascript:void(0)">聯絡我們</a>
+        </div>
+      </div>
+
+      <!-- Demo 2: Dropdown -->
+      <div class="demo-container" data-demo-title="互動 Demo — Dropdown">
+        <div class="demo-label">點擊按鈕展開下拉選單，選擇一個縣市。</div>
+        <div class="demo-dropdown-wrap" id="demoDropdownWrap">
+          <button class="demo-dropdown-btn" id="demoDropdownBtn">
+            <span id="demoDropdownText">選擇縣市</span>
+            <span class="demo-arrow">&#9660;</span>
+          </button>
+          <div class="demo-dropdown-list" id="demoDropdownList">
+            <div data-value="taipei">台北市</div>
+            <div data-value="taichung">台中市</div>
+            <div data-value="kaohsiung">高雄市</div>
+            <div data-value="tainan">台南市</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo 3: Toggle/Switch -->
+      <div class="demo-container" data-demo-title="互動 Demo — Toggle / Switch">
+        <div class="demo-label">點擊開關來切換開/關狀態。</div>
+        <div class="demo-toggle-row">
+          <button class="demo-toggle" id="demoToggle1" aria-label="Demo Toggle"></button>
+          <span class="demo-toggle-label" id="demoToggleLabel1">Dark Mode：關</span>
+        </div>
+        <div class="demo-toggle-row" style="margin-top:12px;">
+          <button class="demo-toggle" id="demoToggle2" aria-label="Demo Toggle 2"></button>
+          <span class="demo-toggle-label" id="demoToggleLabel2">通知：關</span>
+        </div>
+      </div>
+
+      <!-- Demo 4: Tab -->
+      <div class="demo-container" data-demo-title="互動 Demo — Tab 頁籤">
+        <div class="demo-label">點擊不同頁籤切換顯示的內容。</div>
+        <div class="demo-tabs">
+          <button class="demo-tab-btn demo-active" data-tab="spec">規格</button>
+          <button class="demo-tab-btn" data-tab="review">評價</button>
+          <button class="demo-tab-btn" data-tab="qa">問答</button>
+        </div>
+        <div class="demo-tab-content demo-active" data-tab-content="spec">
+          處理器：Apple M2 / 記憶體：16GB / 儲存空間：512GB SSD<br>
+          螢幕：13.6 吋 Liquid Retina / 重量：1.24 kg
+        </div>
+        <div class="demo-tab-content" data-tab-content="review">
+          ★★★★★ 「鍵盤手感超好，電池撐一整天。」<br>
+          ★★★★☆ 「效能很棒，但螢幕亮度希望能再高一點。」
+        </div>
+        <div class="demo-tab-content" data-tab-content="qa">
+          Q：可以外接兩台螢幕嗎？<br>
+          A：M2 原生支援一台外接，透過擴充座可支援兩台。
+        </div>
+      </div>
+
+      <!-- Demo 5: Accordion -->
+      <div class="demo-container" data-demo-title="互動 Demo — Accordion（手風琴）">
+        <div class="demo-label">點擊問題標題展開/收合答案。</div>
+        <div class="demo-accordion-item">
+          <button class="demo-accordion-header" data-accordion="a1">
+            什麼是 Claude Code？
+            <span class="demo-accordion-icon">&#9660;</span>
+          </button>
+          <div class="demo-accordion-body" id="demo-a1">
+            <div class="demo-accordion-body-inner">Claude Code 是 Anthropic 推出的命令列工具，讓你可以在終端機裡直接跟 Claude AI 協作寫程式。</div>
+          </div>
+        </div>
+        <div class="demo-accordion-item">
+          <button class="demo-accordion-header" data-accordion="a2">
+            需要會寫程式才能用嗎？
+            <span class="demo-accordion-icon">&#9660;</span>
+          </button>
+          <div class="demo-accordion-body" id="demo-a2">
+            <div class="demo-accordion-body-inner">不需要！這本指南就是為非工程師寫的。你只要會用中文描述你想要什麼，Claude 就能幫你生成程式碼。</div>
+          </div>
+        </div>
+        <div class="demo-accordion-item">
+          <button class="demo-accordion-header" data-accordion="a3">
+            跟 ChatGPT 有什麼不同？
+            <span class="demo-accordion-icon">&#9660;</span>
+          </button>
+          <div class="demo-accordion-body" id="demo-a3">
+            <div class="demo-accordion-body-inner">Claude Code 直接在你的專案資料夾裡運作，能讀寫檔案、執行指令，不只是聊天對話。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo 6: Tooltip -->
+      <div class="demo-container" data-demo-title="互動 Demo — Tooltip（提示框）">
+        <div class="demo-label">把滑鼠移到下方元素上方，會出現提示文字。</div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <div class="demo-tooltip-wrap">
+            <span class="demo-tooltip-trigger">&#9881; 設定</span>
+            <div class="demo-tooltip-bubble">開啟系統設定</div>
+          </div>
+          <div class="demo-tooltip-wrap">
+            <span class="demo-tooltip-trigger">&#128276; 通知</span>
+            <div class="demo-tooltip-bubble">你有 3 則未讀通知</div>
+          </div>
+          <div class="demo-tooltip-wrap">
+            <span class="demo-tooltip-trigger">&#9733; 收藏</span>
+            <div class="demo-tooltip-bubble">加入收藏清單</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo 7: Modal -->
+      <div class="demo-container" data-demo-title="互動 Demo — Modal（彈出視窗）">
+        <div class="demo-label">點擊按鈕會彈出一個對話框，背後變暗。</div>
+        <button class="demo-open-modal" id="demoOpenModal">開啟 Modal</button>
+      </div>
+      <div class="demo-modal-overlay" id="demoModalOverlay">
+        <div class="demo-modal-box">
+          <div class="demo-modal-title">確定要刪除嗎？</div>
+          <div class="demo-modal-body">這個操作無法復原。刪除後，你的資料將永久消失。</div>
+          <div class="demo-modal-actions">
+            <button class="demo-modal-btn demo-modal-cancel" id="demoModalCancel">取消</button>
+            <button class="demo-modal-btn demo-modal-confirm" id="demoModalConfirm">確定刪除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo 8: Spinner/Loading -->
+      <div class="demo-container" data-demo-title="互動 Demo — Spinner / Loading">
+        <div class="demo-label">轉圈圈動畫，用來表示「正在載入」。</div>
+        <div class="demo-spinner-row">
+          <div class="demo-spinner"></div>
+          <span class="demo-spinner-text">載入中，請稍候...</span>
+        </div>
+      </div>
+
+      <!-- Demo 9: Toast -->
+      <div class="demo-container" data-demo-title="互動 Demo — Toast / Banner">
+        <div class="demo-label">點擊按鈕後出現通知條，3 秒後自動消失。</div>
+        <button class="demo-toast-btn" id="demoToastBtn">顯示 Toast 通知</button>
+        <div class="demo-toast-area">
+          <div class="demo-toast" id="demoToast">&#10003; 儲存成功！</div>
+        </div>
+      </div>
+
+      <!-- Demo 10: Carousel -->
+      <div class="demo-container" data-demo-title="互動 Demo — Carousel（輪播）">
+        <div class="demo-label">使用左右箭頭或圓點切換內容。</div>
+        <div class="demo-carousel">
+          <div class="demo-carousel-track" id="demoCarouselTrack">
+            <div class="demo-carousel-slide">Slide 1 — 歡迎光臨</div>
+            <div class="demo-carousel-slide">Slide 2 — 精選商品</div>
+            <div class="demo-carousel-slide">Slide 3 — 限時優惠</div>
+          </div>
+        </div>
+        <div class="demo-carousel-controls">
+          <button class="demo-carousel-btn" id="demoCarouselPrev">&#8249;</button>
+          <div class="demo-carousel-dots" id="demoCarouselDots">
+            <button class="demo-carousel-dot demo-active" data-slide="0"></button>
+            <button class="demo-carousel-dot" data-slide="1"></button>
+            <button class="demo-carousel-dot" data-slide="2"></button>
+          </div>
+          <button class="demo-carousel-btn" id="demoCarouselNext">&#8250;</button>
+        </div>
+      </div>
+
+      <!-- Demo 11: Checkbox / Radio -->
+      <div class="demo-container" data-demo-title="互動 Demo — Checkbox / Radio">
+        <div class="demo-label">Checkbox 可以多選（方框），Radio 只能選一個（圓形）。</div>
+        <div class="demo-check-group">
+          <div class="demo-section-label">興趣（Checkbox — 可多選）</div>
+          <div class="demo-check-row">
+            <label class="demo-check-label"><input type="checkbox"> 程式設計</label>
+            <label class="demo-check-label"><input type="checkbox"> 設計</label>
+            <label class="demo-check-label"><input type="checkbox"> 行銷</label>
+            <label class="demo-check-label"><input type="checkbox"> 財務</label>
+          </div>
+          <div class="demo-section-label" style="margin-top:16px;">性別（Radio — 單選）</div>
+          <div class="demo-check-row">
+            <label class="demo-check-label"><input type="radio" name="demoGender"> 男</label>
+            <label class="demo-check-label"><input type="radio" name="demoGender"> 女</label>
+            <label class="demo-check-label"><input type="radio" name="demoGender"> 其他</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo 12: Range Slider -->
+      <div class="demo-container" data-demo-title="互動 Demo — Range Slider">
+        <div class="demo-label">拖拉滑桿來調整數值。</div>
+        <div class="demo-range-row">
+          <span class="demo-range-label-text">價格：</span>
+          <input type="range" class="demo-range" id="demoRange1" min="0" max="10000" value="5000" step="100">
+          <span class="demo-range-value" id="demoRangeVal1">$5000</span>
+        </div>
+        <div class="demo-range-row" style="margin-top:12px;">
+          <span class="demo-range-label-text">音量：</span>
+          <input type="range" class="demo-range" id="demoRange2" min="0" max="100" value="60">
+          <span class="demo-range-value" id="demoRangeVal2">60%</span>
+        </div>
+      </div>
+
+      <!-- Demo JS -->
+      <script>
+      (function() {
+        /* 1. Hamburger */
+        var hb = document.getElementById('demoHamburger');
+        var hm = document.getElementById('demoHamburgerMenu');
+        hb.addEventListener('click', function() {
+          hb.classList.toggle('demo-active');
+          hm.classList.toggle('demo-active');
+        });
+
+        /* 2. Dropdown */
+        var dbtn = document.getElementById('demoDropdownBtn');
+        var dlist = document.getElementById('demoDropdownList');
+        var dtxt = document.getElementById('demoDropdownText');
+        dbtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          dbtn.classList.toggle('demo-active');
+          dlist.classList.toggle('demo-active');
+        });
+        dlist.querySelectorAll('div').forEach(function(item) {
+          item.addEventListener('click', function() {
+            dtxt.textContent = item.textContent;
+            dbtn.classList.remove('demo-active');
+            dlist.classList.remove('demo-active');
+          });
+        });
+        document.addEventListener('click', function() {
+          dbtn.classList.remove('demo-active');
+          dlist.classList.remove('demo-active');
+        });
+
+        /* 3. Toggle */
+        function setupToggle(btnId, labelId, onText, offText) {
+          var btn = document.getElementById(btnId);
+          var lbl = document.getElementById(labelId);
+          btn.addEventListener('click', function() {
+            btn.classList.toggle('demo-active');
+            lbl.textContent = btn.classList.contains('demo-active') ? onText : offText;
+          });
+        }
+        setupToggle('demoToggle1', 'demoToggleLabel1', 'Dark Mode：開', 'Dark Mode：關');
+        setupToggle('demoToggle2', 'demoToggleLabel2', '通知：開', '通知：關');
+
+        /* 4. Tabs */
+        var tabBtns = document.querySelectorAll('.demo-tab-btn');
+        var tabContents = document.querySelectorAll('.demo-tab-content');
+        tabBtns.forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            tabBtns.forEach(function(b) { b.classList.remove('demo-active'); });
+            tabContents.forEach(function(c) { c.classList.remove('demo-active'); });
+            btn.classList.add('demo-active');
+            document.querySelector('[data-tab-content="' + btn.dataset.tab + '"]').classList.add('demo-active');
+          });
+        });
+
+        /* 5. Accordion */
+        document.querySelectorAll('.demo-accordion-header').forEach(function(hdr) {
+          hdr.addEventListener('click', function() {
+            var body = document.getElementById('demo-' + hdr.dataset.accordion);
+            var isOpen = hdr.classList.contains('demo-active');
+            hdr.classList.toggle('demo-active');
+            body.style.maxHeight = isOpen ? '0' : body.scrollHeight + 'px';
+          });
+        });
+
+        /* 7. Modal */
+        var overlay = document.getElementById('demoModalOverlay');
+        document.getElementById('demoOpenModal').addEventListener('click', function() {
+          overlay.classList.add('demo-active');
+        });
+        document.getElementById('demoModalCancel').addEventListener('click', function() {
+          overlay.classList.remove('demo-active');
+        });
+        document.getElementById('demoModalConfirm').addEventListener('click', function() {
+          overlay.classList.remove('demo-active');
+        });
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) overlay.classList.remove('demo-active');
+        });
+
+        /* 9. Toast */
+        var toastEl = document.getElementById('demoToast');
+        var toastTimer = null;
+        document.getElementById('demoToastBtn').addEventListener('click', function() {
+          clearTimeout(toastTimer);
+          toastEl.classList.remove('demo-toast-exit');
+          toastEl.classList.add('demo-active');
+          toastTimer = setTimeout(function() {
+            toastEl.classList.add('demo-toast-exit');
+            setTimeout(function() {
+              toastEl.classList.remove('demo-active', 'demo-toast-exit');
+            }, 300);
+          }, 3000);
+        });
+
+        /* 10. Carousel */
+        var track = document.getElementById('demoCarouselTrack');
+        var dots = document.querySelectorAll('.demo-carousel-dot');
+        var currentSlide = 0;
+        var totalSlides = 3;
+        function goToSlide(n) {
+          currentSlide = (n + totalSlides) % totalSlides;
+          track.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+          dots.forEach(function(d, i) {
+            d.classList.toggle('demo-active', i === currentSlide);
+          });
+        }
+        document.getElementById('demoCarouselPrev').addEventListener('click', function() { goToSlide(currentSlide - 1); });
+        document.getElementById('demoCarouselNext').addEventListener('click', function() { goToSlide(currentSlide + 1); });
+        dots.forEach(function(dot) {
+          dot.addEventListener('click', function() { goToSlide(parseInt(dot.dataset.slide)); });
+        });
+
+        /* 12. Range Slider */
+        var r1 = document.getElementById('demoRange1');
+        var v1 = document.getElementById('demoRangeVal1');
+        r1.addEventListener('input', function() { v1.textContent = '$' + r1.value; });
+        var r2 = document.getElementById('demoRange2');
+        var v2 = document.getElementById('demoRangeVal2');
+        r2.addEventListener('input', function() { v2.textContent = r2.value + '%'; });
+      })();
+      </script>
+
+      <h3>容器與佈局元件</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>白話</th>
+              <th>用在哪</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Container</strong></td>
+              <td>容器，限制內容寬度的外框</td>
+              <td>頁面中間那個有邊界的區塊</td>
+            </tr>
+            <tr>
+              <td><strong>Wrapper</strong></td>
+              <td>包裹器，把一組東西包在一起</td>
+              <td>把好幾張卡片包成一組</td>
+            </tr>
+            <tr>
+              <td><strong>Grid</strong></td>
+              <td>網格排版</td>
+              <td>商品列表的棋盤式排列</td>
+            </tr>
+            <tr>
+              <td><strong>Flexbox</strong></td>
+              <td>彈性排版</td>
+              <td>一排按鈕自動均分空間</td>
+            </tr>
+            <tr>
+              <td><strong>Icon</strong></td>
+              <td>小圖示</td>
+              <td>選單旁邊的小符號（齒輪、放大鏡、鈴鐺）</td>
+            </tr>
+            <tr>
+              <td><strong>Avatar</strong></td>
+              <td>頭像</td>
+              <td>使用者大頭照的圓形小圖</td>
+            </tr>
+            <tr>
+              <td><strong>Badge</strong></td>
+              <td>徽章/數字標記</td>
+              <td>購物車上面的紅色數字「3」</td>
+            </tr>
+            <tr>
+              <td><strong>Breadcrumb</strong></td>
+              <td>麵包屑導航</td>
+              <td>首頁 &gt; 商品 &gt; 手機 &gt; iPhone</td>
+            </tr>
+            <tr>
+              <td><strong>Skeleton</strong></td>
+              <td>骨架屏</td>
+              <td>載入中時的灰色佔位區塊</td>
+            </tr>
+            <tr>
+              <td><strong>Divider</strong></td>
+              <td>分隔線</td>
+              <td>段落之間的一條橫線</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">Modal vs Drawer vs Toast 的差別</div>
+        <strong>Modal</strong> = 畫面正中間彈出，背後變暗，你必須處理它。<br>
+        <strong>Drawer</strong> = 從旁邊滑出來，可以半覆蓋畫面。<br>
+        <strong>Toast</strong> = 角落短暫出現幾秒就自己消失，不需要你做任何動作。<br><br>
+        干擾程度：Modal > Drawer > Toast
+      </div>
+
+      <!-- ===== C. 網頁行為 ===== -->
+      <h2>C. 網頁行為（動態表現）</h2>
+
+      <p>這些不是「東西」，而是網頁的「行為」。它們描述的是「頁面會怎麼動」。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>現象（你看到的）</th>
+              <th>術語</th>
+              <th>白話</th>
+              <th>你可以這樣跟 Claude 說</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>手機和電腦看到的排版不同</td>
+              <td><strong>RWD</strong>（Responsive Web Design）</td>
+              <td>響應式設計——同一個網頁在不同螢幕大小自動調整排版</td>
+              <td>「這個頁面要做 RWD，手機版一欄、桌機版三欄」</td>
+            </tr>
+            <tr>
+              <td>選單一直釘在最上面不動</td>
+              <td><strong>Sticky Header</strong></td>
+              <td>網頁往下滾，Header 固定不動一直在最上面</td>
+              <td>「Header 做成 Sticky，滾動時固定在頂部」</td>
+            </tr>
+            <tr>
+              <td>往下滾時，東西慢慢飛進來</td>
+              <td><strong>Scroll Animation</strong></td>
+              <td>滾動到某個位置時，元件播放進場動畫</td>
+              <td>「Card 區塊加 Scroll Animation，滾到時淡入」</td>
+            </tr>
+            <tr>
+              <td>點連結後滑順地滾到那個位置</td>
+              <td><strong>Smooth Scroll</strong></td>
+              <td>點了錨點連結後，頁面順滑地滾動（不是瞬移）</td>
+              <td>「目錄的連結用 Smooth Scroll 跳到對應段落」</td>
+            </tr>
+            <tr>
+              <td>背景和前景滾動速度不一樣</td>
+              <td><strong>Parallax（視差效果）</strong></td>
+              <td>前景滾快、背景滾慢，產生立體感</td>
+              <td>「Hero 區域加 Parallax，背景圖滾動速度減半」</td>
+            </tr>
+            <tr>
+              <td>整個網站變黑底白字</td>
+              <td><strong>Dark Mode</strong></td>
+              <td>深色模式，保護眼睛（晚上看比較舒服）</td>
+              <td>「加一個 Dark Mode Toggle，切換深色/淺色」</td>
+            </tr>
+            <tr>
+              <td>第一次用時一步一步的教學引導</td>
+              <td><strong>Onboarding</strong></td>
+              <td>新手引導——用彈窗或高亮一步步教你怎麼用</td>
+              <td>「新使用者第一次登入時跑一個 Onboarding 流程」</td>
+            </tr>
+            <tr>
+              <td>可以用滑鼠拖拉移動東西</td>
+              <td><strong>Drag & Drop</strong></td>
+              <td>拖放操作——用滑鼠抓起一個東西拖到另一個位置</td>
+              <td>「任務清單支援 Drag & Drop 重新排序」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===== D. CSS 最低限度知識 ===== -->
+      <h2>D. CSS 最低限度知識</h2>
+
+      <div class="analogy">
+        <strong>你不需要會寫 CSS，但你要能精準描述。</strong><br><br>
+        這就像你不需要會裁縫，但你去量身訂做西裝時，你要能說「袖子短一公分」而不是「那邊改一下」。<br><br>
+        CSS 負責的事：顏色、大小、間距、排版、動畫、響應式。<br>
+        你只要學會「怎麼用中文精準描述這些東西」。
+      </div>
+
+      <h3>不要這樣說 vs 要這樣說</h3>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「那個按鈕太醜了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「『送出』按鈕的圓角太大，<br>
+改成 8px；背景色太亮，<br>
+改成 #2563eb；hover 時<br>
+加 0.1 秒的過渡效果」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「字跟旁邊的東西太近了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「Card 的 padding 太小，<br>
+內容跟邊框太擠，<br>
+改成 padding: 24px」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「手機上看起來怪怪的」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「手機版（< 768px）的<br>
+grid 從三欄改成一欄，<br>
+字體從 16px 改成 14px」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「顏色不好看」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「主色改成 #d4845a（暖橘），<br>
+背景用 #0f0f0f（深黑），<br>
+文字用 #e0e0e0（淺灰）」
+          </div>
+        </div>
+      </div>
+
+      <h3>常用 CSS 描述詞彙</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>你想表達的</th>
+              <th>CSS 術語</th>
+              <th>白話</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>東西跟邊框的距離</td>
+              <td><code>padding</code></td>
+              <td>「內距」——內容跟自己邊框的距離</td>
+            </tr>
+            <tr>
+              <td>這個東西跟隔壁的距離</td>
+              <td><code>margin</code></td>
+              <td>「外距」——這個元件跟旁邊東西的距離</td>
+            </tr>
+            <tr>
+              <td>圓角</td>
+              <td><code>border-radius</code></td>
+              <td>角落圓不圓——0px 是直角，50% 是圓形</td>
+            </tr>
+            <tr>
+              <td>陰影</td>
+              <td><code>box-shadow</code></td>
+              <td>讓元件看起來浮起來的陰影效果</td>
+            </tr>
+            <tr>
+              <td>滑鼠移上去</td>
+              <td><code>hover</code></td>
+              <td>滑鼠游標移到上面時的變化</td>
+            </tr>
+            <tr>
+              <td>透明度</td>
+              <td><code>opacity</code></td>
+              <td>0 = 完全透明，1 = 完全不透明</td>
+            </tr>
+            <tr>
+              <td>排版方式</td>
+              <td><code>flexbox</code> / <code>grid</code></td>
+              <td>Flex = 一條線排列；Grid = 像表格一樣排</td>
+            </tr>
+            <tr>
+              <td>固定不動</td>
+              <td><code>position: fixed</code> / <code>sticky</code></td>
+              <td>Fixed = 永遠釘在螢幕某處；Sticky = 滾到它時才釘住</td>
+            </tr>
+            <tr>
+              <td>動畫過渡</td>
+              <td><code>transition</code></td>
+              <td>「從 A 狀態變到 B 狀態要花多久」——讓變化不要太突兀</td>
+            </tr>
+            <tr>
+              <td>超出範圍怎麼辦</td>
+              <td><code>overflow</code></td>
+              <td>內容太多塞不下時——hidden 裁掉 / scroll 加捲軸 / auto 自動判斷</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Global CSS vs !important</h3>
+
+      <div class="analogy">
+        <strong>Global CSS = 社區公約</strong><br>
+        「全社區的房子統一用白色外牆」——這是全域的 CSS 規則，所有元件都遵守。<br><br>
+        <strong>!important = 法院強制執行令</strong><br>
+        「不管社區公約說什麼，這面牆必須是紅色」——<code>!important</code> 會覆蓋所有其他規則，強制套用。<br><br>
+        <strong>濫用 !important 就像什麼事都告上法院——系統會亂掉。</strong>正常情況下，靠更精確的選擇器（selector）就能解決。
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">跟 Claude 說的時候</div>
+        如果你改了樣式但沒有效果，可以跟 Claude 說：<br>
+        「這個按鈕的顏色改不動，可能是被 global CSS 或 <code>!important</code> 覆蓋了，幫我查一下 CSS 優先級。」
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">跨瀏覽器相容性</div>
+        不同瀏覽器（Chrome / Safari / Firefox）對 CSS 的渲染可能有微小差異。如果你發現「在我電腦上好好的，別人的卻跑版」，通常是瀏覽器相容性問題。這時候跟 Claude 說「請加上 <code>-webkit-</code> 前綴」或「請確認跨瀏覽器相容性」就好。
+      </div>
+
+      <!-- ===== E. 瀏覽器三劍客 ===== -->
+      <h2>E. 瀏覽器三劍客</h2>
+
+      <p>在 AI 工具生態裡，有三種不同的「看網頁」方式，搞清楚它們的差別很重要。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>工具</th>
+              <th>比喻</th>
+              <th>你在哪</th>
+              <th>適合做什麼</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Chrome DevTools</strong></td>
+              <td>自己拿放大鏡檢查</td>
+              <td>你親手操作你自己的瀏覽器</td>
+              <td>看 CSS、查元素、看 Network 請求、Debug</td>
+            </tr>
+            <tr>
+              <td><strong>Playwright</strong></td>
+              <td>請機器人開一台新車去跑</td>
+              <td>一個全新的瀏覽器（不是你的），自動化操作</td>
+              <td>自動測試、截圖、批量操作、E2E 測試</td>
+            </tr>
+            <tr>
+              <td><strong>Claude in Chrome</strong></td>
+              <td>你坐副駕，Claude 幫你開你的車</td>
+              <td>你的瀏覽器，Claude 用 MCP 控制它</td>
+              <td>看到你看到的畫面、幫你操作你的瀏覽器</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">常見搞混</div>
+          <div class="code-block">
+「幫我用 Playwright 打開我的 Gmail」<br><br>
+不行。Playwright 開的是全新瀏覽器，<br>
+你沒有登入，看不到你的 Gmail。<br>
+它適合「測試公開網頁」，<br>
+不適合「操作你已登入的東西」。
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">正確用法</div>
+          <div class="code-block">
+要操作你已登入的網站<br>
+→ 用 <strong>Claude in Chrome</strong><br><br>
+要自動測試公開頁面<br>
+→ 用 <strong>Playwright</strong><br><br>
+要自己手動查問題<br>
+→ 用 <strong>Chrome DevTools</strong>
+          </div>
+        </div>
+      </div>
+
+      <h3>「右鍵 → 檢查」——非技術人員最該學的一招</h3>
+
+      <div class="analogy">
+        <strong>這一招的價值超過你想像。</strong><br><br>
+        在任何網頁上按「右鍵 → 檢查」（或按 F12），你會看到 Chrome DevTools。<br>
+        不用害怕，你不需要看懂所有東西。你只需要會做一件事：<br><br>
+        <strong>用「選取元素」工具（左上角的游標圖示），點一下畫面上的任何東西，</strong><br>
+        就能看到它的 HTML 標籤名稱和 CSS 樣式。
+      </div>
+
+      <p>為什麼這很重要？因為你可以這樣跟 Claude 說：</p>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不會用 DevTools 的人</div>
+          <div class="code-block">
+「那個按鈕的顏色不對」<br>
+「第三排的圖片跑掉了」<br>
+「有一塊不知道為什麼空白」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">會用 DevTools 的人</div>
+          <div class="code-block">
+「class 叫 .btn-primary 的按鈕<br>
+背景色是 #ccc，應該改成 #2563eb」<br><br>
+「#product-grid 的第三個 .card<br>
+圖片 width 超出容器了」<br><br>
+「.hero 下面有個 margin-bottom: 80px<br>
+造成太大的空白」
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">實作練習</div>
+        現在就試試看：<br>
+        1. 在這個頁面按「右鍵 → 檢查」<br>
+        2. 點左上角的游標圖示（Select Element）<br>
+        3. 把滑鼠移到這個綠色框框上<br>
+        4. 你會看到它的 class 是 <code>box box-tip</code><br><br>
+        恭喜你，你學會了非技術人員最強大的偵查技能。
+      </div>
+
+      <h3>F12 開發者模式：你最該學的一招</h3>
+
+      <div class="analogy">
+        <strong>步驟超簡單，照做就好：</strong><br><br>
+        1. 在任何網頁上按 <strong>F12</strong>（Mac 用 <strong>Cmd + Option + I</strong>）<br>
+        2. 點左上角的「箭頭圖示」（Select Element）<br>
+        3. 滑鼠移到你想改的東西上面，點一下<br>
+        4. 右邊會顯示這個元素的 HTML 和 CSS<br>
+        5. 你就知道它叫什麼 class、用了什麼樣式
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">學會這招的威力</div>
+        學會這招之後，你再也不用跟 LLM 說「那個藍色的上面的東西」。你可以直接說「class 叫 <code>.hero-title</code> 的 h1，font-size 改成 36px」。精準度提升 10 倍。
+      </div>
+
+      <p>如果你在 DevTools 裡看不懂那些 CSS，沒關係。把你在 DevTools 看到的 HTML 結構直接複製，貼給 Claude，說「幫我改這個元素的樣式」。Claude 看到 HTML 就知道要改什麼了。</p>
+
+      <!-- ===== F. 怎麼跟 LLM 精準描述 ===== -->
+      <h2>F. 怎麼跟 LLM 精準描述</h2>
+
+      <p>以上學的所有術語，最終目的只有一個：<strong>讓你用一句話就講清楚，省掉三輪來回。</strong></p>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「那個圖片太大了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「Hero 區塊的背景圖在手機版<br>
+超出容器（overflow），<br>
+請加 object-fit: cover<br>
+並設 max-height: 300px」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「按鈕按了沒反應」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「.submit-btn 的 click event listener<br>
+沒有綁定，或是被 z-index 較高的<br>
+overlay 擋住了，請檢查 DOM 層級」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「手機版跑版了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「在 viewport width 375px 時，<br>
+Navbar 的 flex-wrap 沒設定，<br>
+導致選單項目溢出。請加<br>
+@media (max-width: 768px) 的 RWD 樣式」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「字跟字太擠了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「.card-body 裡的 p 標籤<br>
+line-height 只有 1.2，請改成 1.6，<br>
+然後段落之間加 margin-bottom: 16px」
+          </div>
+        </div>
+      </div>
+
+      <h3>描述公式</h3>
+
+      <div class="analogy">
+        <strong>哪個元件 + 什麼屬性 + 改成什麼 + 什麼時候</strong><br><br>
+        範例：「<code>.btn-primary</code> 按鈕的 <code>background-color</code> 改成 <code>#2563eb</code>，<code>hover</code> 時改成 <code>#1d4ed8</code>」<br><br>
+        四個資訊一次到位，AI 一輪就能做。
+      </div>
+
+      <h3>各場景描述範例</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>你想做的事</th>
+              <th>精準的說法</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>改按鈕顏色</td>
+              <td>「把 <code>.btn-primary</code> 的 background-color 從 #ccc 改成 #2563eb」</td>
+            </tr>
+            <tr>
+              <td>加一個彈窗確認</td>
+              <td>「按『刪除』時彈一個 Modal，有『確定』和『取消』兩個按鈕」</td>
+            </tr>
+            <tr>
+              <td>改手機版排版</td>
+              <td>「螢幕寬度 < 768px 時，Card Grid 從三欄改成一欄」</td>
+            </tr>
+            <tr>
+              <td>選單固定在上面</td>
+              <td>「Navbar 做成 Sticky Header，background 加 blur 效果」</td>
+            </tr>
+            <tr>
+              <td>加一個聊天按鈕</td>
+              <td>「右下角加一個 FAB（圓形按鈕），點了打開一個 Drawer 顯示聊天室」</td>
+            </tr>
+            <tr>
+              <td>通知使用者操作成功</td>
+              <td>「表單送出成功後，右上角顯示一個綠色 Toast，3 秒後自動消失」</td>
+            </tr>
+            <tr>
+              <td>FAQ 區塊</td>
+              <td>「FAQ 用 Accordion 排列，預設全部收合，點標題展開答案」</td>
+            </tr>
+            <tr>
+              <td>圖片輪播</td>
+              <td>「Banner 區域做一個 Carousel，自動播放，底部加圓點指示器」</td>
+            </tr>
+            <tr>
+              <td>表格太多資料</td>
+              <td>「資料列表加 Pagination，每頁 20 筆，底部顯示頁碼」</td>
+            </tr>
+            <tr>
+              <td>篩選用拖拉桿</td>
+              <td>「價格篩選改成 Range Slider，最小值 0 最大值 50000」</td>
+            </tr>
+            <tr>
+              <td>新手引導</td>
+              <td>「新使用者首次登入時跑 Onboarding Tour，用 Tooltip 高亮每個功能區」</td>
+            </tr>
+            <tr>
+              <td>暗色模式</td>
+              <td>「Header 右上加 Dark Mode Toggle，用 CSS Variables 切換色彩主題」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>進階技巧：截圖 + 標註</h3>
+
+      <div class="box box-info">
+        <div class="box-label">最強描述法</div>
+        當文字描述不夠的時候，<strong>截圖 + 用紅框圈起來 + 文字標註</strong>是最快的。<br><br>
+        你可以這樣跟 Claude 說：<br>
+        「看這張截圖，紅框圈起來的 Card 區塊，padding 太小，文字跟邊框太擠。幫我改成 padding: 24px，然後加 border-radius: 12px 和 box-shadow。」<br><br>
+        一張圖 + 一句話，抵過十輪對話。
+      </div>
+
+      <h2>本章術語總表</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>類別</th>
+              <th>術語</th>
+              <th>一句話解釋</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="10">網頁結構</td>
+              <td>Header</td>
+              <td>頁面最上面那一條</td>
+            </tr>
+            <tr><td>Footer</td><td>頁面最下面那一條</td></tr>
+            <tr><td>Hero</td><td>首頁最大最醒目的那塊</td></tr>
+            <tr><td>Section</td><td>頁面中的一個主題區塊</td></tr>
+            <tr><td>Sidebar</td><td>側邊窄欄</td></tr>
+            <tr><td>Modal</td><td>正中間彈出的對話框</td></tr>
+            <tr><td>Navbar</td><td>導覽列（選單連結那一排）</td></tr>
+            <tr><td>Card</td><td>卡片式的小區塊</td></tr>
+            <tr><td>Button</td><td>可以按的按鈕</td></tr>
+            <tr><td>Form</td><td>填資料的表單</td></tr>
+            <tr>
+              <td rowspan="16">UI 元件</td>
+              <td>Hamburger Menu</td>
+              <td>三條線的手機版選單按鈕</td>
+            </tr>
+            <tr><td>Dropdown</td><td>往下展開的選單</td></tr>
+            <tr><td>Toggle / Switch</td><td>開/關切換器</td></tr>
+            <tr><td>Tab</td><td>頁籤，同區域切換內容</td></tr>
+            <tr><td>Accordion</td><td>展開/收合的區塊</td></tr>
+            <tr><td>Carousel / Slider</td><td>輪播（自動左右滑）</td></tr>
+            <tr><td>Tooltip</td><td>滑鼠移上去的小提示</td></tr>
+            <tr><td>FAB / Chat Widget</td><td>右下角浮動圓形按鈕</td></tr>
+            <tr><td>Banner / Toast</td><td>通知條 / 短暫提示</td></tr>
+            <tr><td>Spinner / Loading</td><td>轉圈圈載入動畫</td></tr>
+            <tr><td>Infinite Scroll</td><td>滑到底自動載入更多</td></tr>
+            <tr><td>Pagination</td><td>分頁（1, 2, 3... 下一頁）</td></tr>
+            <tr><td>Checkbox / Radio</td><td>多選框 / 單選框</td></tr>
+            <tr><td>Range Slider</td><td>拖拉橫桿選數值</td></tr>
+            <tr><td>Dialog</td><td>確認對話框</td></tr>
+            <tr><td>Drawer</td><td>從側邊滑出的面板</td></tr>
+            <tr>
+              <td rowspan="8">網頁行為</td>
+              <td>RWD</td>
+              <td>響應式設計，不同螢幕自動排版</td>
+            </tr>
+            <tr><td>Sticky Header</td><td>滾動時固定在頂部的 Header</td></tr>
+            <tr><td>Scroll Animation</td><td>滾到時播放進場動畫</td></tr>
+            <tr><td>Smooth Scroll</td><td>點連結後平滑滾動</td></tr>
+            <tr><td>Parallax</td><td>背景和前景滾動速度不同的視差效果</td></tr>
+            <tr><td>Dark Mode</td><td>深色模式</td></tr>
+            <tr><td>Onboarding</td><td>新手引導教學</td></tr>
+            <tr><td>Drag & Drop</td><td>拖拉放置操作</td></tr>
+            <tr>
+              <td rowspan="3">瀏覽器工具</td>
+              <td>Chrome DevTools</td>
+              <td>自己拿放大鏡看（右鍵 → 檢查）</td>
+            </tr>
+            <tr><td>Playwright</td><td>機器人開新瀏覽器自動測試</td></tr>
+            <tr><td>Claude in Chrome</td><td>Claude 幫你操作你的瀏覽器</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">本章重點</div>
+        <strong>看到 → 認出名字 → 精準描述 → AI 一次到位。</strong><br><br>
+        你不需要會做這些東西，但你需要會「指」。<br>
+        就像你去餐廳不需要會做菜，但你要會看菜單——<br>
+        「松露奶油燉飯」跟「那個白白的飯」，出來的東西完全不同。
+      </div>
+
+      <!-- Chapter Nav -->
+      <div class="chapter-nav">
+        <a href="chapter4.html" class="prev">
+          <span class="nav-label">上一章</span>
+          <span class="nav-title">你缺什麼知識</span>
+        </a>
+        <a href="chapter6.html" class="next">
+          <span class="nav-label">下一章</span>
+          <span class="nav-title">Claude Code 是什麼</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

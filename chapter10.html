@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十章：蓋大樓才會遇到的問題 — Claude Code 指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html" class="active">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第十章</div>
+      <h1>蓋大樓才會遇到的問題</h1>
+      <p class="lead">當你的專案從「一頁式網站」長成「多功能系統」，有些觀念會從「聽過就好」變成「不懂就踩坑」。這一章把第三章簡單提過的概念展開講清楚。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <!-- ===== A. 異步寫入 ===== -->
+    <h2>異步寫入（Async）：三道菜同時做</h2>
+
+    <div class="analogy">
+      <strong>比喻：餐廳廚房。</strong><br><br>
+      你在餐廳點了三道菜：沙拉、牛排、甜點。<br><br>
+      <strong>同步做法</strong>：廚房做完沙拉 → 端出來 → 做牛排 → 端出來 → 做甜點 → 端出來。你等到天荒地老。<br><br>
+      <strong>異步做法</strong>：三道菜同時開工！沙拉區切菜、烤爐烤牛排、甜點師做提拉米蘇。誰先做好誰先上桌。效率大幅提升。
+    </div>
+
+    <p>程式的世界也是這樣。同步（Synchronous）是一件事做完才做下一件；異步（Asynchronous）是多件事同時做，誰先完成誰先回報。</p>
+
+    <p>用文字畫出來大概長這樣：</p>
+
+    <div class="code-block">
+<strong style="color: var(--accent-light);">同步流程（一件一件來）</strong><br>
+<br>
+[查使用者資料] ──等 2 秒──&gt; 完成<br>
+　　　　　　　　　　　　　　[查訂單紀錄] ──等 3 秒──&gt; 完成<br>
+　　　　　　　　　　　　　　　　　　　　　　　　　　　[寄通知信] ──等 1 秒──&gt; 完成<br>
+<br>
+<span style="color: var(--red);">總共花了：2 + 3 + 1 = 6 秒</span><br>
+<br>
+──────────────────────────────<br>
+<br>
+<strong style="color: var(--accent-light);">異步流程（同時開工）</strong><br>
+<br>
+[查使用者資料] ──等 2 秒──&gt; 完成 ┐<br>
+[查訂單紀錄]　──等 3 秒──&gt; 完成 ├─&gt; 全部到齊，繼續！<br>
+[寄通知信]　　──等 1 秒──&gt; 完成 ┘<br>
+<br>
+<span style="color: var(--green);">總共花了：3 秒（取最慢的那個）</span>
+    </div>
+
+    <p>看起來異步完勝？沒錯，<strong>大部分情況下異步確實更快</strong>。但問題來了——</p>
+
+    <h3>異步的坑：順序不一定對</h3>
+
+    <p>回到餐廳的比喻：如果甜點比牛排先做好，但甜點的淋醬需要用牛排的肉汁呢？甜點先到你桌上，但它還沒淋醬——這就出問題了。</p>
+
+    <div class="analogy">
+      <strong>程式裡的真實案例：</strong><br><br>
+      你寫了一個「註冊流程」：<br>
+      1. 在資料庫建立使用者帳號<br>
+      2. 用這個帳號的 ID 去建立預設設定<br>
+      3. 寄歡迎信給使用者<br><br>
+      如果三步同時跑（異步），第二步可能比第一步先完成——但帳號還沒建好，哪來的 ID？<br><br>
+      <strong>結果：程式爆掉，因為它找不到一個還不存在的帳號。</strong>
+    </div>
+
+    <h3>Race Condition：搶最後一個座位</h3>
+
+    <p><strong>Race Condition（競爭條件）</strong>是異步最經典的問題。想像這個場景：</p>
+
+    <p>電影院最後一個座位。小明和小華同時在不同的電腦上訂票。兩個人幾乎同一秒按下「訂票」。系統查了一下：「有一個空位？有！」→ 兩個人都成功訂到了。但實際上只有一個座位。</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">沒處理 Race Condition</div>
+        <div class="code-block">
+小明查：有 1 個空位 → 訂！<br>
+小華查：有 1 個空位 → 訂！<br>
+<br>
+結果：2 個人搶到 1 個座位<br>
+<span style="color: var(--red);">有人到現場沒位子坐</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">有處理 Race Condition</div>
+        <div class="code-block">
+小明查：有 1 個空位 → 鎖住 → 訂！<br>
+小華查：座位被鎖 → 等一下...<br>
+小明完成 → 解鎖 → 空位 = 0<br>
+小華查：沒位子了 → 顯示已售完<br>
+<span style="color: var(--green);">正確！一個座位只賣一次</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      當你的系統開始有「多人同時操作」的需求時，記得跟 Claude 說：<br>
+      「這個功能可能有 race condition，幫我加上 lock 機制」或<br>
+      「這幾個步驟有順序依賴，不能用 Promise.all，要依序執行」
+    </div>
+
+    <!-- ===== B. SSOT ===== -->
+    <h2>SSOT：全公司只有一本電話簿</h2>
+
+    <p><strong>SSOT</strong> 是 <strong>Single Source of Truth</strong> 的縮寫，中文叫「單一真理來源」。聽起來很哲學，但其實超級實用。</p>
+
+    <div class="analogy">
+      <strong>比喻：電話簿。</strong><br><br>
+      假設公司有三個部門，每個部門各自維護一份員工電話簿。<br><br>
+      小明換了手機號碼，HR 部門更新了，但業務部和工程部還是舊號碼。<br>
+      三個月後，業務部打小明電話打不通，客戶的案子卡住了——<br><br>
+      <strong>問題出在哪？同一筆資料存了三份，只更新了一份。</strong>
+    </div>
+
+    <p>程式裡也是一模一樣的問題。來看一個實際案例：</p>
+
+    <h3>實際問題：商品價格存了三個地方</h3>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">沒有 SSOT — 三份資料各自為政</div>
+        <div class="code-block">
+<span style="color: var(--red);">前端 JavaScript：</span><br>
+const price = 299; // 寫死在程式裡<br>
+<br>
+<span style="color: var(--red);">後端 API：</span><br>
+return { price: 350 }; // 上次改了忘記通知前端<br>
+<br>
+<span style="color: var(--red);">資料庫：</span><br>
+product.price = 399; // 最新的價格<br>
+<br>
+<span style="color: var(--red);">結果：客戶看到 299，結帳變 350，<br>
+帳務對帳是 399。三個數字都不一樣。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">有 SSOT — 只存一個地方</div>
+        <div class="code-block">
+<span style="color: var(--green);">資料庫（唯一真相）：</span><br>
+product.price = 399;<br>
+<br>
+<span style="color: var(--green);">後端 API：</span><br>
+return db.getProduct(id); // 去 DB 查<br>
+<br>
+<span style="color: var(--green);">前端：</span><br>
+const data = await fetch('/api/product');<br>
+// 顯示後端回傳的價格<br>
+<br>
+<span style="color: var(--green);">結果：不管在哪裡看，都是 399。<br>
+改一個地方，全部同步更新。</span>
+        </div>
+      </div>
+    </div>
+
+    <p>SSOT 的原則很簡單：<strong>每一筆資料只存在一個地方，其他需要這筆資料的地方，都去那裡查。</strong></p>
+
+    <h3>SSOT 的常見應用場景</h3>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>場景</th>
+            <th>真理來源（SSOT）</th>
+            <th>其他地方怎麼做</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>商品價格</td>
+            <td>資料庫</td>
+            <td>前端、後端都去 DB 查</td>
+          </tr>
+          <tr>
+            <td>使用者權限</td>
+            <td>後端的權限表</td>
+            <td>前端只負責顯示，不自己判斷</td>
+          </tr>
+          <tr>
+            <td>設定值</td>
+            <td>環境變數 / 設定檔</td>
+            <td>程式啟動時讀取，不寫死在程式裡</td>
+          </tr>
+          <tr>
+            <td>UI 狀態</td>
+            <td>狀態管理工具（如 Redux）</td>
+            <td>各元件去 store 讀取，不各自維護</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-warning">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這個資料的 SSOT 是資料庫，前端不要自己存一份」<br>
+      「幫我檢查一下，有沒有同一筆資料被存在多個地方的情況」
+    </div>
+
+    <!-- ===== C. 耦合 ===== -->
+    <h2>耦合（Coupling）：積木 vs 膠水模型</h2>
+
+    <div class="analogy">
+      <strong>比喻：積木和膠水。</strong><br><br>
+      想像你蓋了一個模型城堡：<br><br>
+      <strong>用積木蓋的（低耦合）</strong>：每一塊都是獨立的。你拆掉一棟塔樓，城牆還是好好的。想換一個更酷的塔樓？直接拔掉舊的、插上新的。<br><br>
+      <strong>用膠水黏的（高耦合）</strong>：所有零件都黏死在一起。你想拆掉一棟塔樓？不好意思，旁邊的城牆、護城河、吊橋全部一起碎掉。因為它們都黏在一起了。
+    </div>
+
+    <p>軟體的世界裡，「耦合」就是指兩個功能之間的<strong>依賴程度</strong>。依賴越深，耦合越高；依賴越少，耦合越低。</p>
+
+    <h3>高耦合的痛：改 A 壞 B C D</h3>
+
+    <p>這是新手最常遇到的地獄場景。你跟 Claude 說「幫我改一下登入頁面的按鈕顏色」，結果改完之後：</p>
+
+    <ul>
+      <li>首頁的 header 跑版了</li>
+      <li>結帳頁面的按鈕消失了</li>
+      <li>手機版的選單打不開了</li>
+    </ul>
+
+    <p>為什麼？因為這些功能全部擠在同一個檔案裡，共用同一段 CSS，牽一髮動全身。</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">高耦合 — 所有東西攪在一起</div>
+        <div class="code-block">
+<span style="color: var(--red);">一個 app.js 檔案裡面塞了：</span><br>
+- 登入邏輯<br>
+- 商品列表<br>
+- 購物車計算<br>
+- 寄信功能<br>
+- 金流串接<br>
+<br>
+改登入 → 購物車壞了<br>
+改金流 → 寄信功能掛了<br>
+<span style="color: var(--red);">全部糾纏在一起，無法單獨維護</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">低耦合 — 功能模組各自獨立</div>
+        <div class="code-block">
+<span style="color: var(--green);">每個功能獨立一個模組：</span><br>
+- auth/login.js　　→ 只管登入<br>
+- products/list.js → 只管商品<br>
+- cart/calculate.js → 只管購物車<br>
+- email/send.js　　→ 只管寄信<br>
+- payment/stripe.js → 只管金流<br>
+<br>
+改登入 → 其他功能不受影響<br>
+改金流 → 寄信功能照樣運作<br>
+<span style="color: var(--green);">各模組獨立，改一個不會壞另一個</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>怎麼降低耦合</h3>
+
+    <div class="analogy">
+      <strong>比喻：部門之間用公文往來。</strong><br><br>
+      公司裡，業務部需要工程部做一個功能。正確做法是寫一張需求單（API），工程部按照需求單來做。<br><br>
+      錯誤做法是業務部的人直接跑去工程部的桌上翻資料、改程式碼。這樣工程部根本不知道什麼被改了，下次部署直接爆炸。<br><br>
+      <strong>模組之間的溝通，應該透過明確定義的介面（API），而不是直接互相觸碰內部邏輯。</strong>
+    </div>
+
+    <p>降低耦合的三個基本原則：</p>
+
+    <ol>
+      <li><strong>功能拆成獨立模組</strong>：每個檔案只做一件事。登入歸登入、購物車歸購物車。</li>
+      <li><strong>模組之間用 API 溝通</strong>：A 模組需要 B 模組的資料？透過 B 暴露的 function 來拿，不要直接去改 B 的內部變數。</li>
+      <li><strong>不要共用全域變數</strong>：就像不要讓所有部門共用一張桌子。每個模組管好自己的資料。</li>
+    </ol>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這個功能跟其他模組耦合太高了，幫我拆成獨立的 module」<br>
+      「我不想改 A 的時候影響到 B，幫我用 interface 把它們解耦」<br>
+      「這個檔案太大了，幫我按功能拆分」
+    </div>
+
+    <!-- ===== D. 前後端邏輯歸屬 ===== -->
+    <h2>前端 vs 後端：什麼計算該放哪裡</h2>
+
+    <p>這是很多新手搞不清楚的問題：某段邏輯到底該寫在前端還是後端？</p>
+
+    <div class="analogy">
+      <strong>比喻：餐廳的菜單 vs 收銀台。</strong><br><br>
+      菜單上可以印「參考價格」，讓客人大概知道要花多少錢。但<strong>結帳金額一定要收銀台算</strong>。<br><br>
+      為什麼？因為菜單在客人手上，客人可以塗改。但收銀台在店裡面，客人碰不到。<br><br>
+      前端 = 菜單（在使用者的電腦上，使用者看得到、改得到）<br>
+      後端 = 收銀台（在伺服器上，使用者碰不到）
+    </div>
+
+    <h3>判斷原則：誰能被竄改？</h3>
+
+    <p>前端的程式碼跑在使用者的瀏覽器裡。任何懂一點技術的人，都可以打開瀏覽器的開發者工具，修改前端的 JavaScript。所以——</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>類型</th>
+            <th>放前端</th>
+            <th>放後端</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>日期格式化</td>
+            <td style="color: var(--green);">可以。純展示，沒安全問題</td>
+            <td>不需要</td>
+          </tr>
+          <tr>
+            <td>表單欄位驗證</td>
+            <td style="color: var(--yellow);">可以做，提升使用者體驗</td>
+            <td style="color: var(--green);">一定要！前端驗證可以被繞過</td>
+          </tr>
+          <tr>
+            <td>訂單金額計算</td>
+            <td style="color: var(--yellow);">可以顯示「預估金額」</td>
+            <td style="color: var(--green);">一定要！最終金額只能後端算</td>
+          </tr>
+          <tr>
+            <td>使用者權限判斷</td>
+            <td style="color: var(--red);">不行！使用者可以改前端</td>
+            <td style="color: var(--green);">一定要！權限只能後端決定</td>
+          </tr>
+          <tr>
+            <td>密碼加密</td>
+            <td style="color: var(--red);">不行！密碼不能在前端處理</td>
+            <td style="color: var(--green);">一定要！</td>
+          </tr>
+          <tr>
+            <td>搜尋結果排序</td>
+            <td style="color: var(--green);">可以做客戶端排序</td>
+            <td style="color: var(--green);">資料量大時要在後端排序</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-danger">
+      <div class="box-label">關鍵原則</div>
+      <strong>涉及「錢」、「權限」、「安全」的邏輯，一定要放後端。</strong><br><br>
+      前端可以做「預覽」和「使用者體驗優化」，但最終的計算和判斷，必須在伺服器上完成。<br><br>
+      記住：<strong>前端是給使用者看的，後端是給你自己用的。</strong>使用者看得到的東西，都有可能被竄改。
+    </div>
+
+    <h3>一個真實的災難案例</h3>
+
+    <p>某購物網站把折扣計算寫在前端 JavaScript 裡。結果有人用瀏覽器的開發者工具，把折扣從「打九折」改成「打一折」，然後送出訂單。後端沒有重新驗算，直接按前端傳來的金額扣款。</p>
+
+    <p>一台原價三萬的筆電，用三千塊就買走了。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這個折扣計算要放在後端做，前端只顯示結果」<br>
+      「幫我確認所有跟金額有關的邏輯都在 server side」<br>
+      「前端的權限檢查只是 UX，後端的 middleware 才是真正的守門員」
+    </div>
+
+    <!-- Chapter Nav -->
+    <div class="chapter-nav">
+      <a href="chapter9.html" class="prev">
+        <span class="nav-label">上一章</span>
+        <span class="nav-title">術語快速理解</span>
+      </a>
+      <a href="chapter11.html" class="next">
+        <span class="nav-label">下一章</span>
+        <span class="nav-title">工具生態</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>

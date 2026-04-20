@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第六章：Claude Code 是什麼 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="index.html" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="index.html">首頁</a>
+      <a href="chapter1.html">LLM 本質</a>
+      <a href="chapter2.html">下指令</a>
+      <a href="chapter3.html">工作流程</a>
+      <a href="chapter9.html">術語字典</a>
+      <a href="appendix.html">附錄</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="index.html">首頁</a>
+  <a href="chapter1.html">第一章：LLM 本質</a>
+  <a href="chapter2.html">第二章：下指令</a>
+  <a href="chapter3.html">第三章：工作流程</a>
+  <a href="chapter4.html">第四章：基本知識</a>
+  <a href="chapter5.html">第五章：描述力</a>
+  <a href="chapter6.html" class="active">第六章：Claude Code</a>
+  <a href="chapter7.html">第七章：技術棧</a>
+  <a href="chapter8.html">第八章：API</a>
+  <a href="chapter9.html">第九章：術語字典</a>
+  <a href="chapter10.html">第十章：進階問題</a>
+  <a href="chapter11.html">第十一章：工具生態</a>
+  <a href="appendix.html">附錄</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第六章</div>
+      <h1>Claude Code 是什麼，跟其他 LLM 差在哪</h1>
+      <p class="lead">一般 LLM 是只能出嘴巴的顧問，Claude Code 是有手有腳能實際動工的工人。這一章讓你搞懂它到底多了什麼。</p>
+    </div>
+
+    <div class="content">
+
+      <!-- ========== A. Claude Code vs 一般 LLM ========== -->
+      <h2>Claude Code vs 一般 LLM（ChatGPT / Gemini 網頁版）</h2>
+
+      <p>你在 ChatGPT 或 Gemini 的網頁上問問題，它會給你很好的答案、甚至幫你寫一段程式碼。但有個致命的問題：<strong>它只能用嘴巴</strong>。</p>
+
+      <p>它可以告訴你「你應該在 index.html 的第 37 行加一段程式碼」，但它不能幫你開檔案、不能幫你存檔、不能幫你跑指令。你還是得自己動手。</p>
+
+      <div class="analogy">
+        <strong>白話比喻：</strong><br><br>
+        一般 LLM（ChatGPT / Gemini 網頁版）= <strong>只能用嘴巴的顧問</strong><br>
+        他坐在旁邊給你建議，但不能碰你的電腦。你問他「這個 bug 怎麼修？」他會說「你去那個檔案改第 37 行」，但他自己不能改。<br><br>
+        Claude Code = <strong>有手有腳的工人</strong><br>
+        他可以直接打開你的檔案、改程式碼、存檔、跑測試、甚至幫你把東西上傳到網路上。你只需要下指令，他就去做。
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">一般 LLM（只能出嘴巴）</div>
+          <div class="code-block">
+你：「幫我把首頁標題改成紅色」<br><br>
+AI：「請在 styles.css 裡找到 .title，<br>
+加上 color: red;」<br><br>
+然後你要自己：<br>
+1. 打開 styles.css<br>
+2. 找到 .title<br>
+3. 加上那行程式碼<br>
+4. 存檔<br>
+5. 重新整理瀏覽器確認<br><br>
+<span style="color: var(--red);">你還是得自己動手</span>
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">Claude Code（直接動手做）</div>
+          <div class="code-block">
+你：「幫我把首頁標題改成紅色」<br><br>
+Claude Code：<br>
+1. 自己打開 styles.css<br>
+2. 找到 .title<br>
+3. 加上 color: red;<br>
+4. 存檔<br>
+5. 告訴你「改好了」<br><br>
+<span style="color: var(--green);">你只負責下指令，它負責執行</span>
+          </div>
+        </div>
+      </div>
+
+      <p>簡單來說，一般 LLM 是你的「軍師」，Claude Code 是你的「施工隊」。軍師能出好主意，但施工隊能直接把房子蓋起來。</p>
+
+      <!-- ========== B. 控制面向 ========== -->
+      <h2>Claude Code 的核心差異：控制面向</h2>
+
+      <p>Claude Code 最厲害的地方，不只是「能動手」，更是「<strong>你可以精準控制它能做什麼</strong>」。就像你雇了一個工人，你可以規定他能進哪些房間、能碰哪些東西。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>面向</th>
+              <th>說明</th>
+              <th>白話</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>電腦權限</strong></td>
+              <td>可以讀寫檔案、執行 Terminal 指令、操作瀏覽器、管理 Git 版控</td>
+              <td>有手有腳的工人，能搬磚、釘釘子、刷油漆</td>
+            </tr>
+            <tr>
+              <td><strong>控制程度</strong></td>
+              <td>透過 CLAUDE.md 設定邊界、Hook 做自動防護、Permission 系統管理權限</td>
+              <td>你可以設定這個工人「能做什麼、不能做什麼」，就像給員工一本規範手冊</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">重點</div>
+        Claude Code 不是「失控的 AI 自己亂做事」。它更像是一個聽話的員工——你給規範，它就照規範做；你說不能碰的東西，它就不碰。
+      </div>
+
+      <!-- ========== C. 三種使用方式 ========== -->
+      <h2>三種使用 Claude Code 的方式</h2>
+
+      <p>Claude Code 不是只有一種打開方式。根據你的習慣和需求，有三條路可以走：</p>
+
+      <h3>1. Terminal 原生方式</h3>
+      <p>在終端機（Terminal）裡直接打 <code>claude</code> 指令，就可以開始對話。</p>
+      <div class="code-block">
+$ claude<br>
+> 幫我看一下這個專案的結構<br><br>
+Claude Code 會直接讀取你的檔案，然後回答你
+      </div>
+      <div class="analogy">
+        <strong>白話：</strong>像直接跟工人面對面說話。沒有花俏的介面，但最直接、最快。
+      </div>
+
+      <h3>2. VS Code 編輯器</h3>
+      <p>如果你用 VS Code 寫程式（或看程式碼），有兩種方式使用 Claude Code：</p>
+      <ul>
+        <li><strong>在 VS Code 的 Terminal 裡用</strong>——跟原生方式一模一樣，只是 Terminal 嵌在編輯器裡面</li>
+        <li><strong>用 Claude Code 插件（Extension）</strong>——會出現一個側邊欄的聊天視窗，像在 VS Code 裡面開了一個 LINE 聊天室</li>
+      </ul>
+      <div class="box box-info">
+        <div class="box-label">小知識</div>
+        用插件的好處是，你可以一邊看程式碼、一邊跟 Claude Code 聊天，它改了什麼你馬上在編輯器裡就看得到。
+      </div>
+
+      <h3>VS Code 的殺手級功能：Diff</h3>
+      <p>Diff 就是「比較兩個版本的差異」。你可以把它想成 Word 的「追蹤修訂」功能——紅色是刪除的部分、綠色是新增的部分。</p>
+      <p>VS Code 會在左邊欄顯示哪些檔案被改了，點進去就能看到每一行的差異。這是用 Claude Code 最大的好處之一：<strong>它改了什麼，你在 VS Code 裡一目瞭然</strong>。不用擔心 Claude 偷偷改了什麼你不知道的東西。</p>
+      <div class="analogy">
+        <strong>白話：</strong>Diff 就像老師用紅筆批改作業——哪裡被劃掉、哪裡是新寫的，全部清清楚楚。你不用逐行去比對「到底改了什麼」，VS Code 幫你標好了。
+      </div>
+
+      <h3>3. Claude Desktop（桌面應用程式）</h3>
+      <p>Anthropic 官方出的桌面 App。這個版本除了基本對話功能外，還有幾個獨家能力：</p>
+      <ul>
+        <li><strong>Computer Use（電腦操控）</strong>——可以操控你的電腦 GUI（圖形介面），像是幫你開 Chrome、點按鈕、填表單。就像你的手被 AI 附身了</li>
+        <li><strong>Pitch 功能</strong>——用對話的方式快速產出簡報或文件草稿</li>
+        <li><strong>Schedule 功能（排程任務）</strong>——可以設定排程，讓 Claude 在特定時間自動執行任務。例如「每天早上 9 點幫我整理 Email 摘要」</li>
+      </ul>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>使用方式</th>
+              <th>介面</th>
+              <th>適合誰</th>
+              <th>獨有功能</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Terminal 原生</td>
+              <td>純文字命令列</td>
+              <td>習慣 Terminal 的人</td>
+              <td>最快、最輕量</td>
+            </tr>
+            <tr>
+              <td>VS Code</td>
+              <td>Terminal 或側邊欄聊天</td>
+              <td>有在寫程式/看程式碼的人</td>
+              <td>邊看程式碼邊對話</td>
+            </tr>
+            <tr>
+              <td>Claude Desktop</td>
+              <td>圖形化桌面 App</td>
+              <td>不想碰 Terminal 的人</td>
+              <td>Computer Use、Pitch、Schedule</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ========== D. 核心功能介紹 ========== -->
+      <h2>核心功能介紹</h2>
+
+      <p>Claude Code 不只是「能幫你改檔案的 ChatGPT」。它有一整套工具和機制，讓你能像管理一個團隊一樣管理 AI。以下是你一定會碰到的核心功能：</p>
+
+      <h3>CLAUDE.md——員工的 SOP 手冊</h3>
+      <p>這是一個放在專案根目錄的純文字檔案。Claude Code 每次啟動時都會先讀它，就像員工每天上班前先看一次規範手冊。</p>
+      <p>你可以在裡面寫：</p>
+      <ul>
+        <li>這個專案用什麼語言、什麼框架</li>
+        <li>程式碼風格（例如：用 2 個空格縮排，不要用 Tab）</li>
+        <li>哪些檔案不能動</li>
+        <li>特殊的工作流程（例如：改完程式碼要先跑測試）</li>
+      </ul>
+      <div class="code-block">
+# CLAUDE.md 範例<br><br>
+## 專案規範<br>
+- 語言：TypeScript<br>
+- 框架：Next.js<br>
+- 程式碼風格：用 ESLint 標準<br>
+- 每次修改前先跑 npm run test<br><br>
+## 禁止事項<br>
+- 不要動 database/ 資料夾<br>
+- 不要在程式碼裡寫入任何密碼或 API Key
+      </div>
+
+      <h3>CLAUDE.md 的兩個層級</h3>
+      <p>CLAUDE.md 其實不只一個。Claude Code 的設定檔分成兩層，就像公司的規範有分「全公司通用」和「各部門專用」：</p>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>層級</th>
+              <th>位置</th>
+              <th>作用</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>全域（Global）</strong></td>
+              <td><code>~/.claude/CLAUDE.md</code></td>
+              <td>所有專案都會讀到</td>
+              <td>公司的「員工守則」，不管你調到哪個部門都要遵守</td>
+            </tr>
+            <tr>
+              <td><strong>專案（Project）</strong></td>
+              <td>專案根目錄/<code>CLAUDE.md</code></td>
+              <td>只有這個專案會讀到</td>
+              <td>部門的「SOP」，只有這個部門的人要看</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>全域設定放你的通用偏好（語言、風格、常用工具），專案設定放該專案特有的規則（技術棧、命名慣例、部署目標）。Claude 每次開工會先讀全域，再讀專案，專案的設定會覆蓋全域。</p>
+
+      <h3>MCP（Model Context Protocol）——Claude 的「手臂」</h3>
+      <p>MCP 是一種通訊協議，讓 Claude Code 可以去操作外部服務。你可以想像成：Claude Code 本身是一個人，MCP 就是它伸出去的手臂，每一隻手臂可以握住一個工具。</p>
+      <p>常見的 MCP 工具包括：</p>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>MCP 工具</th>
+              <th>能做什麼</th>
+              <th>白話</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Supabase MCP</td>
+              <td>操作資料庫、讀寫資料表</td>
+              <td>幫你開抽屜、找資料</td>
+            </tr>
+            <tr>
+              <td>GitHub MCP</td>
+              <td>管理原始碼、發 PR、查 Issue</td>
+              <td>幫你管理程式碼倉庫</td>
+            </tr>
+            <tr>
+              <td>Cloudflare MCP</td>
+              <td>部署網站、管理 DNS</td>
+              <td>幫你把網站放到網路上</td>
+            </tr>
+            <tr>
+              <td>Brave Search MCP</td>
+              <td>搜尋網路資訊</td>
+              <td>幫你上網查資料</td>
+            </tr>
+            <tr>
+              <td>Google Calendar MCP</td>
+              <td>讀寫行事曆</td>
+              <td>幫你安排約會和會議</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="analogy">
+        <strong>白話：</strong>沒有 MCP 的 Claude Code，只能在你的電腦裡面做事。有了 MCP，它就像長了好幾隻手，可以同時伸到 GitHub、Supabase、Cloudflare 等外部服務去操作。
+      </div>
+
+      <h3>Subagent——帶一個團隊做事</h3>
+      <p>Claude Code 不只是一個人。它可以「派出」子代理人（Subagent），讓多個任務同時進行。就像工頭把工作分給不同工人平行處理：</p>
+      <ul>
+        <li>Subagent A：去查這個 API 的文件</li>
+        <li>Subagent B：同時幫我改首頁的 CSS</li>
+        <li>Subagent C：同時去跑測試</li>
+      </ul>
+      <p>三個任務同時進行，比一個一個排隊做快很多。</p>
+
+      <h3>Memory——跨 Session 記憶系統</h3>
+      <p>一般的 LLM 對話，關掉視窗就全忘了。Claude Code 有記憶系統，可以把重要的事情記住，下次開新的 Session 還是知道。</p>
+      <div class="box box-info">
+        <div class="box-label">Memory 的運作方式</div>
+        Claude Code 會把重要資訊寫進 CLAUDE.md 或專門的記憶檔案。下次你再開對話，它會先讀這些檔案，就像員工翻看自己上次的工作筆記。
+      </div>
+
+      <h3>Hook——自動化觸發器</h3>
+      <p>Hook 是一種「自動觸發的規則」。你可以設定：</p>
+      <ul>
+        <li>每次 Claude Code 要修改檔案之前，先做 XXX</li>
+        <li>每次 Git commit 之前，先跑測試</li>
+        <li>每次部署之前，先做安全檢查</li>
+      </ul>
+      <div class="analogy">
+        <strong>白話：</strong>Hook 就像你在工地門口貼的告示牌：「進門前先戴安全帽」。不管誰進來，都會先做那件事。
+      </div>
+
+      <h3>Plugin / Skill——可安裝的擴充包</h3>
+      <p>你可以幫 Claude Code 安裝各種「技能包」，讓它會做更多事情。例如：</p>
+      <ul>
+        <li><strong>Skill</strong>：一套預先寫好的指令和規範。例如「程式碼審查 Skill」會讓 Claude Code 用特定的標準幫你檢查程式碼品質</li>
+        <li><strong>Plugin</strong>：外掛模組，可以擴充 Claude Code 的能力。例如 Discord Plugin 讓它可以讀寫 Discord 訊息</li>
+      </ul>
+      <p>就像手機裝 App 一樣——手機出廠只有基本功能，裝了 App 才能做更多事。</p>
+
+      <!-- ========== E. MD 檔的重要性 ========== -->
+      <h2>MD 檔的重要性</h2>
+
+      <h3>Markdown 是什麼？</h3>
+      <p>Markdown（簡稱 MD）是一種用<strong>純文字寫格式</strong>的方法。你可以把它想成「簡化版的 Word」。</p>
+      <p>在 Word 裡面，你要粗體就用滑鼠選取文字然後點 B。在 Markdown 裡面，你只要打：</p>
+      <div class="code-block">
+**這段文字會變粗體**<br><br>
+# 這是大標題<br>
+## 這是次標題<br><br>
+- 這是項目符號<br>
+- 第二點<br><br>
+`這是程式碼`
+      </div>
+      <p>就這麼簡單。不需要任何特殊軟體，用記事本就能寫。</p>
+
+      <h3>為什麼 Claude Code 生態都用 MD？</h3>
+      <p>有三個關鍵原因：</p>
+      <ol>
+        <li><strong>最省 Token</strong>——純文字檔案不含格式代碼，一個 MD 檔比同內容的 Word 檔小好幾倍。檔案越小，AI 讀得越快、花的 Token 越少</li>
+        <li><strong>最好讀</strong>——不管是人還是 AI，讀純文字都最直接。不像 Word 或 PDF，裡面一堆格式代碼會干擾 AI 的理解</li>
+        <li><strong>Git 友好</strong>——Git 版控系統是用「逐行比較」來追蹤變更。純文字的 MD 檔可以精準看出哪一行被改了；Word 檔是二進位格式，Git 根本無法比較</li>
+      </ol>
+
+      <h3>常見的 MD 檔案</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>檔名</th>
+              <th>功能</th>
+              <th>白話</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>CLAUDE.md</code></td>
+              <td>Claude Code 的設定檔，定義它的行為規範</td>
+              <td>員工的 SOP 手冊，每天上班先讀一次</td>
+            </tr>
+            <tr>
+              <td><code>README.md</code></td>
+              <td>專案的說明書。打開 GitHub 倉庫時，首頁顯示的就是這個檔案</td>
+              <td>產品外包裝上的使用說明</td>
+            </tr>
+            <tr>
+              <td><code>CHANGELOG.md</code></td>
+              <td>紀錄每次更新改了什麼。方便追溯歷史</td>
+              <td>產品的「更新日誌」，像手機系統更新說明</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">常見誤解</div>
+        很多人以為用 Word 寫文件比較「正式」。但在程式開發的世界裡，MD 才是標準格式。用 Word 寫 CLAUDE.md？那就像穿西裝去工地——不是不行，但真的沒必要，而且會礙手礙腳。
+      </div>
+
+      <!-- ========== F. Chrome DevTools + Claude ========== -->
+      <h2>實戰組合：Chrome DevTools + Claude Code</h2>
+
+      <p>Chrome DevTools 可以解析 DOM（網頁結構）和 JS（JavaScript）程式邏輯，直接把這些資料提供給 Claude。這比你手動複製開發者模式的訊息給 AI 快很多。</p>
+
+      <div class="box box-info">
+        <div class="box-label">什麼是 JS？</div>
+        JS（JavaScript）是讓網頁「會動」的程式語言。按鈕點了會跑出東西、表單可以送出、動畫會播放——這些都是 JS 在背後做的事。
+      </div>
+
+      <p>Claude 搭配 DevTools MCP 可以直接讀取：</p>
+      <ul>
+        <li><strong>Console 錯誤訊息</strong>——不用你複製貼上，Claude 自己去看</li>
+        <li><strong>Network 請求</strong>——API 有沒有回應、回了什麼資料</li>
+        <li><strong>DOM 結構</strong>——元素的 class、id、屬性，全部一覽無遺</li>
+      </ul>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">手動方式（慢又容易漏）</div>
+          <div class="code-block">
+1. 你打開 F12 開發者工具<br>
+2. 看到紅色錯誤訊息<br>
+3. 截圖或複製錯誤訊息<br>
+4. 貼給 Claude<br>
+5. Claude 問你更多問題<br>
+6. 你再去 F12 查更多資料<br>
+7. 來回好幾次才找到問題<br><br>
+<span style="color: var(--red);">你變成 AI 和瀏覽器之間的「傳話人」</span>
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">DevTools MCP（快又完整）</div>
+          <div class="code-block">
+1. Claude 直接讀 Console 錯誤<br>
+2. Claude 直接看 Network 請求<br>
+3. Claude 直接分析 DOM 結構<br>
+4. 一次找到問題根源<br>
+5. 直接修改程式碼<br><br>
+<span style="color: var(--green);">Claude 自己去看、自己去查、自己修</span>
+          </div>
+        </div>
+      </div>
+
+      <p>補充一點：有時候 Headless Browser（無頭瀏覽器，就是沒有畫面的自動化瀏覽器，像 Playwright）會遇到問題，通常是因為取得的資訊不夠完整，或是 DOM 沒有全部渲染完。在做 E2E 測試（End-to-End，從頭到尾的完整流程測試）的問題排除時，DevTools + Claude 是最快的組合。</p>
+
+      <div class="box box-info">
+        <div class="box-label">補充術語</div>
+        <ul style="margin-bottom: 0;">
+          <li><strong>TDD（Test-Driven Development，測試驅動開發）</strong>：先寫測試，再寫功能。確保每個功能都有測試保護。</li>
+          <li><strong>E2E（End-to-End Testing，端對端測試）</strong>：模擬真實使用者操作整個流程（打開網頁 → 點按鈕 → 填表單 → 送出），確認一切正常。</li>
+          <li>這些概念在你的專案變大的時候會越來越重要。現在先知道名字就好。</li>
+        </ul>
+      </div>
+
+      <!-- Chapter Navigation -->
+      <div class="chapter-nav">
+        <a href="chapter5.html" class="prev">
+          <span class="nav-label">上一章</span>
+          <span class="nav-title">學會描述你看到的東西</span>
+        </a>
+        <a href="chapter7.html" class="next">
+          <span class="nav-label">下一章</span>
+          <span class="nav-title">用什麼材料蓋房子（技術棧）</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+</body>
+</html>
