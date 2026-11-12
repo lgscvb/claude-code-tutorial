@@ -515,3 +515,82 @@ tr:hover { background: var(--bg-card); }
   .hero h1 { font-size: 26px; }
   .analogy { padding: 16px 18px; }
 }
+
+/* === Shared additions (2026-11 重編) ===
+   只新增、不覆蓋上面的規則。各頁自己 <style> 裡同名規則載入在後，照樣以頁面為準。 */
+
+/* 內文連結：.content 裡沒有 class 的 <a>，不必再寫行內 style。
+   用 :where() 壓低權重，頁面裡任何 `.xxx a` 規則都能蓋過它。 */
+.content :where(a:not([class])) {
+  color: var(--accent-light);
+  text-decoration: underline;
+}
+.content :where(a:not([class])):hover { color: var(--accent); }
+.content :where(a:not([class])):focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* 示範外框：<div class="demo-container" data-demo-title="互動示範：…"> */
+.demo-container {
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 20px 0;
+  background: var(--bg-card);
+  position: relative;
+}
+.demo-container:where([data-demo-title])::before {
+  content: attr(data-demo-title);
+  position: absolute;
+  top: -11px;
+  left: 16px;
+  background: var(--bg-card);
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.demo-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* 示範按鈕：<button class="demo-btn">；主要動作加 demo-btn-main；
+   切換型按鈕用 aria-pressed="true" 表示目前選中。 */
+.demo-btn {
+  min-height: 44px;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-light);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+.demo-btn:hover { border-color: var(--accent); }
+.demo-btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+.demo-btn[aria-pressed="true"],
+.demo-btn-main { background: var(--accent); border-color: var(--accent); color: #fff; }
+.demo-btn-main:hover { background: var(--accent-light); border-color: var(--accent-light); }
+.demo-btn:disabled { opacity: 0.45; cursor: default; }
+.demo-btn:disabled:hover { border-color: var(--border-light); }
+.demo-btn-main:disabled:hover { background: var(--accent); border-color: var(--accent); }
+
+/* 比較框：兩欄（手機一欄）裡的程式碼不撐破版面 */
+.compare > * { min-width: 0; }
+.compare .code-block,
+.compare pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-btn { transition: none; }
+}

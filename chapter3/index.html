@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第三章：正確的工作流程 — Claude Code 指南</title>
+  <title>第三章：下指令 — Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -13,11 +13,11 @@
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
       <a href="/">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/">下指令</a>
-      <a href="/chapter3/" class="active">工作流程</a>
-      <a href="/chapter9/">術語字典</a>
-      <a href="/appendix/">附錄</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,325 +27,435 @@
 
 <nav class="mobile-nav">
   <a href="/">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/">第二章：下指令</a>
-  <a href="/chapter3/" class="active">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/">第六章：Claude Code</a>
-  <a href="/chapter7/">第七章：技術棧</a>
-  <a href="/chapter8/">第八章：API</a>
-  <a href="/chapter9/">第九章：術語字典</a>
-  <a href="/chapter10/">第十章：進階問題</a>
-  <a href="/chapter11/">第十一章：工具生態</a>
-  <a href="/appendix/">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/" class="active">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
+<style>
+  /* 第三章小目錄 */
+  .c3-toc { margin-top: 24px; padding: 16px 20px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius); }
+  .c3-toc-title { font-size: 14px; font-weight: 700; color: var(--text-heading); margin-bottom: 8px; }
+  .c3-toc ol { margin: 0; padding-left: 1.4em; columns: 2; column-gap: 32px; font-size: 15px; line-height: 1.9; }
+  .c3-toc li { break-inside: avoid; }
+  .c3-toc a { color: var(--accent-light); text-decoration: none; }
+  .c3-toc a:hover { text-decoration: underline; }
+  .c3-toc a:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; border-radius: 2px; }
+  @media (max-width: 600px) { .c3-toc ol { columns: 1; } }
+  .content h2[id] { scroll-margin-top: 80px; }
+</style>
+
   <section class="container">
     <div class="page-header">
       <div class="chapter-label">第三章</div>
-      <h1>正確的工作流程</h1>
-      <p class="lead">你不會跟建築師說「幫我蓋房子」就等交屋。你會先看樣品屋、討論格局、看設計圖，最後才動工。跟 AI 做專案也一樣。</p>
+      <h1>下指令：目標、邊界、情境</h1>
+      <p class="lead">你給 AI 的每一句話叫 Prompt（提示詞）。學會怎麼寫好 Prompt，就是學會怎麼寫「讓員工一次做對的工作交辦事項」。</p>
+
+      <nav class="c3-toc" aria-label="本章小目錄">
+        <div class="c3-toc-title">本章目錄</div>
+        <ol>
+          <li><a href="#prompt">Prompt 和 Prompt Engineering</a></li>
+          <li><a href="#three">三層溝通模型：目標、邊界、情境</a></li>
+          <li><a href="#unknown">你不知道可能有什麼問題</a></li>
+          <li><a href="#compare">新手 vs 有效的指令</a></li>
+          <li><a href="#order">先講跟後講，差在要不要打牆</a></li>
+          <li><a href="#checklist">下指令的檢查清單</a></li>
+          <li><a href="#claude-md">CLAUDE.md：你的邊界文件</a></li>
+          <li><a href="#takeaway">這章帶走什麼</a></li>
+          <li><a href="#say">跟 Claude 怎麼說</a></li>
+        </ol>
+      </nav>
     </div>
   </section>
 
   <section class="container content">
 
-    <!-- 1. 新手 vs 正確做法 -->
-    <h2>新手的做法 vs 正確的做法</h2>
+    <p><a href="/chapter2/">上一章</a>講到，AI 是在接龍，你沒講的它只能猜，而且每一輪來回都要重讀整段對話、都要花錢。這章教你怎麼講：一次把要什麼、不要什麼、在什麼狀況下講清楚，讓它一輪就做對。</p>
 
-    <p>絕大多數新手拿到 AI 工具，第一件事就是打一段話：「幫我做一個 XXX。」然後 AI 噴出 50 個檔案，你看不懂、改不動，最後砍掉重練。</p>
+    <!-- 1. 基本概念 -->
+    <h2 id="prompt">Prompt 和 Prompt Engineering</h2>
+
+    <p>先搞清楚兩個詞：</p>
+
+    <ul>
+      <li><strong>Prompt</strong>：你給 AI 的「工作交辦事項」。你打的每一句話，每一段指令，都是 Prompt。</li>
+      <li><strong>Prompt Engineering</strong>：學會怎麼寫出「讓 AI 一次做對」的交辦事項。不是什麼高深技術，就是「把話說清楚」的學問。</li>
+    </ul>
+
+    <div class="analogy">
+      <strong>比喻：交辦事項寫得好不好</strong><br><br>
+      你請一個新來的助理幫你買咖啡。<br><br>
+      你說：「幫我買咖啡。」他可能買了一杯美式、一杯拿鐵、或是三合一即溶。因為你沒講清楚。<br><br>
+      你說：「去樓下便利商店買一杯大杯冰美式，不要加糖。」他一次搞定，不用再打電話問你。<br><br>
+      <strong>Prompt Engineering 就是學會寫出第二種交辦。</strong>
+    </div>
+
+    <!-- 2. 三層溝通模型 -->
+    <h2 id="three">三層溝通模型：目標、邊界、情境</h2>
+
+    <p>每一次跟 AI 溝通，你需要想清楚三層東西：</p>
+
+    <ol>
+      <li><strong>目標（要什麼）</strong>：你希望 AI 產出什麼結果</li>
+      <li><strong>邊界（不要什麼、做到哪裡）</strong>：你不希望 AI 做什麼、哪些是禁區、做到哪裡停</li>
+      <li><strong>情境（在什麼狀況下）</strong>：目前的背景、限制條件、已有的東西</li>
+    </ol>
+
+    <p>很多人只講了第一層（我要一個購物車功能），其他交給 AI 猜。你收到的東西可能完全不是你要的，但你也不能怪 AI，因為你沒告訴它不要什麼、做到哪裡。</p>
+
+    <div class="box box-danger">
+      <div class="box-label">核心觀念</div>
+      <strong>「不要什麼」比「要什麼」更重要。</strong><br><br>
+      因為「要什麼」的範圍是有限的，但「AI 可能自作主張做的事」是無限的。你沒說不要，它就可能會做。你得用邊界把它框住。
+    </div>
+
+    <div class="analogy">
+      <strong>比喻：裝潢師傅</strong><br><br>
+      你跟裝潢師傅說：「幫我裝潢客廳。」<br><br>
+      有的師傅很認真，做了天花板造型、電視牆、木地板、間接照明、訂製書櫃。但你只是想<strong>刷白漆、換一盞燈</strong>。<br><br>
+      也有的師傅反過來，只換了燈泡就收工。你其實想連牆一起刷。<br><br>
+      師傅做錯了嗎？沒有。兩個都做了「裝潢客廳」這件事。是範圍只有你知道：要做到哪裡、不要動天花板、不要做電視牆、不要換地板，你沒說。<br><br>
+      <strong>跟 AI 溝通也一樣，兩個方向都會發生：它常常照最小的範圍做；要它順手修東西時，又可能「好心幫你多做」，動到你沒想到的地方。做到哪裡、哪裡不准碰，要你講。</strong>
+    </div>
+
+    <p>第一個方向，官方的使用建議（Best practices）也講得很直接：Claude 讀需求偏保守，常會做出「剛好滿足字面要求」的最小版本，因為它看不到你心裡期待多少。你要的是完整版，就明講，例如「做完整一點：沒有資料的時候、出錯的時候畫面長怎樣，也一起做」。第二個方向，就是本章一直在講的邊界。</p>
+
+    <!-- 3. 你不知道你不知道的 -->
+    <h2 id="unknown">你不知道可能有什麼問題</h2>
+
+    <p>三層模型的「情境」這一層最容易被忽略，因為<strong>你不知道它不知道什麼</strong>。</p>
+
+    <div class="analogy">
+      <strong>比喻：蓋房子的故事</strong><br><br>
+      有個台灣人要在台灣蓋房子，找了三位建築師：一位來自很少地震的地方，一位來自日本，一位是台灣人。<br><br>
+      三棟房子都蓋得很漂亮。<br><br>
+      結果地震來了。<br><br>
+      第一位建築師蓋的房子出了問題：他的經驗裡沒有地震這件事，設計時根本沒想到要耐震。<br>
+      日本和台灣的建築師蓋的都沒事，因為他們的「情境知識」包含了「這裡會地震」。<br><br>
+      <strong>重點不是技術差，而是「情境」不同。</strong>你跟 AI 講「幫我蓋房子」，它不一定知道你在台灣、台灣會地震、需要耐震結構。你得主動告訴它。
+    </div>
+
+    <p>這就是為什麼很多人覺得「AI 好笨」。不是 AI 笨，是你沒給它足夠的情境。它不知道你的產業、你的客戶、你的限制條件。你得像跟一個外國來的新同事交接工作一樣，把所有背景交代清楚。</p>
+
+    <p>Claude Code 官方的使用建議，開頭就講這件事：<strong>把它從檔案裡看不到的事告訴它。</strong>部署流程只在某個人腦子裡、某個檔案絕對不能讀、上線前一定要過的檢查、預算上限，這些它讀遍整個資料夾也不會知道。手上已經有的東西就直接給，不要用描述的：檔案給路徑、畫面給截圖、錯誤給整段原文。</p>
+
+    <!-- 4. 實際對比 -->
+    <h2 id="compare">新手 vs 有效的指令</h2>
+
+    <p>來看幾個實際的對比，你就知道差異有多大：</p>
 
     <div class="compare">
       <div class="compare-bad">
-        <div class="compare-label">新手的做法</div>
+        <div class="compare-label">新手的說法</div>
         <div class="code-block">
-你：「幫我做一個 CRM 系統。」<br><br>
-AI：（生成 50 個檔案、3 個資料表、<br>
-用了你沒聽過的框架、<br>
-加了你不需要的功能）<br><br>
-你：「等等，這不是我要的......」<br>
-你：「這個拿掉、那個改掉」<br>
-你：「為什麼改了 A 功能，B 壞了？」<br>
-你：「算了，砍掉重練。」<br><br>
-<span style="color: var(--red);">花了 3 小時 + 大量 Token = 什麼都沒得到</span>
+「幫我做一個網站。」
         </div>
       </div>
       <div class="compare-good">
-        <div class="compare-label">正確的做法</div>
+        <div class="compare-label">有效的說法</div>
         <div class="code-block">
-Step 1：Demo（10 分鐘）<br>
-Step 2：確認邊界（10 分鐘）<br>
-Step 3：規劃架構（20 分鐘）<br>
-Step 4：正式開始寫（省時省 Token）<br><br>
-<span style="color: var(--green);">花了 40 分鐘 + 少量 Token = 方向正確</span>
+「用純 HTML、CSS、JS 做一個<br>
+單頁式產品介紹頁，不要打包步驟，<br>
+改完直接上傳 Cloudflare。<br>
+內容包含：Hero 區塊、三個功能特色、<br>
+價格方案比較表、聯絡表單。<br>
+深色主題。<br>
+先不要後端、不要資料庫。」
         </div>
       </div>
     </div>
 
-    <p>接下來我們一步一步看，正確的流程到底怎麼做。</p>
+    <p>為什麼指定「純 HTML、CSS、JS、不要打包」，在<a href="/chapter11/">第十一章 技術棧</a>會講；Hero 是首頁第一眼那一大塊，網頁各部位的名字在<a href="/chapter6/">第六章 描述力</a>。</p>
 
-    <!-- 2. Step 1: Demo -->
-    <h2>第一步：先做 Demo（10 分鐘）</h2>
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">新手的說法</div>
+        <div class="code-block">
+「登入功能壞了，幫我修。」
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">有效的說法</div>
+        <div class="code-block">
+「會員登入頁按『登入』後，<br>
+又跳回登入頁。帳密是對的。<br>
+昨天正常，今天早上改過 Header<br>
+之後才這樣。F12 的 Console<br>
+有一行紅字：（整段貼上）。<br>
+先找原因講給我聽，先不要改。」
+        </div>
+      </div>
+    </div>
 
-    <p>任何專案的第一步，不是「開始做」，而是「先看個樣子」。</p>
+    <p>好的說法講的是<strong>在哪裡、看到什麼、應該是什麼、最近改過什麼</strong>，再加一句「先找原因，先不要改」。Console 是瀏覽器裡顯示錯誤的地方，按 F12 打開（<a href="/chapter6/">第六章</a>）；紅字怎麼讀，見<a href="/appendix/">附錄 常見問題</a>。</p>
+
+    <p>紅字看得懂一些的時候，可以再多給一點線索，例如「Console 顯示 401 Unauthorized，登入的 token 有產生，但好像沒存起來，可能跟 CORS 或 response header 有關」。但猜的原因要明講是「可能」，讓它去查證，不要讓它照你的猜測直接改。</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">新手的說法</div>
+        <div class="code-block">
+「加一個搜尋功能。」
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">有效的說法</div>
+        <div class="code-block">
+「在商品列表頁加搜尋框，<br>
+用頁面上已經有的資料過濾就好，<br>
+不用打 API、不要動後端。<br>
+搜尋範圍只包含商品名稱，<br>
+不搜描述。打字時即時過濾，<br>
+不用按送出按鈕。<br>
+沒結果時顯示『找不到相關商品』。」
+        </div>
+      </div>
+    </div>
+
+    <p>「打 API」就是去後面的伺服器要資料，API 是什麼在<a href="/chapter12/">第十二章</a>；什麼可以在頁面上做、什麼一定要放後面，在<a href="/chapter16/">第十六章 前後端邊界</a>。</p>
+
+    <!-- 5. 先後順序陷阱 -->
+    <h2 id="order">先講跟後講，差在要不要打牆</h2>
+
+    <p>除了「說什麼」，「什麼時候說」也很重要。很多需求如果在一開始就提出來，AI 會自然地把它放進架構裡。但如果你等到做完了才補充，AI 就得把原本的東西拆掉重做。</p>
 
     <div class="analogy">
-      <strong>比喻：先看樣品屋，再討論格局</strong><br><br>
-      你要買房子，不會直接在設計圖上簽約。你會先去看樣品屋——走進去感受空間大小、看看動線、摸摸建材。看完之後你才有「感覺」：客廳太小、廚房要開放式、浴室要乾濕分離。<br><br>
-      <strong>Demo 就是你的樣品屋。</strong>它不需要完美，甚至不需要能用。它只需要讓你「看到」一個大概的樣子，這樣你才能開始說出具體的意見。
+      <strong>比喻：水電管線</strong><br><br>
+      蓋房子的時候，水電管線要在砌牆之前就埋好。如果牆都砌好了，你才說「欸，這裡加一個插座」，那就得打牆、埋管、補牆、重新粉刷。<br><br>
+      本來畫在設計圖上的一條線，變成一整輪的工程。<br><br>
+      <strong>跟 AI 溝通也一樣。在開始動工前就把需求說完整，改的只是設計圖。動工後才補需求，就是打牆重來。</strong>
     </div>
 
-    <p>怎麼跟 AI 要一個 Demo：</p>
+    <h3>例子：多國語言（i18n）</h3>
 
-    <div class="code-block">
-你：「我想做一個客戶管理系統。先不要做完整版，<br>
-幫我做一個最簡單的 Demo：<br><br>
-- 一個頁面就好<br>
-- 有一個客戶列表（假資料）<br>
-- 可以點進去看客戶詳情<br>
-- 用最簡單的方式做，不用資料庫，假資料寫在程式碼裡就好<br><br>
-目的是讓我看到畫面，確認方向對不對。」
+    <p><strong>i18n</strong> 是 internationalization 的縮寫（i 和 n 之間有 18 個字母）。白話說就是：讓你的網站支援多種語言，可以切換。</p>
+
+    <div class="compare">
+      <div class="compare-good">
+        <div class="compare-label">一開始就說</div>
+        <div class="code-block">
+「做一個產品介紹頁，<br>
+要支援中文和英文切換，<br>
+文字都放在語言檔案裡，<br>
+不要寫死在 HTML。」<br><br>
+<span style="color: var(--green);">AI 從第一行程式碼就照這個方式寫。</span>
+        </div>
+      </div>
+      <div class="compare-bad">
+        <div class="compare-label">做完才說</div>
+        <div class="code-block">
+（網站已做完，30 個檔案，<br>
+所有文字都寫死在 HTML 裡）<br><br>
+「欸，加一個英文版。」<br><br>
+<span style="color: var(--red);">AI 要翻遍 30 個檔案，<br>
+把每一段文字抽出來，<br>
+建立語言檔，重寫引用方式。<br>
+改一改還可能改壞其他功能。</span>
+        </div>
+      </div>
     </div>
-
-    <p>10 分鐘後，你就有一個可以看、可以點的東西。這時候你才能真正開始思考：「這個跟我想的一不一樣？」</p>
-
-    <div class="box box-tip">
-      <div class="box-label">Demo 的關鍵</div>
-      <strong>Demo 不是最終版本。</strong>它就是一個用來「確認方向」的拋棄式原型。不要在 Demo 上修修補補變成正式版——那條路是災難。看完 Demo、確認方向後，才開始正式做。
-    </div>
-
-    <!-- 3. Step 2: 確認邊界 -->
-    <h2>第二步：看著 Demo 確認邊界</h2>
-
-    <p>有了 Demo，你現在可以做第二章講的「邊界確認」了。因為你有東西可以指著說：</p>
-
-    <ul>
-      <li>「這個列表要加<strong>搜尋</strong>功能」</li>
-      <li>「客戶詳情頁<strong>不需要</strong>編輯功能，只看就好」</li>
-      <li>「<strong>不要</strong>做刪除客戶，怕誤刪」</li>
-      <li>「列表要能<strong>按日期排序</strong>」</li>
-      <li>「手機上也要能看，<strong>RWD</strong> 是必須的」</li>
-    </ul>
-
-    <p>這些需求在看到 Demo 之前，你可能根本想不到。因為人類是視覺動物——<strong>看到東西才能反應</strong>。</p>
-
-    <div class="analogy">
-      <strong>比喻：看了樣品屋之後的對話</strong><br><br>
-      看樣品屋之前：「我想要一個舒服的家。」（模糊到不行）<br><br>
-      看樣品屋之後：「客廳太小要加大、廚房要做開放式、主臥的窗戶方向不對，冬天會西曬、浴室要有浴缸不要淋浴間。」<br><br>
-      <strong>看了之後你才知道自己要什麼、不要什麼。</strong>
-    </div>
-
-    <p>把你看完 Demo 的所有想法整理成一份清單，分成「要加的」和「不要的」。這份清單就是你的<strong>邊界文件</strong>。</p>
-
-    <!-- 4. Step 3: 規劃架構 -->
-    <h2>第三步：規劃架構（最重要的一步）</h2>
-
-    <p>確認了要做什麼、不做什麼之後，接下來不是直接開始寫程式，而是<strong>先把架構規劃好</strong>。</p>
-
-    <div class="analogy">
-      <strong>比喻：蓋房子的地基</strong><br><br>
-      地基是房子最先做、也最不起眼的部分。但地基歪了，上面蓋得再漂亮都沒用——整棟樓都是歪的。<br><br>
-      軟體的「地基」就是<strong>資料庫設計</strong>和<strong>架構決策</strong>。這些東西一旦確定了，後面要改的成本非常高。
-    </div>
-
-    <p>在這一步，你需要跟 AI 討論（不是直接叫它寫程式）的事情：</p>
-
-    <h3>3-1. 資料庫欄位設計</h3>
-
-    <p>資料庫就像你的檔案櫃。每一格抽屜放什麼、怎麼分類，一開始就要決定好。後面要改抽屜的格局，等於把所有文件搬出來重新分類。</p>
-
-    <div class="code-block">
-你：「先不要寫程式。幫我規劃客戶資料表的欄位：<br><br>
-必要欄位：姓名、電話、Email、公司名稱<br>
-可選欄位：備註、標籤<br>
-系統欄位：建立時間、最後更新時間<br><br>
-問題：<br>
-1. 一個客戶可以有多個聯絡人嗎？（如果可以，要拆成兩個表）<br>
-2. 標籤是固定選項還是自由輸入？<br>
-3. 需要記錄誰建立的嗎？（多人使用的話需要）」
-    </div>
-
-    <h3>3-2. 計算邏輯放哪裡</h3>
-
-    <p>如果你的系統有計算功能（例如：訂單總金額、庫存數量），你需要決定計算邏輯放在<strong>前端</strong>（使用者的瀏覽器）還是<strong>後端</strong>（伺服器）。</p>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>放前端</th>
-            <th>放後端</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>速度快、體驗好</td>
-            <td>資料準確、安全</td>
-          </tr>
-          <tr>
-            <td>但使用者可以「竄改」</td>
-            <td>但每次都要等網路</td>
-          </tr>
-          <tr>
-            <td>適合：顯示用途（即時預覽價格）</td>
-            <td>適合：金流相關（實際扣款金額）</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>3-3. 耦合預告：哪些東西會互相影響</h3>
-
-    <p><strong>耦合</strong>的意思是「A 和 B 綁在一起，動了 A 就會影響 B」。在規劃階段，你需要先知道哪些功能是「綁在一起」的，這樣做的時候才不會一改就壞。</p>
-
-    <div class="analogy">
-      <strong>比喻：衣櫃跟電線</strong><br><br>
-      你在房間靠牆放了一個大衣櫃，結果衣櫃後面剛好是電線的接線盒。現在要修電線，得先把 50 公斤的衣櫃搬開。<br><br>
-      如果一開始就知道接線盒在這裡，衣櫃就不會放這個位置。<br><br>
-      <strong>耦合預告就是先標出「接線盒在哪」，避免以後搬衣櫃的痛苦。</strong>
-    </div>
-
-    <p>常見的耦合範例：</p>
-    <ul>
-      <li>使用者權限 ↔ 頁面顯示（改了權限規則，每個頁面都要跟著改）</li>
-      <li>商品價格 ↔ 訂單計算（價格欄位改了，訂單那邊也要改）</li>
-      <li>上傳功能 ↔ 儲存空間（檔案格式改了，儲存的邏輯也要改）</li>
-    </ul>
-
-    <h3>3-4. SSOT：單一真理來源在哪裡</h3>
-
-    <p><strong>SSOT</strong>（Single Source of Truth）翻譯成白話就是：<strong>同一筆資料只存在一個地方。</strong></p>
-
-    <div class="analogy">
-      <strong>比喻：公司通訊錄</strong><br><br>
-      公司有一份通訊錄。如果每個部門都各自維護一份，A 部門改了電話，B 部門不知道，就會打到舊號碼。<br><br>
-      正確做法：只有一份「正式通訊錄」放在公司系統上，所有部門都看這一份。誰改了，大家都看得到。<br><br>
-      <strong>那份「正式通訊錄」就是 SSOT。</strong>在軟體裡，某筆資料應該只存在一個地方（通常是資料庫），其他地方需要用就去那裡查，不要各自存一份。
-    </div>
-
-    <p>在規劃架構時問 AI：</p>
-
-    <div class="code-block">
-你：「這個系統的 SSOT 在哪裡？<br>
-客戶資料的唯一來源是 Supabase 的 customers 表？<br>
-還是有些資料會另外存在 localStorage？<br>
-我想確認不會出現資料不同步的問題。」
-    </div>
-
-    <!-- 5. Step 4: 正式開始寫 -->
-    <h2>第四步：正式開始寫</h2>
-
-    <p>做完前三步，你現在有了：</p>
-
-    <ol>
-      <li>一個看得到的 Demo（知道長什麼樣）</li>
-      <li>一份邊界清單（知道要什麼、不要什麼）</li>
-      <li>一份架構規劃（知道資料結構、技術選擇、耦合風險）</li>
-    </ol>
-
-    <p>現在才是正式開始寫程式的時候。而且因為前面的功課做足了，你下指令的品質會好很多：</p>
-
-    <div class="code-block">
-你：「根據我們剛才討論的架構，開始正式實作。<br><br>
-先做第一個功能：客戶列表頁<br>
-- 資料從 Supabase 的 customers 表讀取<br>
-- 欄位：姓名、公司、電話、最後聯絡日期<br>
-- 預設按最後聯絡日期排序（最近的在上面）<br>
-- 頂部有搜尋框，即時過濾（前端過濾）<br>
-- RWD，手機版用卡片式而不是表格<br>
-- 不要做分頁，先用無限滾動<br>
-- 不要做刪除功能<br><br>
-做完這個再做下一個，一次做一個功能。」
-    </div>
-
-    <div class="box box-tip">
-      <div class="box-label">一次做一個功能</div>
-      不要一口氣叫 AI 做完整個系統。<strong>一次做一個功能，確認沒問題再做下一個。</strong>這樣出問題才知道是哪裡出的，也比較好修。就像蓋房子，一層一層蓋，每層驗收完才蓋下一層。
-    </div>
-
-    <!-- 6. 為什麼不能跳過 -->
-    <h2>為什麼不能跳過第二步和第三步</h2>
 
     <div class="box box-warning">
-      <div class="box-label">警告</div>
-      <strong>如果你跳過第二步（確認邊界）和第三步（規劃架構）直接開始做，你會花更多 Token 來回修改。</strong><br><br>
-      因為你省掉的不是「時間」，而是「思考」。那些你沒想清楚的問題，不會消失——它們只會在你做到一半的時候爆出來，而且修起來的成本是事先想清楚的 5-10 倍。<br><br>
-      改設計圖只要擦掉一條線重畫。改已經蓋好的牆，要拆、要補、要重新粉刷。
+      <div class="box-label">記住這個原則</div>
+      <strong>在動工前，把你「可能會要的東西」都先列出來。</strong>就算不確定要不要做，也先告訴 AI「之後可能會有多語言、可能會有手機版、可能會多一個管理員角色」，讓它預留位置。砌牆前埋管線，是改設計圖；砌完牆才打洞，是打牆、補牆、重新粉刷。
     </div>
 
-    <p>常見的「跳過就會後悔」的情境：</p>
+    <p>動工前怎麼把需求想完整，先做一個樣品屋（Demo）看著列清單，是<a href="/chapter4/">下一章 工作流程</a>的主題。</p>
+
+    <h3>例子：搜尋功能的邊界比你想像的複雜</h3>
+
+    <p>你跟 AI 說「加一個搜尋功能」，聽起來很簡單，但搜尋其實有很多種：</p>
 
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>跳過了什麼</th>
-            <th>後果</th>
-            <th>修復成本</th>
+            <th>搜尋類型</th>
+            <th>白話</th>
+            <th>例子</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>沒確認要不要多語言</td>
-            <td>做完才加 i18n，30 個檔案全部要改</td>
-            <td>是一開始就做的 10 倍</td>
+            <td><strong>精確搜尋</strong></td>
+            <td>打什麼找什麼，一字不差</td>
+            <td>搜「冰美式」只找到冰美式</td>
           </tr>
           <tr>
-            <td>沒確認權限設計</td>
-            <td>做到一半才發現「管理員跟一般使用者看到的頁面不同」，整個路由要重寫</td>
-            <td>是一開始就規劃的 5 倍</td>
+            <td><strong>模糊搜尋</strong></td>
+            <td>打錯字也能找到</td>
+            <td>搜「冰美試」也找到冰美式</td>
           </tr>
           <tr>
-            <td>沒設計好資料庫</td>
-            <td>做到第三個功能才發現表格結構不對，要 migrate 還可能丟資料</td>
-            <td>是一開始就設計好的 8 倍</td>
+            <td><strong>範圍搜尋</strong></td>
+            <td>在某個區間裡找</td>
+            <td>價格 1000 到 5000 元</td>
           </tr>
           <tr>
-            <td>沒確認手機版需求</td>
-            <td>整個 UI 做完才說要 RWD，每個元件都要調整</td>
-            <td>是一開始就考慮 RWD 的 3 倍</td>
+            <td><strong>過濾 Filter</strong></td>
+            <td>用條件篩選</td>
+            <td>只看紅色、只看 XL</td>
+          </tr>
+          <tr>
+            <td><strong>全文搜尋</strong></td>
+            <td>搜內文，不只標題</td>
+            <td>搜「退貨」會找到內文提到退貨的文章</td>
+          </tr>
+          <tr>
+            <td><strong>即時搜尋</strong></td>
+            <td>打字的同時就跑出結果</td>
+            <td>邊打字，底下的商品列表邊變少</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <!-- 7. 總結比喻 -->
-    <h2>本章小結：蓋房子的完整流程</h2>
-
-    <div class="analogy">
-      <strong>把整個流程用蓋房子來比喻：</strong><br><br>
-      <strong>Step 1 看樣品屋（Demo）</strong><br>
-      你走進建商的樣品屋，感受空間大小、看看格局、摸摸建材。這讓你從「我想要一個家」變成「我想要這種感覺的家」。<br><br>
-      <strong>Step 2 跟建築師討論格局（確認邊界）</strong><br>
-      你指著樣品屋說：「客廳要再大一點、廚房要開放式、不要浴缸要淋浴間、這個儲藏室不需要。」你說出了「要什麼」和「不要什麼」。<br><br>
-      <strong>Step 3 看設計圖（規劃架構）</strong><br>
-      建築師畫出設計圖、結構圖、水電配置圖。你確認地基怎麼打、管線怎麼走、承重牆在哪裡。這些一旦動工就很難改。<br><br>
-      <strong>Step 4 動工（正式開始寫）</strong><br>
-      一切確認完畢，才開始打地基、灌漿、砌牆。一層一層蓋，每層驗收。<br><br>
-      <strong>你不會跟建築師說「幫我蓋房子」就等交屋。跟 AI 做專案也一樣。</strong>
+    <div class="box box-warning">
+      <div class="box-label">注意</div>
+      如果你只說「加搜尋功能」，AI 可能只做最簡單的精確搜尋。但你的客人期待的是打錯字也找得到，還能篩選。這就是為什麼邊界要講清楚：要哪幾種、搜哪些欄位、做到哪裡停。
     </div>
 
-    <p>記住這個流程：<strong>Demo → 確認 → 規劃 → 執行</strong>。看起來多花了時間，但實際上省下的是來回修改的 Token、砍掉重練的時間、以及抓不到 bug 的挫折感。</p>
+    <!-- 6. Prompt Checklist -->
+    <h2 id="checklist">下指令的檢查清單</h2>
+
+    <p>每次下指令前，過一遍這個清單，可以幫你大幅提高品質、減少來回修改：</p>
+
+    <h3>目標面（要什麼）</h3>
+    <ul>
+      <li>我要的最終產出是什麼？（一個頁面？一張報表？一個能填的表單？一段分析？）</li>
+      <li>它給誰用的？（客人？同事？管理者？我自己？）</li>
+      <li>成功的標準是什麼？（能登入就好？還是要有忘記密碼流程？）</li>
+      <li>有沒有參考範例？（「像 B 咖啡店官網那樣的菜單頁」）</li>
+    </ul>
+
+    <h3>邊界面（不要什麼、做到哪裡）</h3>
+    <ul>
+      <li>哪些功能<strong>不要</strong>做？（不要社群登入、不要會員等級）</li>
+      <li>哪些做法<strong>不要</strong>用？（不要需要打包的框架、不要加我沒點頭的套件、不要新增付費服務）</li>
+      <li>複雜度上限在哪？做到哪裡停？（先做最簡單的版本就好）</li>
+      <li>有什麼已經做好了，<strong>不要動</strong>的？（資料表結構已定，不能改；登入流程不要碰）</li>
+    </ul>
+
+    <h3>情境面（在什麼狀況下）</h3>
+    <ul>
+      <li>目前用什麼技術？（純靜態頁面放 Cloudflare、資料庫用 Supabase、版本放 GitHub，見<a href="/chapter11/">第十一章 技術棧</a>）</li>
+      <li>現有的檔案結構長什麼樣？（列出主要資料夾，或叫它自己先看一遍再講給你聽）</li>
+      <li>有什麼已知的限制？（免費方案、流量限制、手機要能用）</li>
+      <li>這是全新專案，還是要加進現有系統？</li>
+      <li>團隊有幾個人？只有你自己？（只有你一個人維護，就不要做成要一整個團隊才顧得了的東西）</li>
+    </ul>
+
+    <div class="box box-tip">
+      <div class="box-label">不用每次都寫這麼多</div>
+      小任務不需要寫完整個清單。但大任務（做新功能、開新專案、改架構）一定要盡量涵蓋。養成習慣之後，你會自然知道哪些該講。<br><br>
+      還沒想清楚也沒關係，叫它問你：「我想做一個預約系統，還沒想清楚。先問我問題，問到你可以寫成規格為止。」官方的使用建議也推薦這個做法。
+    </div>
+
+    <!-- 7. CLAUDE.md -->
+    <h2 id="claude-md">CLAUDE.md：你的「邊界文件」</h2>
+
+    <p>如果你用 Claude Code，有一個非常重要的檔案叫 <code>CLAUDE.md</code>。它是放在專案資料夾最上層的一個純文字檔（也可以放在專案裡的 <code>.claude</code> 資料夾），Claude Code 每次開新對話都會先讀進去。</p>
+
+    <div class="analogy">
+      <strong>比喻：新員工的 SOP 手冊</strong><br><br>
+      想像你請了一個新員工。他第一天上班，你會給他一本公司 SOP：「我們用什麼工具」、「我們的命名規則」、「客戶的忌諱」、「出包了找誰」。<br><br>
+      <code>CLAUDE.md</code> 就是 AI 的那本 SOP 手冊。你把專案的規則、偏好、禁忌、架構說明寫在裡面。這樣你不用每次開新對話都重複講一遍，<strong>AI 每次都會先讀這本手冊。</strong>
+    </div>
+
+    <p>一個 CLAUDE.md 裡通常會寫什麼：</p>
+
+    <ul>
+      <li>這個專案用什麼技術（純 HTML、CSS、JS，不用打包工具；放 Cloudflare，資料庫用 Supabase）</li>
+      <li>寫法的規矩（畫面上的文字用繁體中文、不要加新的套件、註解寫中文）</li>
+      <li>檔案放哪裡（每一頁一個資料夾放 <code>index.html</code>，共用的樣式放 <code>/styles.css</code>）</li>
+      <li>不能做什麼（不要改資料表結構、不要動登入流程、不要把密碼寫進程式碼）</li>
+      <li>常見的坑（例如「這個外部服務一分鐘最多呼叫 60 次」這種，它讀程式碼看不出來的事）</li>
+    </ul>
+
+    <div class="code-block">
+# CLAUDE.md 範例<br><br>
+## 專案規範<br>
+- 純靜態網站：HTML、CSS、JavaScript，不用打包<br>
+- 放在 Cloudflare，資料庫用 Supabase<br>
+- 改完先在我電腦上開起來給我看，我說好再上線<br><br>
+## 禁止事項<br>
+- 不要動資料表結構<br>
+- 不要在程式碼裡寫入任何密碼或 API Key
+    </div>
+
+    <p>不會寫就在 Claude Code 裡打 <code>/init</code>，它會看過你的資料夾，幫你產生一份初稿，你再改。官方建議一份不要超過大約 200 行：寫越長，每次都佔桌面，它也越不容易每條都照做。只寫它從檔案裡看不出來的事，和你已經糾正過它兩次的事。</p>
 
     <div class="box box-info">
-      <div class="box-label">給自己的提醒</div>
-      下次你打開 Claude Code 想說「幫我做一個 XXX」的時候，先停三秒鐘，改成說：<br><br>
-      <strong>「幫我做一個 XXX 的最簡單 Demo，先不用完整功能，讓我看看大概的樣子。」</strong><br><br>
-      光是這一句話的改變，就能省你好幾個小時。
+      <div class="box-label">CLAUDE.md 的好處</div>
+      <strong>寫一次，每個對話都有效。</strong><br><br>
+      上一章講過 Context Window 的問題：每次開新對話，前一場對話的內容不會帶過來；同一場對話太長、被自動壓縮時，很前面交代的細節也可能不見。但 CLAUDE.md 是存在檔案裡的，你寫進去的東西，它每次開工都會讀。這是對抗「它又忘了」很有效的方法。
+    </div>
+
+    <div class="box box-warning">
+      <div class="box-label">交代不是上鎖</div>
+      官方文件寫明：CLAUDE.md 對它來說是參考，不是強制設定。它通常會照做，但不保證。真的絕對不准碰的事，要用權限規則或 Hook 來擋，那才是鎖。放在哪一層、它自己記的筆記、怎麼上鎖，在<a href="/chapter10/">第十章 Claude Code 怎麼用</a>。
+    </div>
+
+    <!-- 8. 這章帶走什麼 -->
+    <h2 id="takeaway">這章帶走什麼</h2>
+
+    <ol>
+      <li><strong>Prompt 就是你給 AI 的工作交辦事項</strong>，Prompt Engineering 就是學會怎麼寫讓 AI 一次做對的交辦。</li>
+      <li><strong>三層溝通模型</strong>：目標（要什麼）、邊界（不要什麼、做到哪裡）、情境（在什麼狀況下）。大部分人只講了目標，忘了邊界和情境。</li>
+      <li><strong>「不要什麼」比「要什麼」更重要。</strong>裝潢師傅的故事：它可能只做最小的範圍，也可能好心多做。做到哪裡、哪裡不准碰，只有你知道。</li>
+      <li><strong>你不知道它不知道什麼。</strong>蓋房子的故事：情境知識（地震、法規、限制）要主動告訴 AI；手上有的檔案、截圖、錯誤訊息直接給。</li>
+      <li><strong>先後順序影響巨大。</strong>水電管線的故事：先講是改設計圖，後講是打牆。</li>
+      <li><strong>CLAUDE.md 是你的邊界文件。</strong>寫一次，每個對話都有效；但它是交代，不是鎖。</li>
+    </ol>
+
+    <p>現在你知道怎麼「說話」了。但光會說話還不夠，你還需要知道正確的「做事順序」：先看樣子、先看計畫、再讓它動手。<a href="/chapter4/">下一章</a>講工作流程。</p>
+
+    <!-- 9. 跟 Claude 怎麼說 -->
+    <h2 id="say">跟 Claude 怎麼說</h2>
+
+    <div class="box box-tip">
+      <div class="box-label">可以直接抄</div>
+      把邊界講在前面：<br>
+      「這次只改報價單的畫面，不要動資料表，也不要動後端。如果一定要動到別的地方，先停下來告訴我要動哪裡、為什麼。」<br><br>
+      還沒想清楚時：<br>
+      「我想做一個預約系統，還沒想清楚。先問我問題，一次問幾個，問到你可以寫成規格為止，再寫進 SPEC.md。」<br><br>
+      想先比較做法：<br>
+      「先不要動手。給我兩三個做法，各自的好處、壞處，會動到哪些檔案、會不會加資料表或欄位。」<br><br>
+      東西壞了：<br>
+      「先找原因講給我聽，先不要改。」<br><br>
+      要完整版時：<br>
+      「做完整一點：沒有資料的時候、出錯的時候、手機上長怎樣，都一起處理。」<br><br>
+      每次都要遵守的規矩：<br>
+      「把『不要加新的套件，要加先問我』這條加進 CLAUDE.md。」
     </div>
 
     <!-- Chapter Navigation -->
     <div class="chapter-nav">
       <a href="/chapter2/" class="prev">
         <span class="nav-label">上一章</span>
-        <span class="nav-title">怎麼跟 LLM 下指令</span>
+        <span class="nav-title">LLM 本質</span>
       </a>
       <a href="/chapter4/" class="next">
         <span class="nav-label">下一章</span>
-        <span class="nav-title">你缺什麼知識</span>
+        <span class="nav-title">工作流程</span>
       </a>
     </div>
 

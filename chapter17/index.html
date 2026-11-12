@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十七章：會出事的地方 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ===== 第十七章專用樣式（一律 risk- 前綴）===== */
+    .risk-link { color: var(--accent-light); text-underline-offset: 3px; }
+    .risk-link:hover { color: var(--accent); }
+    .content .compare > div { min-width: 0; }
+
+    /* 同步／異步：花了幾秒的長條圖（純 HTML，不需要 JavaScript） */
+    .risk-bars {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-code);
+      padding: 18px 20px;
+      margin: 20px 0;
+    }
+    .risk-bars-group + .risk-bars-group {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px dashed var(--border-light);
+    }
+    .risk-bars-title { font-size: 14px; font-weight: 700; color: var(--text-heading); margin-bottom: 10px; }
+    .risk-bar-row {
+      display: grid;
+      grid-template-columns: 8.5em minmax(0, 1fr);
+      gap: 4px 12px;
+      align-items: center;
+      margin: 6px 0;
+      font-size: 14px;
+    }
+    .risk-bar-name { color: var(--text-muted); }
+    .risk-track { position: relative; height: 22px; background: var(--bg); border-radius: 4px; }
+    .risk-bar {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      border-radius: 4px;
+      background: var(--accent);
+      opacity: 0.85;
+    }
+    .risk-bars-total { margin-top: 10px; font-size: 14px; font-weight: 600; }
+    .risk-total-slow { color: var(--red); }
+    .risk-total-fast { color: var(--green); }
+
+    /* 互動示範：搶最後一個座位 */
+    .risk-modes, .risk-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .risk-meter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 24px;
+      padding: 12px 16px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      margin-bottom: 14px;
+      font-size: 15px;
+    }
+    .risk-meter strong {
+      font-size: 20px;
+      color: var(--text-heading);
+      font-variant-numeric: tabular-nums;
+      margin-left: 6px;
+    }
+    .risk-meter strong.risk-neg { color: var(--red); }
+    .risk-lanes { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; }
+    .risk-lane {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      min-width: 0;
+      min-height: 96px;
+    }
+    .risk-lane-title { font-size: 13px; font-weight: 700; color: var(--accent-light); margin-bottom: 6px; }
+    .content .risk-lane ol { margin: 0; padding-left: 20px; font-size: 14px; }
+    .risk-lane li { margin: 4px 0; overflow-wrap: anywhere; }
+    .risk-lane li.risk-ok { color: var(--green); }
+    .risk-lane li.risk-bad { color: var(--red); }
+    .risk-lane li.risk-wait { color: var(--yellow); }
+    .risk-lane li.risk-in { animation: risk-in 0.3s ease-out; }
+    @keyframes risk-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: none; }
+    }
+    .risk-verdict {
+      margin: 14px 0 0;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-light);
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .risk-verdict.risk-is-bad { color: var(--red); }
+    .risk-verdict.risk-is-ok { color: var(--green); }
+
+    @media (max-width: 600px) {
+      .risk-bar-row { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+      .risk-bars { padding: 14px; }
+      .risk-lanes { grid-template-columns: minmax(0, 1fr); }
+      .risk-actions .demo-btn { flex: 1 1 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .risk-lane li.risk-in { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="/">首頁</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="/">首頁</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/" class="active">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第十七章</div>
+      <h1>會出事的地方：異步、單一資料來源、耦合</h1>
+      <p class="lead">上一章把前端和後端中間那條線畫好了。線畫好，東西還是會壞，而且多半壞在幾個固定的地方。當你的專案從「一頁式網站」長成「多功能系統」，有些觀念會從「聽過就好」變成「不懂就踩坑」。這一章把最常見的三種攤開：順序亂掉、同一份資料存好幾處、改一個壞三個。每一種都對得回前面某一章的邊界。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <p>這三種壞法有一個共同點：剛發生的時候，畫面上看不出來。測試的時候只有你一個人在按、資料只有幾筆、功能剛做好，全部正常。等到兩個人同時按、資料改過幾輪、功能加了半年，才一起冒出來。</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>壞法</th>
+            <th>出事長什麼樣</th>
+            <th>沒守住的邊界</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>順序亂掉（異步、Race Condition）</td>
+            <td>舊的搜尋結果蓋掉新的；最後一個座位賣給兩個人</td>
+            <td><a class="risk-link" href="/chapter14/">第十四章</a>：誰等誰，是串流程那一塊的事；<a class="risk-link" href="/chapter16/">第十六章</a>：庫存只有後端說了算</td>
+          </tr>
+          <tr>
+            <td>同一份資料存好幾處（單一資料來源）</td>
+            <td>網頁寫 299 元，結帳收 350 元</td>
+            <td><a class="risk-link" href="/chapter15/">第十五章</a>：查得到的不存，算得出來的不存</td>
+          </tr>
+          <tr>
+            <td>改一個壞三個（耦合）</td>
+            <td>改登入頁的按鈕，結帳頁跟著壞</td>
+            <td><a class="risk-link" href="/chapter14/">第十四章</a>：一塊只做一件事</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 一、異步 ===== -->
+    <h2>第一種：異步（Async），三道菜同時做</h2>
+
+    <div class="analogy">
+      <strong>比喻：餐廳廚房。</strong><br><br>
+      你在餐廳點了三道菜：沙拉、牛排、甜點。<br><br>
+      <strong>同步做法</strong>：廚房做完沙拉、端出來，才開始煎牛排；牛排端出來，才開始做甜點。你等到天荒地老。<br><br>
+      <strong>異步做法</strong>：三道菜同時開工。沙拉區切菜、煎台煎牛排、甜點區挖冰淇淋，誰先做好誰先上桌。快很多。
+    </div>
+
+    <p>程式的世界也是這樣。同步（synchronous）是一件事做完才做下一件；異步（asynchronous）是幾件事一起開工，誰先完成誰先回報。網頁上查資料、存資料、寄信，幾乎都是異步：送出去之後，不知道什麼時候回來。</p>
+
+    <p>畫出來大概長這樣：</p>
+
+    <div class="risk-bars" role="img" aria-label="同步：查會員資料 2 秒、查訂單紀錄 3 秒、寄通知信 1 秒，一件接一件，總共 6 秒。異步：三件同時開始，總共 3 秒，等於最慢的那一件。">
+      <div class="risk-bars-group">
+        <div class="risk-bars-title">同步：一件接一件</div>
+        <div class="risk-bar-row">
+          <span class="risk-bar-name">查會員資料 2 秒</span>
+          <span class="risk-track"><span class="risk-bar" style="left:0; width:33.33%"></span></span>
+        </div>
+        <div class="risk-bar-row">
+          <span class="risk-bar-name">查訂單紀錄 3 秒</span>
+          <span class="risk-track"><span class="risk-bar" style="left:33.33%; width:50%"></span></span>
+        </div>
+        <div class="risk-bar-row">
+          <span class="risk-bar-name">寄通知信 1 秒</span>
+          <span class="risk-track"><span class="risk-bar" style="left:83.33%; width:16.67%"></span></span>
+        </div>
+        <div class="risk-bars-total risk-total-slow">總共 2 + 3 + 1 = 6 秒</div>
+      </div>
+      <div class="risk-bars-group">
+        <div class="risk-bars-title">異步：同時開工</div>
+        <div class="risk-bar-row">
+          <span class="risk-bar-name">查會員資料 2 秒</span>
+          <span class="risk-track"><span class="risk-bar" style="left:0; width:33.33%"></span></span>
+        </div>
+        <div class="risk-bar-row">
+          <span class="risk-bar-name">查訂單紀錄 3 秒</span>
+          <span class="risk-track"><span class="risk-bar" style="left:0; width:50%"></span></span>
+        </div>
+        <div class="risk-bar-row">
+          <span class="risk-bar-name">寄通知信 1 秒</span>
+          <span class="risk-track"><span class="risk-bar" style="left:0; width:16.67%"></span></span>
+        </div>
+        <div class="risk-bars-total risk-total-fast">總共 3 秒，等於最慢的那一件。全部到齊，再繼續</div>
+      </div>
+    </div>
+
+    <p>看起來異步完勝？大部分情況下異步確實比較快，Claude 也常常這樣寫。麻煩出在先後。</p>
+
+    <h3>坑一：到的順序亂了</h3>
+
+    <p>回到同一間餐廳。「誰先做好誰先上桌」會帶來兩種麻煩，第一種是上桌的順序。</p>
+
+    <div class="analogy">
+      你想的順序是沙拉、牛排、最後冰淇淋。但冰淇淋挖一球只要十秒，第一個上桌；牛排要煎十五分鐘，最後才到。等你吃完牛排，冰淇淋已經變成一碗甜湯。<br><br>
+      三道菜都沒做錯，錯在<strong>上桌的順序沒有人管</strong>。
+    </div>
+
+    <p>程式裡長這樣：你在搜尋框打「台中」。打到「台」的時候送出一次查詢，打完「台中」又送出一次。沒有人保證哪一個先回來。「台」的結果如果比較晚到，就會把「台中」的結果蓋掉：你明明打的是台中，畫面卻停在「台」開頭的那一長串。</p>
+
+    <p>記住一件事就好：<strong>做好的順序，不等於你要的順序。</strong>先送出去的，不一定先回來。順序重要的時候要講明：誰要等誰、晚到的舊結果要不要丟掉。</p>
+
+    <h3>坑二：這一步要用上一步的東西</h3>
+
+    <div class="analogy">
+      牛排的醬汁，要用煎完牛排的那個鍋底來做。牛排還沒下鍋，鍋底是空的，師傅再厲害也做不出醬汁。<br><br>
+      這跟誰快誰慢無關。<strong>第二步要用到第一步做出來的東西</strong>，所以這兩步不能同時開工。
+    </div>
+
+    <div class="analogy">
+      <strong>換成程式：</strong><br><br>
+      假設你做了一個「註冊流程」：<br>
+      1. 在資料庫建立使用者帳號<br>
+      2. 用這個帳號的編號（ID）去建立預設設定<br>
+      3. 寄歡迎信給使用者<br><br>
+      如果三步同時跑（異步），第二步一開工就要帳號的編號，但帳號還沒建好，哪來的編號？<br><br>
+      <strong>結果：註冊到一半出錯，因為它找不到一個還不存在的帳號。</strong>運氣不好的話，還會留下一個沒有設定的帳號。
+    </div>
+
+    <p>判斷方法只有一個問題：<strong>這一步需要上一步的結果嗎？</strong>需要就排隊，不需要才能同時做。上面的第二、三步都要等第一步；但第二步和第三步彼此不相干，可以一起跑。</p>
+
+    <div class="box box-info">
+      <div class="box-label">對回哪條邊界</div>
+      <a class="risk-link" href="/chapter14/">第十四章 功能怎麼切</a>裡有一個「店長」，它不算錢、不排版，只管順序。誰等誰、晚到的舊結果丟不丟，就是店長要定的事。這件事沒人講，Claude 多半照最快的寫法：能同時跑的全部同時跑。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「搜尋框連續打字的時候，只顯示最後一次查詢的結果，比較晚回來的舊結果要丟掉」<br>
+      「這幾個查詢彼此不相干，可以同時跑，但畫面等全部回來再一起顯示」<br>
+      「第二步要用到第一步的結果，這兩步照順序做；彼此不相干的才同時跑」
+    </div>
+
+    <p>另外還有一種麻煩，不是順序，是兩個人同時搶同一個東西。它有自己的名字。</p>
+
+    <h3>Race Condition：搶最後一個座位</h3>
+
+    <p><strong>Race Condition（競爭條件）</strong>是異步最經典的問題。想像這個場景：</p>
+
+    <p>電影院最後一個座位。小明和小華在各自的手機上訂票，兩個人幾乎同一秒按下「訂票」。系統各查一次：「還有空位嗎？有。」兩個人都訂到了。但實際上只有一個座位，有人到現場沒位子坐。</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">沒處理 Race Condition</div>
+        <div class="code-block">
+小明查：有 1 個空位 → 訂！<br>
+小華查：有 1 個空位 → 訂！<br>
+<br>
+結果：2 個人搶到 1 個座位<br>
+<span style="color: var(--red);">有人到現場沒位子坐</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">有處理 Race Condition</div>
+        <div class="code-block">
+小明查：有 1 個空位 → 鎖住 → 訂！<br>
+小華查：座位被鎖 → 等一下⋯⋯<br>
+小明完成 → 解鎖 → 空位 = 0<br>
+小華查：沒位子了 → 顯示已售完<br>
+<span style="color: var(--green);">一個座位只賣一次</span>
+        </div>
+      </div>
+    </div>
+
+    <p>「鎖住、解鎖」是工程師的說法（Lock）。落到實際做法，最常見的是把「查還有沒有」和「扣掉一個」併成同一句話，交給資料庫一次做完：</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：先查，再扣</div>
+        <div class="code-block">
+小明查：剩 1 個 → 訂<br>
+小華查：剩 1 個 → 訂<br>
+小明扣一個 → 剩 0<br>
+小華扣一個 → 剩 −1<br>
+<br>
+<span style="color: var(--red);">一個座位賣了兩次</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：查和扣一步做完</div>
+        <div class="code-block">
+小明：「剩 1 個以上就扣一個」→ 成功，剩 0<br>
+小華：同一句，前面有人在改，排隊<br>
+輪到小華：重看一次，剩 0 → 已售完<br>
+<br>
+<span style="color: var(--green);">一個座位只賣一次</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-container" id="risk-race" data-demo-title="動手按：兩個人同時訂票" hidden>
+      <p class="demo-label">先選一種寫法，再按「兩人同時按訂票」。這只是畫面上的模擬，不會送出任何資料。</p>
+      <div class="risk-modes" role="group" aria-label="選擇寫法">
+        <button type="button" class="demo-btn" id="risk-mode-off" aria-pressed="true">先查，再扣</button>
+        <button type="button" class="demo-btn" id="risk-mode-on" aria-pressed="false">查和扣一步做完</button>
+      </div>
+      <div class="risk-actions">
+        <button type="button" class="demo-btn demo-btn-main" id="risk-go">兩人同時按訂票</button>
+        <button type="button" class="demo-btn" id="risk-reset">重來</button>
+      </div>
+      <div class="risk-meter">
+        <span>剩餘座位<strong id="risk-seats">1</strong></span>
+        <span>訂票成功<strong id="risk-sold">0</strong></span>
+      </div>
+      <div class="risk-lanes">
+        <div class="risk-lane">
+          <div class="risk-lane-title">小明的手機</div>
+          <ol id="risk-lane-a"></ol>
+        </div>
+        <div class="risk-lane">
+          <div class="risk-lane-title">小華的手機</div>
+          <ol id="risk-lane-b"></ol>
+        </div>
+      </div>
+      <p class="risk-verdict" id="risk-verdict" aria-live="polite">還沒開始。</p>
+    </div>
+
+    <p>為什麼前端擋不住？小明畫面上那個「剩 1 個」，是他打開頁面那一刻拍的照片，照片不會自己更新。真正的數字只有資料庫知道，所以「查還有沒有」和「扣掉一個」要在資料庫裡一步做完。</p>
+
+    <p>這不用你寫。Supabase 底下是 PostgreSQL，兩個人同時改同一筆資料時，後到的那個會等前一個做完，再重新確認條件還成不成立；把查和扣寫成同一條指令或一個資料庫函式，就吃得到這個保護。Cloudflare D1 也可以把幾條指令包成一批，一起成功，或一起取消。你只要知道要叫它這樣做。</p>
+
+    <h3>同一件事做了兩次</h3>
+
+    <p>還有一種「同時」：網路慢，客人以為沒按到，又按一次「送出訂單」。後端收到兩張一模一樣的訂單，扣了兩次款。</p>
+
+    <p>解法是每張訂單在送出前就有自己的編號。後端看到同一個編號第二次，回一句「已經收過了」，不再做一次；資料庫也可以設定「這一欄不准重複」，第二筆根本寫不進去。按鈕按下去先變灰，只是讓人少按一次，真正擋住的是後端那一關。</p>
+
+    <div class="box box-info">
+      <div class="box-label">對回哪條邊界</div>
+      <a class="risk-link" href="/chapter16/">第十六章 前後端邊界</a>說，庫存只有後端說了算；<a class="risk-link" href="/chapter15/">第十五章 資料表與欄位</a>說，資料有一個家。搶座位和重複送出，是這兩條加在一起：判斷要在資料的家裡做，不在客人的手機上做。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      當你的系統開始有「多人同時操作」的需求時，記得跟 Claude 說：<br>
+      「這個功能可能有 race condition。兩個人同時訂最後一個位子，只能有一個成功；查和扣要在資料庫裡一步做完，不要前面查完再送」<br>
+      「同一張訂單送兩次，後端只能收一次。用訂單編號擋，按鈕變灰只是輔助」<br>
+      「找出專案裡所有『先查、再改』的地方，列給我看哪些可能被兩個人同時做」
+    </div>
+
+    <!-- ===== 二、單一資料來源 ===== -->
+    <h2>第二種：單一資料來源，全公司只有一本電話簿</h2>
+
+    <p><strong>單一資料來源</strong>，英文是 <strong>Single Source of Truth</strong>，縮寫 <strong>SSOT</strong>。聽起來很哲學，其實超級實用：每一筆資料只住一個地方，別的地方要用，就去那裡問。<a class="risk-link" href="/chapter13/">第十三章 架構拓樸</a>在圖上標過「資料唯一的家」，<a class="risk-link" href="/chapter15/">第十五章 資料表與欄位</a>講過「查得到的不存，算得出來的不存」。這一節看沒做到的時候，出事長什麼樣。</p>
+
+    <div class="analogy">
+      <strong>比喻：電話簿。</strong><br><br>
+      假設公司有三個部門，每個部門各自維護一份員工電話簿。<br><br>
+      小明換了手機號碼，人事部更新了，但業務部和工程部還是舊號碼。<br>
+      三個月後，業務部打小明電話打不通，客戶的案子卡住了。<br><br>
+      <strong>問題出在哪？同一筆資料存了三份，只更新了一份。</strong>
+    </div>
+
+    <p>程式裡也是一模一樣的問題。來看一個常見的例子：</p>
+
+    <h3>實際問題：商品價格存了三個地方</h3>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">沒有單一資料來源：三份各自為政</div>
+        <div class="code-block">
+<span style="color: var(--red);">前端 JavaScript：</span><br>
+const price = 299; // 寫死在程式裡<br>
+<br>
+<span style="color: var(--red);">後端 API：</span><br>
+return { price: 350 }; // 上次改了忘記通知前端<br>
+<br>
+<span style="color: var(--red);">資料庫：</span><br>
+product.price = 399; // 最新的價格<br>
+<br>
+<span style="color: var(--red);">結果：客戶看到 299，結帳變 350，<br>
+月底對帳是 399。三個數字都不一樣。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">有單一資料來源：只存一個地方</div>
+        <div class="code-block">
+<span style="color: var(--green);">資料庫（唯一的家）：</span><br>
+product.price = 399;<br>
+<br>
+<span style="color: var(--green);">後端 API：</span><br>
+return db.getProduct(id); // 去資料庫查<br>
+<br>
+<span style="color: var(--green);">前端：</span><br>
+const data = await fetch('/api/product');<br>
+// 顯示後端回傳的價格<br>
+<br>
+<span style="color: var(--green);">結果：不管在哪裡看，都是 399。<br>
+改一個地方，全部跟著變。</span>
+        </div>
+      </div>
+    </div>
+
+    <p>三份裡沒有一份是「寫錯」的，每一份都是當時改對的。錯在沒有人說過：以哪一份為準。</p>
+
+    <p>原則很簡單：<strong>每一筆資料只存在一個地方，其他需要這筆資料的地方，都去那裡查。</strong></p>
+
+    <h3>常見的「唯一的家」</h3>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>場景</th>
+            <th>唯一的家</th>
+            <th>其他地方怎麼做</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>商品價格</td>
+            <td>資料庫</td>
+            <td>前端、後端都去資料庫查</td>
+          </tr>
+          <tr>
+            <td>使用者權限</td>
+            <td>後端的權限表</td>
+            <td>前端只負責顯示，不自己判斷</td>
+          </tr>
+          <tr>
+            <td>設定值（稅率、運費、服務網址）</td>
+            <td>環境變數／一份設定檔</td>
+            <td>程式啟動時讀取，不寫死在程式裡</td>
+          </tr>
+          <tr>
+            <td>畫面狀態（購物車裡有什麼、目前選了哪個分頁）</td>
+            <td>頁面上一個集中存放的地方</td>
+            <td>各區塊都去那裡讀，不各自記一份</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>第二份常常藏在這些地方</h3>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>第二份藏在哪</th>
+            <th>出事的樣子</th>
+            <th>該以誰為準</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>頁面上寫死的價格、方案內容</td>
+            <td>後台改了價，網頁還是舊的</td>
+            <td>資料庫</td>
+          </tr>
+          <tr>
+            <td>另外一份 Excel 或 Google 試算表的客戶名單</td>
+            <td>客人換了電話，業務打的是舊號碼</td>
+            <td>資料庫；試算表只能是匯出來的抄本</td>
+          </tr>
+          <tr>
+            <td>報表自己存的加總</td>
+            <td>補登一筆付款，報表的數字沒變</td>
+            <td>付款紀錄；加總從紀錄算出來</td>
+          </tr>
+          <tr>
+            <td>寫死在好幾個檔案裡的稅率、運費</td>
+            <td>運費調了，有一頁還在收舊的</td>
+            <td>一份設定</td>
+          </tr>
+          <tr>
+            <td>頁面自己記住的「這個人是管理員」</td>
+            <td>已經停權的人，畫面上還看得到管理按鈕</td>
+            <td>後端的權限資料</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>有些第二份是故意的：簽約當天的金額要留底（<a class="risk-link" href="/chapter15/">第十五章</a>），報表為了快另存一份抄本（<a class="risk-link" href="/chapter13/">第十三章</a>）。分辨方法還是那一句：<strong>來源改了，這一份該不該跟著變？</strong>該變卻沒變的，就是會出事的那一份。故意留的，要寫明「以哪一份為準」，不然半年後沒有人分得出來。</p>
+
+    <div class="box box-info">
+      <div class="box-label">對回哪條邊界</div>
+      <a class="risk-link" href="/chapter15/">第十五章</a>那條「同一筆資料只存一個地方」。Claude 每次只讀它覺得跟這次有關的檔案，這一頁要價格，它就在這一頁寫一份，最快。家在哪裡，要你先講。
+    </div>
+
+    <div class="box box-warning">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這個資料的家是資料庫，前端不要自己存一份」<br>
+      「幫我檢查一下，有沒有同一筆資料被存在多個地方的情況。列出來，說明哪一份該為準」<br>
+      「這份試算表是抄本，以資料庫為準。不要讓任何功能去改它」
+    </div>
+
+    <!-- ===== 三、耦合 ===== -->
+    <h2>第三種：耦合（Coupling），積木 vs 膠水模型</h2>
+
+    <div class="analogy">
+      <strong>比喻：積木和膠水。</strong><br><br>
+      想像你蓋了一個模型城堡：<br><br>
+      <strong>用積木蓋的（低耦合）</strong>：每一塊都是獨立的。你拆掉一棟塔樓，城牆還是好好的。想換一個更酷的塔樓？直接拔掉舊的、插上新的。<br><br>
+      <strong>用膠水黏的（高耦合）</strong>：所有零件都黏死在一起。你想拆掉一棟塔樓？不好意思，旁邊的城牆、護城河、吊橋全部一起碎掉。
+    </div>
+
+    <p>軟體的世界裡，「耦合」就是指兩個功能之間的<strong>依賴程度</strong>。依賴越深，耦合越高；依賴越少，耦合越低。<a class="risk-link" href="/chapter14/">第十四章 功能怎麼切</a>講過一開始怎麼切才不會黏。這一節看已經黏起來之後，出事的現場長什麼樣，以及怎麼把它拆開。</p>
+
+    <h3>高耦合的痛：改 A 壞 B、C、D</h3>
+
+    <p>這是新手最常遇到的地獄場景。下面三個現場都很常見。</p>
+
+    <p><strong>現場一：共用同一段樣式。</strong>你跟 Claude 說「幫我改一下登入頁面的按鈕顏色」，結果改完之後：</p>
+
+    <ul>
+      <li>首頁的上方標題列（header）跑版了</li>
+      <li>結帳頁面的按鈕消失了</li>
+      <li>手機版的選單打不開了</li>
+    </ul>
+
+    <p>為什麼？因為整站的按鈕共用同一段 CSS，Claude 改的是那一段，不是登入頁那一顆。牽一髮動全身。</p>
+
+    <p><strong>現場二：改了一個欄位的名字。</strong>你請它把客戶表的 <code>phone</code> 改叫 <code>mobile</code>。客戶頁正常，但月報表、LINE 通知、匯出功能都直接讀那個欄位，一起壞掉。哪些地方在讀它，沒有人記得。</p>
+
+    <p><strong>現場三：一個檔案裝了所有東西。</strong>這是最常見的。</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">高耦合：所有東西攪在一起</div>
+        <div class="code-block">
+<span style="color: var(--red);">一個 app.js 檔案裡面塞了：</span><br>
+- 登入邏輯<br>
+- 商品列表<br>
+- 購物車計算<br>
+- 寄信功能<br>
+- 金流串接<br>
+<br>
+改登入 → 購物車壞了<br>
+改金流 → 寄信功能掛了<br>
+<span style="color: var(--red);">全部糾纏在一起，每次都不敢確定沒碰壞別的</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">低耦合：功能模組各自獨立</div>
+        <div class="code-block">
+<span style="color: var(--green);">每個功能獨立一個模組：</span><br>
+- auth/login.js　　→ 只管登入<br>
+- products/list.js → 只管商品<br>
+- cart/calculate.js → 只管購物車<br>
+- email/send.js　　→ 只管寄信<br>
+- payment/stripe.js → 只管金流<br>
+<br>
+改登入 → 其他功能不受影響<br>
+改金流 → 寄信功能照樣運作<br>
+<span style="color: var(--green);">改一個，其他檔案沒被打開過</span>
+        </div>
+      </div>
+    </div>
+
+    <p>三個現場有一個共同點：<strong>出事的地方，不是你叫它改的地方。</strong>所以光看它改的那一處是對的，抓不到。</p>
+
+    <h3>怎麼降低耦合</h3>
+
+    <div class="analogy">
+      <strong>比喻：部門之間用公文往來。</strong><br><br>
+      公司裡，業務部需要工程部做一個功能。正確做法是寫一張需求單，工程部照單來做。<br><br>
+      錯誤做法是業務部的人直接跑去工程部的桌上翻資料、改東西。工程部根本不知道什麼被改了，下次上線直接出事，也沒人查得出來。<br><br>
+      <strong>模組之間的溝通，應該透過講好的窗口，而不是直接伸手進別人的內部。</strong>這個窗口，工程師叫它介面（interface）；開給別的系統用的那一種，就是<a class="risk-link" href="/chapter12/">第十二章</a>講的 API。
+    </div>
+
+    <p>降低耦合的三個基本原則：</p>
+
+    <ol>
+      <li><strong>功能拆成獨立模組。</strong>每個檔案只做一件事。登入歸登入、購物車歸購物車，第十四章那張功能清單就是在定這個。</li>
+      <li><strong>模組之間只走講好的窗口。</strong>A 模組需要 B 模組的資料？透過 B 開出來的 function 去拿，不要直接去改 B 的內部變數。購物車要知道誰登入了，去問登入那一塊，不要自己去翻它存的東西。</li>
+      <li><strong>共用的東西越少越好。</strong>就像不要讓所有部門共用一張桌子，每個模組管好自己的資料。共用一段樣式、一個全域變數、一個欄位，每多一個，就多一條看不見的線。真的要共用，讓 Claude 列出有誰在用。</li>
+    </ol>
+
+    <h3>已經黏在一起了怎麼辦</h3>
+
+    <p>不要說「全部重寫」。重寫會把現在能動的東西也一起賭進去。一次拆一塊：先請 Claude 列出黏在一起的地方，挑最常改的那一塊拆出來，拆完把整個流程跑一次，確認結果跟拆之前一樣，再拆下一塊。慢，但每一步都退得回去。</p>
+
+    <div class="box box-info">
+      <div class="box-label">對回哪條邊界</div>
+      <a class="risk-link" href="/chapter14/">第十四章</a>規格裡「不准動哪裡」那一行，加上<a class="risk-link" href="/chapter13/">第十三章</a>那張圖。改之前先問它會動到哪幾塊；答案比你預期的多，就是黏住了。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「改這個之前，先告訴我還有哪些地方用到它。列出來，先不要動手」<br>
+      「只改登入頁的這顆按鈕，不要動全站共用的那段樣式」<br>
+      「改欄位名字之前，先找出所有讀這個欄位的地方」<br>
+      「這個功能跟其他模組耦合太高了，幫我拆成獨立的 module」<br>
+      「我不想改 A 的時候影響到 B，幫我用 interface 把它們分開」<br>
+      「這個檔案太大了，幫我按功能拆分。一次只拆一塊，拆完跑一次，確認結果跟拆之前一樣」
+    </div>
+
+    <p>這一節只講到為什麼要拆。怎麼切功能看<a class="risk-link" href="/chapter14/">第十四章 功能怎麼切</a>，整體怎麼連看<a class="risk-link" href="/chapter13/">第十三章 架構拓樸</a>，資料怎麼放看<a class="risk-link" href="/chapter15/">第十五章 資料表與欄位</a>。</p>
+
+    <h2>三種壞法，同一個根</h2>
+
+    <p>回頭看，三種都是同一件事：Claude 每次只看你眼前講的那一句，挑最近的路。同時跑最快，就同時跑；這一頁要價格，就在這一頁寫一份；要改按鈕，就改那段共用的樣式。每一次都修好了，合起來就是<a class="risk-link" href="/chapter1/">第一章</a>說的越改越纏。</p>
+
+    <p>所以這一章不是要你學會修。是讓你在它動手之前，問得出那一句：「這樣做，會不會跟別的東西撞在一起？」</p>
+
+    <h2>本章術語表</h2>
+
+    <p>這些詞會出現在 Claude 的回覆裡。看得懂就好，不用背。</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>術語</th>
+            <th>白話</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>同步／異步<br>Sync／Async</td>
+            <td>一件做完才做下一件／幾件同時開工，誰先好誰先回</td>
+          </tr>
+          <tr>
+            <td>Race Condition<br>競爭條件</td>
+            <td>兩個人同時搶同一個東西，結果看誰剛好快一點</td>
+          </tr>
+          <tr>
+            <td>鎖<br>Lock</td>
+            <td>有人在改的時候，其他人先排隊</td>
+          </tr>
+          <tr>
+            <td>重複送出</td>
+            <td>同一件事被送了兩次。後端要認得出「這張已經收過」</td>
+          </tr>
+          <tr>
+            <td>單一資料來源<br>SSOT</td>
+            <td>每一筆資料只住一個地方，別處要用就去問它</td>
+          </tr>
+          <tr>
+            <td>耦合<br>Coupling</td>
+            <td>功能黏在一起的程度，第十四章講過</td>
+          </tr>
+          <tr>
+            <td>介面<br>Interface</td>
+            <td>塊和塊之間講好的窗口，像部門之間的需求單</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>這章帶走什麼</h2>
+
+    <ul>
+      <li><strong>先送出去的，不一定先回來。</strong>要用上一步結果的，排隊做；搶同一個東西的，查和扣在資料庫裡一步做完。</li>
+      <li><strong>同一筆資料只住一個家。</strong>第二份不是不能有，但要寫明以誰為準。</li>
+      <li><strong>出事的地方，常常不是叫它改的地方。</strong>改之前先問會動到哪裡；已經黏住了，一次拆一塊。</li>
+      <li><strong>三種壞法都是邊界沒講。</strong>不是自己寫，是在它動手之前說清楚：這件事放哪一塊，這次動到哪裡為止。</li>
+    </ul>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說：寫進 CLAUDE.md 的三條</div>
+      「會被兩個人同時改的東西（庫存、座位、訂單），查和改要在資料庫裡一步做完；同一張訂單只能收一次」<br>
+      「同一筆資料只存一個地方；要另存一份，先跟我說理由，並寫明以哪一份為準」<br>
+      「改任何東西之前，先列出還有哪些地方用到它；會動到別的功能，先停下來問我」
+    </div>
+
+    <p>前面幾章講的都是怎麼做、怎麼守。下一章換個方向，看看 Claude Code 以外還有哪些工具可以搭著用：<a class="risk-link" href="/chapter18/">第十八章 其他工具</a>。</p>
+
+    <div class="chapter-nav">
+      <a href="/chapter16/" class="prev">
+        <span class="nav-label">上一章</span>
+        <span class="nav-title">前後端邊界</span>
+      </a>
+      <a href="/chapter18/" class="next">
+        <span class="nav-label">下一章</span>
+        <span class="nav-title">其他工具</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/main.js"></script>
+<script>
+// 第十七章互動示範：兩個人同時訂最後一個座位（只在本頁模擬，不送出任何資料）
+(function () {
+  var demo = document.getElementById('risk-race');
+  if (!demo) return;
+
+  var offBtn = document.getElementById('risk-mode-off');
+  var onBtn = document.getElementById('risk-mode-on');
+  var goBtn = document.getElementById('risk-go');
+  var resetBtn = document.getElementById('risk-reset');
+  var seatsEl = document.getElementById('risk-seats');
+  var soldEl = document.getElementById('risk-sold');
+  var laneA = document.getElementById('risk-lane-a');
+  var laneB = document.getElementById('risk-lane-b');
+  var verdict = document.getElementById('risk-verdict');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var STEPS = {
+    off: [
+      { lane: 'a', text: '查座位：剩 1 個', seats: 1, sold: 0 },
+      { lane: 'b', text: '查座位：剩 1 個', seats: 1, sold: 0 },
+      { lane: 'a', text: '扣一個，訂票成功', kind: 'ok', seats: 0, sold: 1 },
+      { lane: 'b', text: '扣一個，訂票成功', kind: 'bad', seats: -1, sold: 2 }
+    ],
+    on: [
+      { lane: 'a', text: '送出：「剩 1 個以上就扣一個」', seats: 1, sold: 0 },
+      { lane: 'b', text: '送出同一句：前面有人在改，排隊', kind: 'wait', seats: 1, sold: 0 },
+      { lane: 'a', text: '條件成立，扣一個，訂票成功', kind: 'ok', seats: 0, sold: 1 },
+      { lane: 'b', text: '輪到了，重看一次：剩 0 個，已售完', kind: 'wait', seats: 0, sold: 1 }
+    ]
+  };
+  var VERDICT = {
+    off: { text: '一個座位賣了兩次，剩餘座位變成 −1。有人到現場沒位子坐。', kind: 'bad' },
+    on: { text: '一個座位只賣一次。小華看到「已售完」，不會白跑一趟。', kind: 'ok' }
+  };
+
+  var mode = 'off';
+  var timers = [];
+
+  function showNumber(el, n) {
+    el.textContent = n < 0 ? '−' + Math.abs(n) : String(n);
+    el.classList.toggle('risk-neg', n < 0);
+  }
+
+  function clearTimers() {
+    for (var i = 0; i < timers.length; i++) clearTimeout(timers[i]);
+    timers = [];
+  }
+
+  function reset(message) {
+    clearTimers();
+    laneA.innerHTML = '';
+    laneB.innerHTML = '';
+    showNumber(seatsEl, 1);
+    showNumber(soldEl, 0);
+    verdict.textContent = message || '還沒開始。';
+    verdict.className = 'risk-verdict';
+    goBtn.disabled = false;
+  }
+
+  function setMode(next) {
+    mode = next;
+    offBtn.setAttribute('aria-pressed', mode === 'off' ? 'true' : 'false');
+    onBtn.setAttribute('aria-pressed', mode === 'on' ? 'true' : 'false');
+    reset('換好了。按「兩人同時按訂票」看看。');
+  }
+
+  function addStep(step) {
+    var li = document.createElement('li');
+    li.textContent = step.text;
+    if (step.kind) li.className = 'risk-' + step.kind;
+    if (!reduce) li.classList.add('risk-in');
+    (step.lane === 'a' ? laneA : laneB).appendChild(li);
+    showNumber(seatsEl, step.seats);
+    showNumber(soldEl, step.sold);
+  }
+
+  function finish() {
+    var v = VERDICT[mode];
+    verdict.textContent = v.text;
+    verdict.className = 'risk-verdict risk-is-' + v.kind;
+    goBtn.disabled = false;
+  }
+
+  function run() {
+    reset('進行中⋯⋯');
+    goBtn.disabled = true;
+    var steps = STEPS[mode];
+    if (reduce) {
+      for (var i = 0; i < steps.length; i++) addStep(steps[i]);
+      finish();
+      return;
+    }
+    steps.forEach(function (step, i) {
+      timers.push(setTimeout(function () { addStep(step); }, 650 * (i + 1)));
+    });
+    timers.push(setTimeout(finish, 650 * (steps.length + 1)));
+  }
+
+  offBtn.addEventListener('click', function () { setMode('off'); });
+  onBtn.addEventListener('click', function () { setMode('on'); });
+  goBtn.addEventListener('click', run);
+  resetBtn.addEventListener('click', function () { reset(); });
+
+  reset();
+  demo.hidden = false;
+})();
+</script>
+</body>
+</html>

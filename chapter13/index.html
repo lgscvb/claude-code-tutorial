@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十三章：架構拓樸 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ===== 第十三章專用樣式（一律 topo- 前綴）===== */
+    #topo-play-section { scroll-margin-top: 72px; }
+    .topo-link { color: var(--accent-light); }
+    .topo-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+    /* 圖例 */
+    .content .topo-legend {
+      list-style: none;
+      margin: 16px 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .topo-legend li { margin: 0; display: flex; align-items: center; gap: 8px; }
+    .topo-chip {
+      display: inline-block;
+      padding: 0 10px;
+      border-radius: 999px;
+      border: 1px solid;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.8;
+      white-space: nowrap;
+    }
+    .topo-chip-pub { color: var(--yellow); border-color: var(--yellow); }
+    .topo-chip-key { color: var(--accent-light); border-color: var(--accent-light); }
+    .topo-chip-home { color: var(--green); border-color: var(--green); }
+
+    /* 圖 */
+    .topo-fig {
+      margin: 16px 0 12px;
+      padding: 16px 12px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .topo-fig svg, .topo-demo svg {
+      display: block;
+      width: 100%;
+      max-width: 440px;
+      height: auto;
+      margin: 0 auto;
+    }
+    .topo-fig figcaption {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* 圖裡的方塊、線、標籤 */
+    .topo-n rect { fill: var(--bg); stroke: var(--border-light); stroke-width: 1.5; }
+    .topo-n text { fill: var(--text-heading); font-size: 14px; font-weight: 700; text-anchor: middle; }
+    .topo-n text.topo-sub { fill: var(--text-muted); font-size: 11px; font-weight: 400; }
+    .topo-n.topo-pub rect { stroke: var(--yellow); stroke-dasharray: 5 4; }
+    .topo-n.topo-ext rect { fill: none; }
+    .topo-e { fill: none; stroke: var(--text-muted); stroke-width: 1.5; marker-end: url(#topo-arr); }
+    .topo-el { fill: var(--text-muted); font-size: 11px; }
+    .topo-arr-fill { fill: var(--text-muted); }
+    .topo-arr-fill-on { fill: var(--accent-light); }
+    .topo-arr-fill-bad { fill: var(--red); }
+    .topo-tag rect { fill: var(--bg-card); stroke-width: 1; }
+    .topo-tag text { font-size: 10.5px; font-weight: 700; text-anchor: middle; }
+    .topo-tag-pub rect { stroke: var(--yellow); }
+    .topo-tag-pub text { fill: var(--yellow); }
+    .topo-tag-key rect { stroke: var(--accent-light); }
+    .topo-tag-key text { fill: var(--accent-light); }
+    .topo-tag-home rect { stroke: var(--green); }
+    .topo-tag-home text { fill: var(--green); }
+    .topo-tag-bad rect { stroke: var(--red); }
+    .topo-tag-bad text { fill: var(--red); }
+
+    /* 四種形狀 */
+    .topo-shape {
+      margin: 28px 0;
+      padding-top: 4px;
+    }
+    .topo-shape-num { color: var(--accent); margin-right: 8px; font-variant-numeric: tabular-nums; }
+    .topo-fit {
+      display: grid;
+      grid-template-columns: 8em minmax(0, 1fr);
+      gap: 8px 16px;
+      margin: 12px 0 0;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .topo-fit dt { font-size: 13px; font-weight: 700; padding-top: 2px; }
+    .topo-fit dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+    .topo-enough { color: var(--green); }
+    .topo-grow { color: var(--yellow); }
+
+    /* 邊界表：中間那一欄不要被擠成直排 */
+    .topo-lines th:nth-child(2), .topo-lines td:nth-child(2) { white-space: nowrap; }
+
+    /* 文字圖、Mermaid 範例 */
+    .code-block.topo-pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+    /* 互動示範 */
+    .topo-demo {
+      position: relative;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      padding: 24px;
+      margin: 28px 0 20px;
+    }
+    .topo-demo::before {
+      content: attr(data-demo-title);
+      position: absolute;
+      top: -11px;
+      left: 16px;
+      background: var(--bg-card);
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .topo-demo-label { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .topo-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; }
+    .topo-actions[hidden], .topo-meter[hidden], .topo-status[hidden] { display: none; }
+    .topo-btn {
+      min-height: 44px;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .topo-btn:hover { border-color: var(--accent); }
+    .topo-btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+    .topo-btn:disabled { opacity: 0.45; cursor: default; }
+    .topo-btn:disabled:hover { border-color: var(--border-light); }
+    .topo-btn-main { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .topo-btn-main:hover { background: var(--accent-light); border-color: var(--accent-light); }
+    .topo-btn-main:disabled:hover { background: var(--accent); border-color: var(--accent); }
+    .topo-btn-warn { border-color: var(--red); color: var(--red); }
+
+    /* 示範圖的狀態 */
+    .topo-demo .topo-e, .topo-demo .topo-n rect { transition: stroke 0.25s; }
+    .topo-demo .topo-e.topo-on { stroke: var(--accent-light); marker-end: url(#topo-arr-on); }
+    .topo-demo .topo-e.topo-now {
+      stroke: var(--accent-light);
+      stroke-width: 2.5;
+      stroke-dasharray: 6 5;
+      marker-end: url(#topo-arr-on);
+      animation: topo-flow 0.6s linear infinite;
+    }
+    .topo-demo .topo-n.topo-on rect { stroke: var(--accent-light); }
+    @keyframes topo-flow { to { stroke-dashoffset: -11; } }
+    .topo-m { display: none; }
+    .topo-m.topo-show { display: inline; }
+    .topo-demo .topo-e.topo-m {
+      stroke: var(--red);
+      stroke-dasharray: 5 4;
+      marker-end: url(#topo-arr-bad);
+    }
+    .topo-demo .topo-n.topo-m rect { stroke: var(--red); stroke-dasharray: 5 4; }
+
+    .topo-sub-title { font-size: 13px; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; margin: 20px 0 8px; }
+    .content .topo-steps, .content .topo-messlist { margin: 0; padding-left: 22px; font-size: 14px; }
+    .topo-steps li, .topo-messlist li { margin: 6px 0; }
+    .topo-messlist li span { display: block; color: var(--red); }
+    .topo-js .topo-steps li { color: var(--text-muted); opacity: 0.55; transition: opacity 0.25s, color 0.25s; }
+    .topo-js .topo-steps li.topo-on { color: var(--text); opacity: 1; }
+    .topo-js .topo-messlist li { display: none; }
+    .topo-js .topo-messlist li.topo-show { display: list-item; }
+    .topo-js .topo-mess-title { display: none; }
+    .topo-js .topo-mess-title.topo-show { display: block; }
+
+    .topo-meter {
+      display: grid;
+      grid-template-columns: 9em minmax(0, 1fr);
+      gap: 6px 16px;
+      margin: 14px 0 0;
+      padding: 14px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+    }
+    .topo-meter dt { color: var(--text-muted); font-size: 13px; padding-top: 1px; }
+    .topo-meter dd { margin: 0; min-width: 0; color: var(--green); font-weight: 600; }
+    .topo-meter dd.topo-bad { color: var(--red); }
+    .topo-status {
+      margin: 14px 0 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .topo-status.topo-ok { color: var(--green); }
+    .topo-status.topo-bad { color: var(--red); }
+    .topo-static-note { font-size: 14px; color: var(--text-muted); margin: 0 0 14px; }
+
+    @media (max-width: 600px) {
+      .topo-fit { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+      .topo-fit dd { margin-bottom: 10px; }
+      .topo-fit dd:last-child { margin-bottom: 0; }
+      .topo-demo { padding: 20px 14px 16px; }
+      .topo-btn { flex: 1 1 100%; }
+      .topo-meter { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+      .topo-meter dd { margin-bottom: 8px; }
+      .topo-meter dd:last-child { margin-bottom: 0; }
+      .topo-fig { padding: 14px 6px 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .topo-btn { transition: none; }
+      .topo-demo .topo-e, .topo-demo .topo-n rect { transition: none; }
+      .topo-demo .topo-e.topo-now { animation: none; stroke-dasharray: none; }
+      .topo-js .topo-steps li { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="/">首頁</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="/">首頁</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/" class="active">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第十三章</div>
+      <h1>架構拓樸：先畫出來，才知道哪裡不能亂動</h1>
+      <p class="lead">上一章講 API：兩塊之間怎麼傳話、外部服務怎麼接。再往前，第十一章選好了材料：純靜態頁面放 Cloudflare，資料庫用 Supabase 或 D1，動手前先上 GitHub 找現成的。這一章換一個高度：把整個系統有哪幾塊、誰連到誰、資料怎麼流，畫成一張圖。第一章說能改能修靠的是知道邊界，這張圖就是把邊界畫在紙上。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <!-- 所有圖共用的箭頭 -->
+    <svg class="topo-defs" aria-hidden="true" focusable="false" width="0" height="0">
+      <defs>
+        <marker id="topo-arr" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto">
+          <path class="topo-arr-fill" d="M0,1 L10,5 L0,9 Z"/>
+        </marker>
+        <marker id="topo-arr-on" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto">
+          <path class="topo-arr-fill-on" d="M0,1 L10,5 L0,9 Z"/>
+        </marker>
+        <marker id="topo-arr-bad" viewBox="0 0 10 10" refX="9" refY="5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto">
+          <path class="topo-arr-fill-bad" d="M0,1 L10,5 L0,9 Z"/>
+        </marker>
+      </defs>
+    </svg>
+
+    <!-- ===== 1. 什麼是架構拓樸 ===== -->
+    <h2>架構拓樸是什麼：一間店的動線圖</h2>
+
+    <div class="analogy">
+      <strong>比喻：便當店的動線圖。</strong><br><br>
+      開一間便當店，裝潢之前會先畫一張平面圖：門口在哪、客人站哪裡點餐、櫃檯在哪、廚房在後面、倉庫放食材和帳本、外送平台的接單機擺哪裡。<br><br>
+      這張圖不管便當好不好吃。它只管三件事：<strong>店裡有哪幾區、哪一區通到哪一區、東西照什麼路線走。</strong><br><br>
+      客人走到櫃檯就停，不會進廚房。鑰匙掛在廚房裡面，不掛門口。帳本只有一本，收在倉庫。這些都跟廚藝無關，是動線。
+    </div>
+
+    <p><strong>架構拓樸</strong>（Topology）就是系統的這張動線圖。「拓樸」聽起來很硬，意思只是「東西之間怎麼連」。它回答三個問題：</p>
+
+    <ol>
+      <li><strong>有哪幾塊？</strong>頁面、後端、資料庫，還有哪些別人家的服務。</li>
+      <li><strong>誰連到誰？</strong>哪兩塊之間有線，哪兩塊之間不該有線。</li>
+      <li><strong>資料怎麼流？</strong>一張訂單從哪裡進來、經過誰、最後存在哪。</li>
+    </ol>
+
+    <p>圖上的每一條線，多半就是<a class="topo-link" href="/chapter12/">第十二章 API</a> 講的那件事：一塊向另一塊送出請求，拿回結果。上一章看的是一條線怎麼傳話，這一章看的是全部的線擺在一起長什麼樣子。</p>
+
+    <p>把店裡的每一區對到系統裡：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>店裡</th>
+            <th>系統裡</th>
+            <th>它負責什麼</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>門口和用餐區</td>
+            <td><strong>頁面</strong>（就是前端，跑在客人的瀏覽器裡）</td>
+            <td>客人看得到、碰得到的一切</td>
+          </tr>
+          <tr>
+            <td>櫃檯和後面的廚房</td>
+            <td><strong>後端</strong></td>
+            <td>收單、算錢、決定這件事能不能做</td>
+          </tr>
+          <tr>
+            <td>倉庫和那本帳本</td>
+            <td><strong>資料庫</strong></td>
+            <td>訂單、客戶、合約都記在這裡</td>
+          </tr>
+          <tr>
+            <td>牆上的鬧鐘</td>
+            <td><strong>排程</strong></td>
+            <td>時間到自己動：每天早上對帳、合約到期前提醒</td>
+          </tr>
+          <tr>
+            <td>外送平台、刷卡機、快遞</td>
+            <td><strong>外部服務</strong>（LINE、金流、寄信）</td>
+            <td>別人家的服務，你申請來用</td>
+          </tr>
+          <tr>
+            <td>放照片和文件的置物櫃</td>
+            <td><strong>檔案存放處</strong></td>
+            <td>商品照、合約 PDF、客人上傳的檔案</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>它跟技術棧不一樣。技術棧（<a class="topo-link" href="/chapter11/">第十一章 技術棧</a>）是選哪個牌子的冰箱、跟哪一家外送平台簽約；拓樸是這些東西擺在哪、怎麼接。牌子之後可以換，動線亂了整間店都要重拉。前端和後端各是什麼，<a class="topo-link" href="/chapter5/">第五章 基本知識</a>講過，這裡不重講；這一章把前端直接叫「頁面」。前後端各該放什麼，<a class="topo-link" href="/chapter16/">第十六章 前後端邊界</a>會細講。</p>
+
+    <div class="box box-info">
+      <div class="box-label">這一章要你會的</div>
+      不是自己把圖畫得多漂亮，圖可以請 Claude 畫。你要會的是三件事：<strong>看得懂一張圖、指得出圖上三個要緊的地方、說得出哪一條線不能畫。</strong>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「先不要寫程式。用一張圖告訴我，這個系統有哪幾塊、誰連到誰」<br>
+      「這幾塊裡面，哪些是我們自己的，哪些是別人家的服務？」<br>
+      「用『一張訂單從進來到存好』當例子，把資料走的路線講一遍」
+    </div>
+
+    <!-- ===== 2. 為什麼要先畫 ===== -->
+    <h2>為什麼要先畫：AI 每次只看眼前那一處</h2>
+
+    <p>Claude 會改，也會修。但你說「這一頁太慢」，它就看這一頁；你說「加一個通知」，它就找最近的地方接上去。這不是偷懶，是你每次交給它的範圍就那麼大。</p>
+
+    <div class="analogy">
+      <strong>店裡每次來的都是不同的師傅，沒有人給他平面圖。</strong><br><br>
+      今天這位為了少走幾步，在用餐區牆上開一個洞直通倉庫。明天那位嫌櫃檯擠，把外送平台的接單機搬到門口。後天再來一位，從隔壁拉了一條延長線。<br><br>
+      每一位都把當天的事做完了，店也照常開。半年後你想換一台冰箱，才發現沒有人知道哪條線接到哪裡。
+    </div>
+
+    <p>同一句話，有圖和沒圖，做出來的東西不一樣。假設你說：「訂單成立的時候，通知我的 LINE。」</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：沒有圖</div>
+        <div class="code-block">
+它看到的只有訂單頁面那個檔案<br>
+最近的做法：頁面送出之後，自己去叫 LINE<br>
+LINE 的金鑰跟著寫進頁面<br>
+功能會動，你也收到通知了<br>
+<br>
+<span style="color: var(--red);">多了一條沒人記得的線，<br>金鑰掛在門口</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：先讀圖</div>
+        <div class="code-block">
+它先看圖：頁面只通後端，金鑰在後端<br>
+做法：後端收到訂單之後，由後端去叫 LINE<br>
+圖上多一條「後端 → LINE」，順手更新<br>
+功能一樣會動<br>
+<br>
+<span style="color: var(--green);">線有紀錄，<br>金鑰沒離開過後端</span>
+        </div>
+      </div>
+    </div>
+
+    <p>兩邊都「做好了」，你在畫面上看不出差別。差別在三個月後。</p>
+
+    <div class="box box-danger">
+      <div class="box-label">沒有這張圖，讓 AI 一直改下去會怎樣</div>
+      每一次都修好了，線卻越拉越多。到最後：<br><br>
+      問「客戶資料從哪裡進來、存在哪、有誰在讀」，沒有人答得出來。<br>
+      想換一家金流或寄信服務，不知道會扯到哪幾塊。<br>
+      金鑰外流、兩邊數字對不上的時候，不知道從哪裡查起。<br><br>
+      這叫耦合：每一塊都跟別塊黏在一起，動一塊就扯到好幾塊。這次黏住的不是幾段程式，是整個系統。出事的樣子，<a class="topo-link" href="/chapter17/">第十七章 會出事的地方</a>會完整講。
+    </div>
+
+    <p>線怎麼一條一條變亂，<a class="topo-link" href="#topo-play-section">下面有一張可以點的圖</a>，你可以親手加給它看。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「動手之前先讀架構圖。這次只走圖上已經有的線」<br>
+      「如果你覺得需要一條新的線，先停下來告訴我為什麼，我同意了再加」
+    </div>
+
+    <!-- ===== 3. 四種形狀 ===== -->
+    <h2>小老闆常遇到的四種形狀</h2>
+
+    <p>小公司的系統，多半是下面四種形狀其中一種，或是兩三種疊在一起。先認得形狀，Claude 提方案的時候，你才聽得出它打算蓋多大。</p>
+
+    <p>四張圖都照我自己的做法畫：<strong>頁面用改完直接上傳的純靜態頁面（HTML、CSS、JS），放 Cloudflare；後面接現成的服務，資料庫用 Supabase 或 Cloudflare D1；不自己養機器。</strong>為什麼這樣選，<a class="topo-link" href="/chapter11/">第十一章 技術棧</a>講過。</p>
+
+    <p>圖上有三種標記，下一節會細講，先認得就好：</p>
+
+    <ul class="topo-legend">
+      <li><span class="topo-chip topo-chip-pub">對外</span>任何人都碰得到；虛線框是整塊攤開</li>
+      <li><span class="topo-chip topo-chip-key">金鑰</span>金鑰放在這一塊</li>
+      <li><span class="topo-chip topo-chip-home">資料的家</span>這種資料以這裡為準</li>
+    </ul>
+
+    <!-- 形狀一 -->
+    <div class="topo-shape">
+      <h3><span class="topo-shape-num">01</span>只有頁面</h3>
+      <p>店裡的說法：只有櫥窗和一疊傳單。客人看得到，但沒有櫃檯可以收東西。</p>
+      <figure class="topo-fig">
+        <svg viewBox="0 0 340 176" role="img" aria-label="形狀一：客人的瀏覽器向放頁面的地方要頁面；你在自己的電腦改完直接上傳。放頁面的地方是對外的。">
+          <path class="topo-e" d="M136,49 H204"/>
+          <path class="topo-e" d="M268,118 V76"/>
+          <text class="topo-el" x="170" y="42" text-anchor="middle">要頁面</text>
+          <g class="topo-n">
+            <rect x="8" y="22" width="128" height="54" rx="8"/>
+            <text x="72" y="45">客人的瀏覽器</text>
+            <text class="topo-sub" x="72" y="63">打開你的網址</text>
+          </g>
+          <g class="topo-n topo-pub">
+            <rect x="204" y="22" width="128" height="54" rx="8"/>
+            <text x="268" y="45">放頁面的地方</text>
+            <text class="topo-sub" x="268" y="63">純靜態頁面</text>
+          </g>
+          <g class="topo-tag topo-tag-pub"><rect x="290" y="13" width="36" height="17" rx="8.5"/><text x="308" y="25">對外</text></g>
+          <g class="topo-n">
+            <rect x="204" y="118" width="128" height="46" rx="8"/>
+            <text x="268" y="138">你的電腦</text>
+            <text class="topo-sub" x="268" y="154">改完直接上傳</text>
+          </g>
+        </svg>
+        <figcaption>沒有金鑰，也沒有資料的家：這種形狀根本不存資料。</figcaption>
+      </figure>
+      <dl class="topo-fit">
+        <dt class="topo-enough">什麼時候夠用</dt>
+        <dd>公司介紹、價目表、活動頁、教學站（這個站就是）。內容是你自己改，客人只看不寫。報價試算這種「算給客人看」的小工具也可以放在這裡。</dd>
+        <dt class="topo-grow">再長大要加</dt>
+        <dd>一旦要「收東西」，例如聯絡表單、報名、預約，就要加一個後端。頁面自己沒辦法把客人交來的資料安全地收好。</dd>
+      </dl>
+    </div>
+
+    <!-- 形狀二 -->
+    <div class="topo-shape">
+      <h3><span class="topo-shape-num">02</span>頁面，加一個收表單的後端</h3>
+      <p>店裡的說法：門口多了一個櫃檯。客人把單子遞進來，店員收進抽屜，再喊你一聲。</p>
+      <figure class="topo-fig">
+        <svg viewBox="0 0 340 250" role="img" aria-label="形狀二：頁面把表單送給收表單的後端；後端把資料存進試算表或信箱，並且通知你。頁面是對外的，金鑰在後端，試算表或信箱是資料的家。">
+          <path class="topo-e" d="M170,72 V114"/>
+          <path class="topo-e" d="M140,168 L96,196"/>
+          <path class="topo-e" d="M200,168 L244,196"/>
+          <text class="topo-el" x="178" y="97">送出表單</text>
+          <g class="topo-n topo-pub">
+            <rect x="90" y="18" width="160" height="54" rx="8"/>
+            <text x="170" y="41">頁面</text>
+            <text class="topo-sub" x="170" y="59">聯絡表單、報名表</text>
+          </g>
+          <g class="topo-tag topo-tag-pub"><rect x="208" y="9" width="36" height="17" rx="8.5"/><text x="226" y="21">對外</text></g>
+          <g class="topo-n">
+            <rect x="90" y="114" width="160" height="54" rx="8"/>
+            <text x="170" y="137">收表單的後端</text>
+            <text class="topo-sub" x="170" y="155">現成服務或一支小函式</text>
+          </g>
+          <g class="topo-tag topo-tag-key"><rect x="208" y="105" width="36" height="17" rx="8.5"/><text x="226" y="117">金鑰</text></g>
+          <g class="topo-n">
+            <rect x="14" y="196" width="146" height="46" rx="8"/>
+            <text x="87" y="224">試算表或信箱</text>
+          </g>
+          <g class="topo-tag topo-tag-home"><rect x="20" y="187" width="54" height="17" rx="8.5"/><text x="47" y="199">資料的家</text></g>
+          <g class="topo-n topo-ext">
+            <rect x="180" y="196" width="146" height="46" rx="8"/>
+            <text x="253" y="224">通知你：LINE、信</text>
+          </g>
+        </svg>
+        <figcaption>後端可以是現成的收表單服務，也可以是一支自己的小函式，跟頁面一起放在 Cloudflare。小函式就是第十一章說的「門鈴」：平常不用人顧，有人按鈴才醒來，辦完就休息。</figcaption>
+      </figure>
+      <dl class="topo-fit">
+        <dt class="topo-enough">什麼時候夠用</dt>
+        <dd>聯絡我們、活動報名、索取報價、問卷。客人只「交進來」，不需要回頭查自己交過什麼。</dd>
+        <dt class="topo-grow">再長大要加</dt>
+        <dd>客人要登入、要查自己的訂單，或是你要改狀態（已報價、已簽約、已收款）。這時候試算表撐不住，要換成資料庫。</dd>
+      </dl>
+    </div>
+
+    <!-- 形狀三 -->
+    <div class="topo-shape">
+      <h3><span class="topo-shape-num">03</span>頁面，加現成的資料庫服務</h3>
+      <p>店裡的說法：倉庫租給專門的倉儲公司管。門禁（誰能進來）和「誰能開哪一格」的規則，也交給它。</p>
+      <figure class="topo-fig">
+        <svg viewBox="0 0 340 262" role="img" aria-label="形狀三：頁面直接向資料庫服務讀寫自己的資料，由登入和存取規則把關；付款和通知交給一支小函式，小函式帶著金鑰去叫金流、LINE、寄信，也會寫回資料庫。檔案放在檔案存放處。">
+          <path class="topo-e" d="M130,72 L96,124"/>
+          <path class="topo-e" d="M210,72 L252,124"/>
+          <path class="topo-e" d="M198,153 H158"/>
+          <path class="topo-e" d="M265,182 V214"/>
+          <path class="topo-e" d="M83,182 V214"/>
+          <text class="topo-el" x="102" y="100" text-anchor="end">讀寫自己的資料</text>
+          <text class="topo-el" x="240" y="100">付款、通知</text>
+          <g class="topo-n topo-pub">
+            <rect x="90" y="18" width="160" height="54" rx="8"/>
+            <text x="170" y="41">頁面</text>
+            <text class="topo-sub" x="170" y="59">會員、訂單、後台</text>
+          </g>
+          <g class="topo-tag topo-tag-pub"><rect x="208" y="9" width="36" height="17" rx="8.5"/><text x="226" y="21">對外</text></g>
+          <g class="topo-n">
+            <rect x="8" y="124" width="150" height="58" rx="8"/>
+            <text x="83" y="149">資料庫服務</text>
+            <text class="topo-sub" x="83" y="167">登入＋存取規則</text>
+          </g>
+          <g class="topo-tag topo-tag-home"><rect x="14" y="115" width="54" height="17" rx="8.5"/><text x="41" y="127">資料的家</text></g>
+          <g class="topo-n">
+            <rect x="198" y="124" width="134" height="58" rx="8"/>
+            <text x="265" y="149">小函式（後端）</text>
+            <text class="topo-sub" x="265" y="167">算錢、叫外部服務</text>
+          </g>
+          <g class="topo-tag topo-tag-key"><rect x="290" y="115" width="36" height="17" rx="8.5"/><text x="308" y="127">金鑰</text></g>
+          <g class="topo-n">
+            <rect x="8" y="214" width="150" height="40" rx="8"/>
+            <text x="83" y="239">檔案存放處</text>
+          </g>
+          <g class="topo-n topo-ext">
+            <rect x="198" y="214" width="134" height="40" rx="8"/>
+            <text x="265" y="239">金流、LINE、寄信</text>
+          </g>
+        </svg>
+        <figcaption>頁面直通資料庫的那條線，靠的是登入和存取規則。規則沒開，這條線就不能畫。</figcaption>
+      </figure>
+      <p>這張圖有一條要特別看的線：頁面直接連資料庫。有些資料庫服務（例如 Supabase）就是設計成這樣用，服務本身替你把門：用設在資料表上的存取規則（RLS，<a class="topo-link" href="/chapter9/#step4">第九章「步驟四：開門，再上鎖」</a>動手開過；哪些事規則擋不住、一定要交給後端，<a class="topo-link" href="/chapter16/">第十六章</a>會講）規定「每個人只能讀寫自己的那幾筆」。有些（例如 Cloudflare D1）是給後端程式用的，頁面要讀寫，得先經過一支小函式。兩種都算這個形狀，差別只在圖上有沒有那條直通的線。</p>
+      <dl class="topo-fit">
+        <dt class="topo-enough">什麼時候夠用</dt>
+        <dd>會員、訂單、預約、客戶與合約管理、公司內部的後台。大多數「要登入、要記東西」的工具都在這一格。</dd>
+        <dt class="topo-grow">再長大要加</dt>
+        <dd>沒有人開著頁面的時候，系統也要自己動（半夜對帳、LINE 自動回覆），就要加下一種形狀。照片和 PDF 變多的時候，檔案放檔案存放處，資料庫只記「檔案放在哪」。</dd>
+      </dl>
+    </div>
+
+    <!-- 形狀四 -->
+    <div class="topo-shape">
+      <h3><span class="topo-shape-num">04</span>要一直待命的：LINE 機器人、排程</h3>
+      <p>店裡的說法：外送平台的接單機，和牆上的鬧鐘。沒有客人走進門，它們也會響。</p>
+      <figure class="topo-fig">
+        <svg viewBox="0 0 340 268" role="img" aria-label="形狀四：LINE 平台把客人的訊息轉送到後端的一個固定網址；排程時間到也會叫醒後端。後端讀寫資料庫，再回覆 LINE 或寄信。後端的這個網址是對外的窗口，金鑰收在後端裡面。">
+          <path class="topo-e" d="M83,72 L120,122"/>
+          <path class="topo-e" d="M257,72 L220,122"/>
+          <path class="topo-e" d="M120,180 L90,222"/>
+          <path class="topo-e" d="M220,180 L250,222"/>
+          <text class="topo-el" x="92" y="102" text-anchor="end">轉送訊息</text>
+          <text class="topo-el" x="248" y="102">時間到，叫醒</text>
+          <g class="topo-n topo-ext">
+            <rect x="8" y="18" width="150" height="54" rx="8"/>
+            <text x="83" y="41">LINE 平台</text>
+            <text class="topo-sub" x="83" y="59">客人傳訊息進來</text>
+          </g>
+          <g class="topo-n">
+            <rect x="182" y="18" width="150" height="54" rx="8"/>
+            <text x="257" y="41">排程</text>
+            <text class="topo-sub" x="257" y="59">每天早上九點</text>
+          </g>
+          <g class="topo-n">
+            <rect x="60" y="122" width="220" height="58" rx="8"/>
+            <text x="170" y="147">後端：一個固定的網址</text>
+            <text class="topo-sub" x="170" y="165">有人按鈴就醒來</text>
+          </g>
+          <g class="topo-tag topo-tag-pub"><rect x="178" y="113" width="54" height="17" rx="8.5"/><text x="205" y="125">對外窗口</text></g>
+          <g class="topo-tag topo-tag-key"><rect x="238" y="113" width="36" height="17" rx="8.5"/><text x="256" y="125">金鑰</text></g>
+          <g class="topo-n">
+            <rect x="8" y="222" width="150" height="40" rx="8"/>
+            <text x="83" y="247">資料庫</text>
+          </g>
+          <g class="topo-tag topo-tag-home"><rect x="14" y="213" width="54" height="17" rx="8.5"/><text x="41" y="225">資料的家</text></g>
+          <g class="topo-n topo-ext">
+            <rect x="182" y="222" width="150" height="40" rx="8"/>
+            <text x="257" y="247">回覆 LINE、寄信</text>
+          </g>
+        </svg>
+        <figcaption>起點不是頁面。這張圖上甚至可以沒有頁面。</figcaption>
+      </figure>
+      <p>前三種形狀，都是有人打開頁面才開始動。這一種不是：客人在 LINE 傳一句話，LINE 平台把它轉送到你後端的一個固定網址（這種「別人主動來按你門鈴」的做法叫 Webhook）；或是時間到了，排程去叫醒後端。</p>
+      <p>「待命」不等於你要養一台二十四小時開著的機器。多半用第十一章說的「門鈴」那種小函式就夠：有人按鈴才醒來。待命的是那個網址。</p>
+      <dl class="topo-fit">
+        <dt class="topo-enough">什麼時候夠用</dt>
+        <dd>LINE 自動回覆、每天早上對帳、合約到期前七天提醒、每週寄一份報表。每次醒來做的事不多，幾秒鐘做完。</dd>
+        <dt class="topo-grow">再長大要加</dt>
+        <dd>一次要跑很久的工作，例如大量抓資料、整批處理檔案。這時候才需要一台真的一直開著的機器。它沒人用也照時間計費，還要有人盯著有沒有掛掉，先請 Claude 說明為什麼小函式做不到。怎麼判斷要不要這台機器，<a class="topo-link" href="/chapter11/">第十一章 技術棧</a>有講。</dd>
+      </dl>
+      <div class="box box-warning">
+        <div class="box-label">這種形狀容易漏掉的一件事</div>
+        那個固定網址是對外的，任何人都可以對它送東西，假裝自己是 LINE。後端收到之後要先確認「這真的是 LINE 送來的」（LINE 會在每一次轉送附上簽章，讓後端核對），才往下處理。
+      </div>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">動手之前，先找現成的</div>
+      預約系統、報價單產生器、LINE 機器人，這些多半有人做過。怎麼找、怎麼判斷能不能用，照<a class="topo-link" href="/chapter11/">第十一章 技術棧</a>的「先上 GitHub 找」。找到之後多做一件事：請 Claude 畫出那個專案的拓樸，是上面哪一種形狀、金鑰放哪、資料存哪。形狀跟你要的對得上，再往下看。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「我要的只是聯絡表單，客人只會交資料進來。用『頁面加一個收表單的後端』就好，不要加資料庫和登入」<br>
+      「頁面用純靜態、不要打包，後面接現成的服務。先告訴我你打算用哪一種形狀、為什麼」<br>
+      「你的方案比我講的多了哪幾塊？每一塊不加的話會怎樣？」<br>
+      「先上 GitHub 找有沒有現成的。找到的話，把它的架構畫給我看再決定」
+    </div>
+
+    <!-- ===== 4. 三件事 ===== -->
+    <h2>圖上一定要標的三件事</h2>
+
+    <p>一張圖只畫了方塊和線，還不夠用。要多標三件事，這張圖才擋得住人。上面四張圖的三種標記，就是這三件事。</p>
+
+    <h3>一、哪一段是對外的</h3>
+
+    <p>對外，是指<strong>任何人都碰得到</strong>。碰得到有兩種程度：</p>
+
+    <ul>
+      <li><strong>頁面是整塊攤開的。</strong>它跑在客人的瀏覽器裡，裡面寫了什麼，會看原始碼的人全部看得到。</li>
+      <li><strong>後端只有窗口對外。</strong>誰都可以來敲那個網址，但看不到裡面。上一節的 Webhook 網址也是這一種。</li>
+    </ul>
+
+    <p>店裡的說法：用餐區誰都能走進來東看西看；櫃檯誰都能來問，但進不了廚房。兩種都要假設有人會亂試，差別是用餐區連藏東西的地方都沒有。</p>
+
+    <h3>二、金鑰放在哪一塊</h3>
+
+    <p>金鑰是你跟外部服務之間的鑰匙：LINE 一把、金流一把、寄信一把。誰拿到，誰就能用你的名義發訊息、花你的額度。</p>
+
+    <p>每一把金鑰，都要在圖上標出它放在哪一塊。標完看一眼：<strong>金鑰只能放在外人看不到裡面的那幾塊。出現在頁面上，就是警報。</strong>店裡的鑰匙掛在廚房裡面，沒有人會掛在用餐區的牆上。（例外：Supabase 給頁面用的 publishable key 本來就設計成可以公開，資料靠存取規則把關；另一把 secret key 會略過所有規則，絕對不能出現在頁面上。細節在<a class="topo-link" href="/chapter16/">第十六章 前後端邊界</a>。）</p>
+
+    <h3>三、哪一塊是資料唯一的家</h3>
+
+    <p>訂單、客戶、合約，每一種資料指定一個家。別的地方要用，就來這裡問，不要各自抄一份。工程師叫它單一資料來源（SSOT），搬到圖上就是一個標記。抄成兩份會怎麼出事，<a class="topo-link" href="/chapter17/">第十七章 會出事的地方</a>有實例。</p>
+
+    <p>店裡的說法：帳本只有一本。櫃檯一本、廚房一本、老闆手機裡又一本，月底一定對不起來。</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：只畫方塊和線</div>
+        <div class="code-block topo-pre">頁面 → 後端 → 資料庫
+後端 → LINE
+後端 → 試算表
+
+<span style="color: var(--red);">看得出誰連到誰，但答不出：
+金鑰在哪？
+訂單以資料庫還是試算表為準？
+外人碰得到哪幾塊？</span></div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：三件事都標了</div>
+        <div class="code-block topo-pre">頁面（對外）
+→ 後端（對外的只有收訂單的窗口；
+　LINE 的金鑰在這）
+→ 資料庫（訂單、客戶的家）
+後端 → LINE
+後端 → 試算表（抄本，每天重抄）
+
+<span style="color: var(--green);">三個問題，看圖就答得出來</span></div>
+      </div>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「在圖上標三件事：哪幾塊是對外的、每一把金鑰放在哪一塊、每一種資料的家是哪一塊」<br>
+      「訂單、客戶、合約，各自以哪一塊為準？有沒有哪一種資料現在有兩個家？」<br>
+      「頁面這一塊裡面，有沒有出現任何金鑰？」
+    </div>
+
+    <!-- ===== 5. 邊界 ===== -->
+    <h2>邊界：哪些線可以畫，哪些不能畫</h2>
+
+    <p>標完三件事，邊界就看得出來了。平面圖上有牆：不是每兩區之間都該開一扇門。系統也一樣，下面四條是常用到的牆。</p>
+
+    <ol>
+      <li><strong>對外的頁面，不拿金鑰去連外部服務。</strong>要發 LINE、要收款、要寄信，都請後端代辦。</li>
+      <li><strong>兩塊之間只留一條明確的通道。</strong>頁面要拿訂單，全部走同一個窗口。不要這一頁走後端、那一頁自己繞過去。</li>
+      <li><strong>寫進資料的家，只有一條路。</strong>誰能新增、誰能改訂單，都經過同一個地方把關。</li>
+      <li><strong>外部服務回頭找你，只找後端。</strong>付款結果、LINE 訊息，都送到後端，不送到頁面。</li>
+    </ol>
+
+    <div class="table-wrapper topo-lines">
+      <table>
+        <thead>
+          <tr>
+            <th>這條線</th>
+            <th>可以畫嗎</th>
+            <th>為什麼</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>頁面 → 後端</td>
+            <td style="color: var(--green);">可以</td>
+            <td>客人走到櫃檯，本來就該走這條</td>
+          </tr>
+          <tr>
+            <td>後端 → LINE、金流、寄信</td>
+            <td style="color: var(--green);">可以</td>
+            <td>金鑰在後端，由後端去叫</td>
+          </tr>
+          <tr>
+            <td>排程 → 後端</td>
+            <td style="color: var(--green);">可以</td>
+            <td>鬧鐘響了，叫店員去做，走的還是原本那條路</td>
+          </tr>
+          <tr>
+            <td>頁面 → LINE、金流、寄信（帶著金鑰）</td>
+            <td style="color: var(--red);">不行</td>
+            <td>金鑰到了門口，誰都拿得走</td>
+          </tr>
+          <tr>
+            <td>金流 → 頁面（付款結果只告訴頁面）</td>
+            <td style="color: var(--red);">不行</td>
+            <td>客人把視窗關掉，就沒人知道他付了；頁面說「我付了」也不能算數</td>
+          </tr>
+          <tr>
+            <td>排程 → 自己另存的一份名單</td>
+            <td style="color: var(--red);">不行</td>
+            <td>資料多了第二個家</td>
+          </tr>
+          <tr>
+            <td>頁面 → 資料庫</td>
+            <td style="color: var(--yellow);">看情況</td>
+            <td>資料庫服務有開存取規則才可以，見下面的灰色地帶</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>其中「付款結果」那一條容易畫錯，拿出來單獨看：</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：付款結果經過頁面</div>
+        <div class="code-block">
+客人在金流的頁面付完錢<br>
+金流把客人帶回你的「付款成功」頁<br>
+這一頁告訴後端：「這張付好了」<br>
+後端把訂單改成已付款<br>
+<br>
+<span style="color: var(--red);">客人付完直接關視窗：錢收了，訂單沒改<br>
+有人直接打開「付款成功」頁：沒付錢，訂單卻改了</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：金流直接通知後端</div>
+        <div class="code-block">
+客人在金流的頁面付完錢<br>
+金流直接通知你的後端<br>
+後端確認是金流送來的，把訂單改成已付款<br>
+「付款成功」頁只是去問後端：付好了嗎？<br>
+<br>
+<span style="color: var(--green);">客人關不關視窗都不影響<br>
+頁面自己說的不算數</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>灰色地帶：線也畫不到百分之百乾淨</h3>
+
+    <p>四條牆是原則。實際的圖上，總有幾條線不那麼乾淨：</p>
+
+    <ul>
+      <li><strong>頁面直接連資料庫。</strong>前面的第三種形狀就是。這條線可以畫，但要在線上註明「靠存取規則把關」，而且金額、狀態這類不能讓客人自己說了算的東西，還是交給後端寫。規則沒開，就等於倉庫沒鎖。</li>
+      <li><strong>頁面嵌了別人家的東西。</strong>影片、地圖、客服小視窗，頁面會直接連到別人家。這種線沒帶你的金鑰，也不碰你的資料，可以畫。但圖上照樣要有，不然哪天頁面變慢，你不知道是誰拖的。</li>
+      <li><strong>為了快，多存一份。</strong>報表每次重算太慢，另外存一份算好的。這是第二份，不是第二個家：圖上寫明「抄本，以資料庫為準，每天重抄」，就不會有人拿它來做決定。</li>
+    </ul>
+
+    <div class="box box-info">
+      <div class="box-label">分不清楚能不能畫的時候，問這兩句</div>
+      <strong>「外人順著這條線走進來，會碰到什麼？」</strong><br>
+      碰到的只有本來就公開的東西：可以。碰到金鑰、別人的資料、能改金額的地方：不行。<br><br>
+      <strong>「這一份跟那一份不一樣的時候，以誰為準？」</strong><br>
+      答得出來，而且圖上寫了：可以留。答不出來：先別加。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「頁面只能連我們自己的後端。要用 LINE、金流、寄信，一律由後端去叫」<br>
+      「頁面跟後端之間只留一個窗口。要開第二條路之前先問我」<br>
+      「付款結果由金流直接通知後端，不要靠付款成功頁回報」<br>
+      「這條線如果是例外，在圖上註明為什麼可以、靠什麼把關」
+    </div>
+
+    <!-- ===== 6. 互動示範 ===== -->
+    <h2 id="topo-play-section">動手玩：一張訂單走過哪些地方</h2>
+
+    <p>下面是一個小店的訂單系統，照前面的邊界畫好的。先按「客人送出一張訂單」，看資料照什麼順序走。再按幾次「讓 AI 隨便加一條線」，每按一次，就是你提了一個很平常的要求，而它挑了最近的路。</p>
+
+    <div class="demo-container topo-demo" id="topo-demo" data-demo-title="互動示範：訂單系統的拓樸">
+      <div class="demo-label topo-demo-label">這張圖只在你眼前這一頁運作，不會送出任何資料。</div>
+
+      <p class="topo-static-note" id="topo-static-note">按鈕要開 JavaScript 才會出現。看不到的話，圖下面兩份清單是同一件事的文字版。</p>
+
+      <svg viewBox="0 0 340 304" role="img" aria-labelledby="topo-demo-title topo-demo-desc">
+        <title id="topo-demo-title">訂單系統的拓樸圖</title>
+        <desc id="topo-demo-desc">訂單頁面只連到後端。後端連到資料庫、金流服務、LINE 通知、寄信服務。頁面是對外的，金鑰在後端，資料庫是訂單的家。</desc>
+
+        <path class="topo-e" id="topo-g1" d="M97,68 V124"/>
+        <path class="topo-e" id="topo-g2" d="M166,151 H214"/>
+        <path class="topo-e" id="topo-g3" d="M64,178 L48,244"/>
+        <path class="topo-e" id="topo-g3b" d="M62,244 L78,178"/>
+        <path class="topo-e" id="topo-g4" d="M112,178 L148,244"/>
+        <path class="topo-e" id="topo-g5" d="M150,178 L262,244"/>
+
+        <path class="topo-e topo-m" id="topo-m1" d="M166,56 L228,124"/>
+        <path class="topo-e topo-m" id="topo-m2" d="M28,41 H14 V222 Q14,232 24,232 H172 Q182,232 182,244"/>
+        <path class="topo-e topo-m" id="topo-m3" d="M268,124 V68"/>
+        <path class="topo-e topo-m" id="topo-m4" d="M322,41 H331 V269 H322"/>
+
+        <g class="topo-n topo-pub" id="topo-n-page">
+          <rect x="28" y="14" width="138" height="54" rx="8"/>
+          <text x="97" y="39">訂單頁面</text>
+          <text class="topo-sub" x="97" y="56">客人的瀏覽器</text>
+        </g>
+        <g class="topo-tag topo-tag-pub"><rect x="124" y="5" width="36" height="17" rx="8.5"/><text x="142" y="17">對外</text></g>
+        <g class="topo-tag topo-tag-bad topo-m" id="topo-t-key"><rect x="34" y="5" width="36" height="17" rx="8.5"/><text x="52" y="17">金鑰</text></g>
+
+        <g class="topo-n topo-m" id="topo-n-sheet">
+          <rect x="214" y="14" width="108" height="54" rx="8"/>
+          <text x="268" y="39">試算表</text>
+          <text class="topo-sub" x="268" y="56">訂單的抄本</text>
+        </g>
+        <g class="topo-tag topo-tag-bad topo-m" id="topo-t-home"><rect x="262" y="5" width="54" height="17" rx="8.5"/><text x="289" y="17">第二個家</text></g>
+
+        <g class="topo-n" id="topo-n-api">
+          <rect x="28" y="124" width="138" height="54" rx="8"/>
+          <text x="97" y="149">後端</text>
+          <text class="topo-sub" x="97" y="166">收訂單、算金額</text>
+        </g>
+        <g class="topo-tag topo-tag-key"><rect x="124" y="115" width="36" height="17" rx="8.5"/><text x="142" y="127">金鑰</text></g>
+
+        <g class="topo-n" id="topo-n-db">
+          <rect x="214" y="124" width="108" height="54" rx="8"/>
+          <text x="268" y="149">資料庫</text>
+          <text class="topo-sub" x="268" y="166">訂單、客戶</text>
+        </g>
+        <g class="topo-tag topo-tag-home"><rect x="262" y="115" width="54" height="17" rx="8.5"/><text x="289" y="127">資料的家</text></g>
+
+        <g class="topo-n topo-ext" id="topo-n-pay">
+          <rect x="6" y="244" width="98" height="50" rx="8"/>
+          <text x="55" y="274">金流服務</text>
+        </g>
+        <g class="topo-n topo-ext" id="topo-n-line">
+          <rect x="114" y="244" width="98" height="50" rx="8"/>
+          <text x="163" y="274">LINE 通知</text>
+        </g>
+        <g class="topo-n topo-ext" id="topo-n-mail">
+          <rect x="224" y="244" width="98" height="50" rx="8"/>
+          <text x="273" y="274">寄信服務</text>
+        </g>
+      </svg>
+
+      <div class="topo-actions" id="topo-actions" hidden>
+        <button type="button" class="topo-btn topo-btn-main" id="topo-play">客人送出一張訂單</button>
+        <button type="button" class="topo-btn topo-btn-warn" id="topo-mess">讓 AI 隨便加一條線</button>
+        <button type="button" class="topo-btn" id="topo-reset">擦掉重來</button>
+      </div>
+
+      <p class="topo-status" id="topo-status" aria-live="polite" hidden></p>
+
+      <dl class="topo-meter" id="topo-meter" hidden>
+        <dt>外人順著頁面碰得到</dt>
+        <dd id="topo-meter-pub">只有後端的窗口</dd>
+        <dt>金鑰放在</dt>
+        <dd id="topo-meter-key">只在後端</dd>
+        <dt>訂單的家</dt>
+        <dd id="topo-meter-home">一個：資料庫</dd>
+      </dl>
+
+      <div class="topo-sub-title">一張訂單走的路</div>
+      <ol class="topo-steps" id="topo-steps">
+        <li>頁面把「選了什麼、幾個」交給後端。進來的路只有這一條。</li>
+        <li>後端自己查價目、算金額，把訂單寫進資料庫。</li>
+        <li>後端帶著金鑰，請金流開一筆付款。客人付完，金流回頭通知後端。</li>
+        <li>後端把資料庫裡的那張訂單改成「已付款」。</li>
+        <li>後端通知你的 LINE，再請寄信服務寄確認信給客人。</li>
+      </ol>
+
+      <div class="topo-sub-title topo-mess-title" id="topo-mess-title">AI 加上去的線</div>
+      <ol class="topo-messlist" id="topo-messlist">
+        <li>你：「查訂單的那一頁太慢。」它讓頁面跳過後端，自己去資料庫拿。<span>對外的地方多了一條通到資料的路，路上沒有人檢查這位客人能看哪幾筆。</span></li>
+        <li>你：「客人一送出就要通知我。」它把 LINE 的金鑰寫進頁面，由頁面直接發。<span>金鑰到了任何人都看得到的地方。</span></li>
+        <li>你：「每天給我一份報表。」它把訂單另外抄一份到試算表。<span>訂單有了第二個家，圖上沒有寫以誰為準。</span></li>
+        <li>你：「還沒付款的，寄信催一下。」它拿試算表那一份來判斷誰沒付。<span>抄本晚一步更新，付過錢的客人也收到催繳信。</span></li>
+      </ol>
+
+    </div>
+
+    <p>四條線都不是誰寫壞的。每一條都對應一個合理的要求，也都當場「做好了」。亂掉的原因只有一個：加線的那一刻，沒有人拿圖出來對。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「查訂單太慢，先找出慢在哪一段。不要讓頁面繞過後端直接連資料庫」<br>
+      「報表要用的資料從資料庫現查。真的要另存一份，先告訴我，並且在圖上標成抄本」
+    </div>
+
+    <!-- ===== 7. 怎麼用 ===== -->
+    <h2>怎麼用這張圖：先畫、存起來、每次改之前先問</h2>
+
+    <h3>第一步：請 Claude 把現有的專案畫出來</h3>
+
+    <p>圖不用你畫。專案已經做到一半也沒關係，請 Claude 讀完程式，把現況畫給你。先用文字圖就夠，跟前面「三件事都標了」那種一樣：</p>
+
+    <div class="code-block topo-pre">訂單頁面（對外）
+  → 後端：收訂單（LINE、金流的金鑰在這）
+      → 資料庫（訂單、客戶的家）
+      → 金流服務
+      → LINE 通知
+      → 寄信服務</div>
+
+    <p>想要看起來像一張真的圖，可以請它用 <strong>Mermaid</strong>。Mermaid 是一種用文字寫圖的格式，文字長這樣：</p>
+
+    <div class="code-block topo-pre">flowchart TD
+  page["訂單頁面（對外）"]
+  api["後端：收訂單（金鑰在這）"]
+  db[("資料庫（訂單、客戶的家）")]
+  pay["金流服務"]
+  linebot["LINE 通知"]
+  mail["寄信服務"]
+
+  page -->|只送品項和數量| api
+  api --> db
+  api -->|開一筆付款| pay
+  pay -->|付款結果| api
+  api --> linebot
+  api --> mail</div>
+
+    <p>你不用會寫，看得懂兩件事就好：方括號是一塊，箭頭是一條線。把這段文字放進 Markdown 檔的 <code>```mermaid</code> 區塊，GitHub 會直接把它顯示成一張圖，<a class="topo-link" href="/chapter18/">第十八章 其他工具</a>會介紹的筆記軟體 Obsidian 也會。</p>
+
+    <div class="box box-warning">
+      <div class="box-label">它畫的是它讀到的</div>
+      Claude 是讀程式之後畫的，有可能漏掉一條線，也有可能把「應該是這樣」畫成「現在是這樣」。拿到圖之後多問一句：「哪幾條線你有實際在程式裡看到？哪幾條是你猜的？」
+    </div>
+
+    <h3>第二步：把圖存成專案裡的一份文件</h3>
+
+    <p>畫在對話裡的圖，換一個對話就不見了。請它存成專案裡的一個檔案，例如 <code>docs/architecture.md</code>，內容就是那張圖加上三個標記。</p>
+
+    <p>再請它在專案的 <code>CLAUDE.md</code>（<a class="topo-link" href="/chapter10/">第十章 Claude Code 怎麼用</a>講過）加一行，叫它每次開工先讀這份文件。寫進 <code>CLAUDE.md</code> 是交代，不是鎖：官方文件也說它被當成參考資料，不是強制設定，所以它會盡量照做，但不保證每一次。所以還要有第三步。</p>
+
+    <h3>第三步：每次改之前，先問會動到哪幾塊</h3>
+
+    <p>整章就靠這一句話：<strong>「這次會動到圖上哪幾塊？」</strong>聽它的回答，大概分三種：</p>
+
+    <ul>
+      <li><strong>只動一塊。</strong>例如只改頁面的版面。放心讓它做。</li>
+      <li><strong>動兩三塊，但線不變。</strong>例如加一個「統編」欄位：頁面多一格、後端多收一項、資料庫多一欄。請它講清楚每一塊各改什麼，再做。</li>
+      <li><strong>要加一條新的線，或多一塊。</strong>這是架構上的決定，要你點頭。回去對前面的邊界：這條線能不能畫？</li>
+    </ul>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：直接叫它做</div>
+        <div class="code-block">
+你：「加一個會員等級的功能」<br>
+它：改了七個檔案，說做好了<br>
+你：試了一下，會動<br>
+<br>
+<span style="color: var(--red);">等級是在頁面算的還是後端算的？<br>
+有沒有多一條線？你不知道</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：先問動到哪幾塊</div>
+        <div class="code-block">
+你：「要加會員等級。先說會動到圖上哪幾塊、要不要加新的線」<br>
+它：「資料庫多一欄、後端算等級、頁面顯示。不加新的線」<br>
+你：「好，照這樣做。做完告訴我圖要不要更新」<br>
+<br>
+<span style="color: var(--green);">動手之前，你已經知道它會碰哪裡</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      <strong>第一次</strong><br>
+      「讀完這個專案，畫出現在的架構圖：有哪幾塊、誰連到誰。標出對外的、金鑰在哪、每種資料的家。用 Mermaid 畫」<br>
+      「把這張圖存成 docs/architecture.md，並在 CLAUDE.md 加一行：動手改之前先讀這份文件」<br><br>
+      <strong>每次要改之前</strong><br>
+      「這次會動到圖上哪幾塊？會不會多一條線、多一塊？先講，我確認了你再做」<br><br>
+      <strong>改完之後</strong><br>
+      「這次有沒有新增或拿掉任何一條線？有的話更新 docs/architecture.md」<br><br>
+      <strong>偶爾巡一次</strong><br>
+      「對照 docs/architecture.md 和現在的程式，有沒有哪一條線圖上沒有、程式裡卻有？」
+    </div>
+
+    <!-- ===== 8. 術語表 ===== -->
+    <h2>本章術語表</h2>
+
+    <p>排程、外部服務、檔案存放處這三個詞，在開頭那張「店裡對系統裡」的表。</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>術語</th>
+            <th>店裡的說法</th>
+            <th>白話</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>架構拓樸</strong><br>Topology</td>
+            <td>店的動線圖</td>
+            <td>系統有哪幾塊、誰連到誰、資料怎麼流</td>
+          </tr>
+          <tr>
+            <td><strong>對外</strong><br>Public</td>
+            <td>門口到櫃檯前面那一段</td>
+            <td>任何人都碰得到的部分：頁面整塊攤開，後端只有窗口</td>
+          </tr>
+          <tr>
+            <td><strong>金鑰</strong><br>API key、Secret</td>
+            <td>掛在廚房裡的鑰匙</td>
+            <td>你跟外部服務之間的通行證，不能出現在對外的地方</td>
+          </tr>
+          <tr>
+            <td><strong>資料的家</strong><br>SSOT</td>
+            <td>唯一的那本帳本</td>
+            <td>一種資料只以一個地方為準，又叫單一資料來源</td>
+          </tr>
+          <tr>
+            <td><strong>Webhook</strong></td>
+            <td>外送平台的接單機</td>
+            <td>別人家的服務有事的時候，主動送到你後端的一個固定網址</td>
+          </tr>
+          <tr>
+            <td><strong>存取規則</strong><br>Row Level Security（RLS）</td>
+            <td>倉庫每一格的門禁</td>
+            <td>設在資料庫上的規則，規定誰能讀寫哪幾筆</td>
+          </tr>
+          <tr>
+            <td><strong>Mermaid</strong></td>
+            <td>用文字寫的平面圖</td>
+            <td>一種用文字描述圖的格式，GitHub 會把它顯示成圖</td>
+          </tr>
+          <tr>
+            <td><strong>邊界</strong><br>Boundary</td>
+            <td>牆</td>
+            <td>哪兩塊之間可以有線、哪兩塊之間不行</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ===== 收尾 ===== -->
+    <h2>這章帶走什麼</h2>
+
+    <ul>
+      <li><strong>系統先畫成一張圖：</strong>有哪幾塊、誰連到誰、資料怎麼流。圖請 Claude 畫，你負責看懂。</li>
+      <li><strong>圖上標三件事：</strong>哪裡對外、金鑰在哪、每種資料的家在哪。</li>
+      <li><strong>邊界就是哪些線不能畫：</strong>頁面不帶金鑰、付款結果只找後端、資料只有一個家。畫不到百分之百乾淨，例外要寫在圖上。</li>
+      <li><strong>不懂這張圖，讓 AI 一直改下去：</strong>它每次都修得好，但每次都挑最近的路。線越拉越多，到後來沒有人說得出資料從哪裡進、從哪裡出，想換任何一塊都會扯到別塊。</li>
+    </ul>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說：整章只記一句</div>
+      「改之前先告訴我，這次會動到圖上哪幾塊。要加新的線，先停下來問我。」
+    </div>
+
+    <p>這一章只看到「塊」和「線」。下一章鑽進一塊裡面，看功能要怎麼切：<a class="topo-link" href="/chapter14/">第十四章 功能怎麼切</a>。資料的家裡面，表和欄位怎麼設計，在<a class="topo-link" href="/chapter15/">第十五章 資料表與欄位</a>。</p>
+
+    <div class="chapter-nav">
+      <a href="/chapter12/" class="prev">
+        <span class="nav-label">上一章</span>
+        <span class="nav-title">API</span>
+      </a>
+      <a href="/chapter14/" class="next">
+        <span class="nav-label">下一章</span>
+        <span class="nav-title">功能怎麼切</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/main.js"></script>
+<script>
+// 第十三章互動示範：訂單系統的拓樸（只在本頁運作，不送出任何資料）
+(function () {
+  var demo = document.getElementById('topo-demo');
+  if (!demo) return;
+
+  function $(id) { return document.getElementById(id); }
+
+  var actions = $('topo-actions');
+  var playBtn = $('topo-play');
+  var messBtn = $('topo-mess');
+  var resetBtn = $('topo-reset');
+  var meter = $('topo-meter');
+  var status = $('topo-status');
+  var note = $('topo-static-note');
+  var messTitle = $('topo-mess-title');
+  var stepItems = $('topo-steps').children;
+  var messItems = $('topo-messlist').children;
+  var meterPub = $('topo-meter-pub');
+  var meterKey = $('topo-meter-key');
+  var meterHome = $('topo-meter-home');
+  if (!actions || !playBtn || !messBtn || !resetBtn || !meter || !status) return;
+
+  var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var STEP_MS = 1300;
+
+  // 一張訂單走的路：每一步亮哪幾條線、哪幾塊
+  var FLOW = [
+    { edges: ['topo-g1'], nodes: ['topo-n-page', 'topo-n-api'] },
+    { edges: ['topo-g2'], nodes: ['topo-n-api', 'topo-n-db'] },
+    { edges: ['topo-g3', 'topo-g3b'], nodes: ['topo-n-api', 'topo-n-pay'] },
+    { edges: ['topo-g2'], nodes: ['topo-n-api', 'topo-n-db'] },
+    { edges: ['topo-g4', 'topo-g5'], nodes: ['topo-n-api', 'topo-n-line', 'topo-n-mail'] }
+  ];
+  var GOOD_EDGES = ['topo-g1', 'topo-g2', 'topo-g3', 'topo-g3b', 'topo-g4', 'topo-g5'];
+  var GOOD_NODES = ['topo-n-page', 'topo-n-api', 'topo-n-db', 'topo-n-pay', 'topo-n-line', 'topo-n-mail'];
+
+  // AI 每次加的一條線：要顯示哪些東西、三個指標變成什麼
+  var MESS = [
+    { show: ['topo-m1'], pub: '後端的窗口，還有資料庫' },
+    { show: ['topo-m2', 'topo-t-key'], pub: '後端的窗口、資料庫、LINE 的金鑰', key: '後端，還有頁面（任何人都看得到）' },
+    { show: ['topo-m3', 'topo-n-sheet', 'topo-t-home'], home: '兩個：資料庫、試算表' },
+    { show: ['topo-m4'], home: '兩個，而且催繳信看的是抄本' }
+  ];
+  var BASE = { pub: '只有後端的窗口', key: '只在後端', home: '一個：資料庫' };
+
+  var timers = [];
+  var playing = false;
+  var messCount = 0;
+
+  function each(ids, fn) {
+    for (var i = 0; i < ids.length; i++) {
+      var el = $(ids[i]);
+      if (el) fn(el);
+    }
+  }
+
+  function setStatus(text, kind) {
+    status.textContent = text;
+    status.className = 'topo-status' + (kind ? ' topo-' + kind : '');
+    status.hidden = !text;
+  }
+
+  function clearFlow() {
+    for (var t = 0; t < timers.length; t++) clearTimeout(timers[t]);
+    timers = [];
+    playing = false;
+    playBtn.disabled = false;
+    each(GOOD_EDGES, function (el) { el.classList.remove('topo-on', 'topo-now'); });
+    each(GOOD_NODES, function (el) { el.classList.remove('topo-on'); });
+    for (var i = 0; i < stepItems.length; i++) stepItems[i].classList.remove('topo-on');
+  }
+
+  function showStep(i) {
+    each(GOOD_EDGES, function (el) {
+      if (el.classList.contains('topo-now')) {
+        el.classList.remove('topo-now');
+        el.classList.add('topo-on');
+      }
+    });
+    if (i >= FLOW.length) return;
+    each(FLOW[i].edges, function (el) { el.classList.remove('topo-on'); el.classList.add('topo-now'); });
+    each(FLOW[i].nodes, function (el) { el.classList.add('topo-on'); });
+    stepItems[i].classList.add('topo-on');
+  }
+
+  function finishFlow() {
+    showStep(FLOW.length);
+    playing = false;
+    playBtn.disabled = false;
+    if (messCount === 0) {
+      setStatus('走完了。訂單從一個門進來，只寫進一個家，金鑰沒有離開過後端。', 'ok');
+    } else {
+      setStatus('訂單還是走得完，畫面上看不出哪裡不對。紅色那幾條線，要等出事才會有人想起來。', 'bad');
+    }
+  }
+
+  function play() {
+    if (playing) return;
+    clearFlow();
+    playing = true;
+    playBtn.disabled = true;
+    setStatus('', '');
+    if (reduceMotion) {
+      // 不做逐步動畫：一次全部標出來
+      for (var i = 0; i < FLOW.length; i++) {
+        each(FLOW[i].edges, function (el) { el.classList.add('topo-on'); });
+        each(FLOW[i].nodes, function (el) { el.classList.add('topo-on'); });
+        stepItems[i].classList.add('topo-on');
+      }
+      finishFlow();
+      return;
+    }
+    for (var s = 0; s < FLOW.length; s++) {
+      (function (n) {
+        timers.push(setTimeout(function () { showStep(n); }, n * STEP_MS));
+      })(s);
+    }
+    timers.push(setTimeout(finishFlow, FLOW.length * STEP_MS));
+  }
+
+  function renderMeter() {
+    var pub = BASE.pub, key = BASE.key, home = BASE.home;
+    for (var i = 0; i < messCount; i++) {
+      if (MESS[i].pub) pub = MESS[i].pub;
+      if (MESS[i].key) key = MESS[i].key;
+      if (MESS[i].home) home = MESS[i].home;
+    }
+    meterPub.textContent = pub;
+    meterKey.textContent = key;
+    meterHome.textContent = home;
+    meterPub.className = pub === BASE.pub ? '' : 'topo-bad';
+    meterKey.className = key === BASE.key ? '' : 'topo-bad';
+    meterHome.className = home === BASE.home ? '' : 'topo-bad';
+  }
+
+  function renderMessButton() {
+    if (messCount >= MESS.length) {
+      messBtn.disabled = true;
+      messBtn.textContent = '四條都加上去了';
+    } else {
+      messBtn.disabled = false;
+      messBtn.textContent = messCount === 0 ? '讓 AI 隨便加一條線' : '再加一條（已加 ' + messCount + ' 條）';
+    }
+  }
+
+  function addMess() {
+    if (messCount >= MESS.length) return;
+    each(MESS[messCount].show, function (el) { el.classList.add('topo-show'); });
+    messItems[messCount].classList.add('topo-show');
+    if (messTitle) messTitle.classList.add('topo-show');
+    messCount++;
+    renderMeter();
+    renderMessButton();
+    if (messCount >= MESS.length) {
+      setStatus('四次都是「做好了」，每一次單獨看都合理。現在問「訂單從哪裡進、存在哪、有誰在讀」，已經沒有人能一口氣講完。', 'bad');
+    } else {
+      setStatus('多了一條線。功能會動，畫面上看不出差別。', 'bad');
+    }
+  }
+
+  function reset() {
+    clearFlow();
+    for (var i = 0; i < MESS.length; i++) {
+      each(MESS[i].show, function (el) { el.classList.remove('topo-show'); });
+      messItems[i].classList.remove('topo-show');
+    }
+    if (messTitle) messTitle.classList.remove('topo-show');
+    messCount = 0;
+    renderMeter();
+    renderMessButton();
+    setStatus('', '');
+  }
+
+  playBtn.addEventListener('click', play);
+  messBtn.addEventListener('click', addMess);
+  resetBtn.addEventListener('click', reset);
+
+  demo.classList.add('topo-js');
+  if (note) note.hidden = true;
+  actions.hidden = false;
+  meter.hidden = false;
+  renderMeter();
+  renderMessButton();
+})();
+</script>
+</body>
+</html>

@@ -3,8 +3,167 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第七章：用什麼材料蓋房子 — Claude Code 非工程師指南</title>
+  <title>第七章：部署 — Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ===== 第七章專用（前綴 dp-） ===== */
+
+    /* 流程示意圖：你的電腦 → GitHub → Cloudflare → 客人的瀏覽器（純 HTML/CSS） */
+    .dp-flow {
+      margin: 28px 0;
+      padding: 24px 20px 18px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+    }
+    .dp-flow-list {
+      list-style: none;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .dp-flow-list > li { margin: 0 !important; }
+    .dp-node {
+      flex: 1 1 0;
+      min-width: 0;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .dp-node-tag {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+    .dp-node-name {
+      display: block;
+      font-weight: 700;
+      color: var(--text-heading);
+      font-size: 16px;
+      margin: 2px 0 4px;
+    }
+    .dp-node-note {
+      display: block;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text);
+    }
+    .dp-node-cf { border-color: var(--accent); }
+    .dp-arrow {
+      flex: 0 0 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--accent-light);
+    }
+    .dp-arrow-sym {
+      display: inline-block;
+      font-size: 22px;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+    .dp-flow figcaption {
+      margin-top: 14px;
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* 步驟卡：要做什麼／跟 Claude 怎麼說／你自己動手／做完會看到／常見卡住 */
+    .dp-step {
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      margin: 28px 0;
+      overflow: hidden;
+    }
+    .dp-step-head {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card-hover);
+    }
+    .dp-step-no {
+      flex: 0 0 auto;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 999px;
+      padding: 2px 10px;
+    }
+    .dp-step-head h3 {
+      margin: 0 !important;
+      font-size: 18px;
+    }
+    .dp-step-body { margin: 0; padding: 4px 20px 12px; }
+    .dp-row {
+      display: grid;
+      grid-template-columns: 8.5em 1fr;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .dp-row:last-child { border-bottom: none; }
+    .dp-row > dt {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding-top: 2px;
+    }
+    .dp-row > dd { margin: 0; min-width: 0; font-size: 15px; }
+    .dp-row > dd p { margin: 0 0 8px; }
+    .dp-row > dd p:last-child { margin-bottom: 0; }
+    .dp-row > dd ul, .dp-row > dd ol { margin: 4px 0 0; padding-left: 20px; }
+    .dp-say > dt { color: var(--green); }
+    .dp-say > dd {
+      background: rgba(74, 222, 128, 0.08);
+      border-left: 3px solid var(--green);
+      border-radius: 0 6px 6px 0;
+      padding: 8px 12px;
+    }
+    .dp-you > dt { color: var(--yellow); }
+    .dp-see > dt { color: var(--blue); }
+    .dp-stuck > dt { color: var(--red); }
+
+    /* 設定檔與指令 */
+    .dp-code {
+      white-space: pre-wrap;
+      color: var(--text);
+    }
+    .dp-code .dp-cm { color: var(--text-muted); }
+
+    /* 邊界表的兩欄標色 */
+    .dp-bound td:nth-child(2) { color: var(--green); }
+    .dp-bound td:nth-child(3) { color: var(--yellow); }
+
+    @media (max-width: 700px) {
+      .dp-flow-list { flex-direction: column; align-items: stretch; }
+      .dp-node { flex: 0 0 auto; }
+      .dp-arrow {
+        flex: 0 0 auto;
+        flex-direction: row;
+        gap: 8px;
+        padding: 6px 0;
+      }
+      .dp-arrow-sym { transform: rotate(90deg); margin-bottom: 0; }
+      .dp-row { grid-template-columns: 1fr; gap: 6px; }
+      .dp-step-head { flex-wrap: wrap; padding: 14px 16px; }
+      .dp-step-body { padding: 4px 16px 10px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -13,11 +172,11 @@
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
       <a href="/">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/">下指令</a>
-      <a href="/chapter3/">工作流程</a>
-      <a href="/chapter9/">術語字典</a>
-      <a href="/appendix/">附錄</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,423 +186,903 @@
 
 <nav class="mobile-nav">
   <a href="/">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/">第二章：下指令</a>
-  <a href="/chapter3/">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/">第六章：Claude Code</a>
-  <a href="/chapter7/" class="active">第七章：技術棧</a>
-  <a href="/chapter8/">第八章：API</a>
-  <a href="/chapter9/">第九章：術語字典</a>
-  <a href="/chapter10/">第十章：進階問題</a>
-  <a href="/chapter11/">第十一章：工具生態</a>
-  <a href="/appendix/">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/" class="active">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
   <section class="container">
     <div class="page-header">
       <div class="chapter-label">第七章</div>
-      <h1>用什麼材料蓋房子（技術棧推薦）</h1>
-      <p class="lead">蓋房子之前，你得知道要用鋼筋還是木頭。選對技術棧，Claude Code 才能事半功倍。</p>
+      <h1>部署：把網站放上網</h1>
+      <p class="lead">上一章練的是把想要的畫面講清楚。這一章拿一個真的例子來用：先請 Claude 做出一個頁面，再把它放上網，讓客人拿手機就打得開。之後改了內容也知道怎麼重新上線、改壞了怎麼退回去。</p>
     </div>
 
     <div class="content">
 
-      <!-- ========== A. 選擇原則 ========== -->
-      <h2>選擇原則</h2>
+      <p>接下來三章用同一個例子：<strong>B 咖啡店要一個「線上預約表」頁面</strong>。客人填姓名、電話、日期、時間、人數和備註，按送出。這個頁面還不存在，下面第 0 步會先請 Claude 做出來。</p>
 
-      <p>市面上的工具和服務多到眼花撩亂。身為一個想用 Claude Code 做事的非工程師，你不需要每個都懂，但你需要知道<strong>怎麼選</strong>。三個核心原則：</p>
+      <ul>
+        <li><strong>這一章（第七章）</strong>：把預約表頁面放上網，拿到一個別人打得開的網址</li>
+        <li><strong><a href="/chapter8/">第八章</a></strong>：把那串網址換成 B 咖啡店自己的網址</li>
+        <li><strong><a href="/chapter9/">第九章</a></strong>：讓客人按下送出的預約，真的存進資料庫</li>
+      </ul>
+
+      <p>所以這一章做完，表單看得到、填得了，但按送出還不會存。這是故意的：一次只多一塊，哪裡出問題你才找得到。</p>
+
+      <!-- ========== 1. 什麼叫部署 ========== -->
+      <h2 id="what">什麼叫部署：把傳單從書桌放到街口的架子上</h2>
+
+      <div class="analogy">
+        <strong>比喻：</strong>你在家裡書桌上做好一張傳單，排版漂亮、字也校對過了。可是它躺在書桌上，路人看不到。<br><br>
+        <strong>部署</strong>就是把傳單拿到街口的架子上，誰經過都能拿一張。<br><br>
+        <strong>你的電腦</strong>＝書桌。關機、闔上螢幕、帶出門，別人就連不到。<br>
+        <strong>放網站的服務</strong>（這一章用 Cloudflare）＝街口的架子。一直都在，全世界連得到。<br>
+        <strong>網址</strong>＝告訴別人架子在哪裡。
+      </div>
+
+      <p>白話講：部署就是把做好的檔案，放到一台一直開著、大家都連得到的機器上，再配一個網址。</p>
+
+      <p>「在我電腦上打得開」跟「別人打得開」是兩件事。Claude 做完頁面給你看的時候，網址常常是 <code>localhost</code> 開頭，或是 <code>file://</code> 開頭的一串路徑。那是你書桌上的東西，傳給朋友，他那邊打不開。</p>
+
+      <div class="box box-warning">
+        <div class="box-label">很常見的誤會</div>
+        把 <code>localhost</code> 的網址貼給同事，說「做好了你看一下」。<code>localhost</code> 的意思是「這台電腦自己」，同事打開會連到他自己的電腦，當然什麼都沒有。要給別人看，得先部署。
+      </div>
+
+      <!-- ========== 2. 全貌 ========== -->
+      <h2 id="overview">先看全貌：從你的電腦到客人的手機</h2>
+
+      <p>整條路只有四站。先看一次，後面每一步都在這張圖上的某一段。</p>
+
+      <figure class="dp-flow" aria-label="部署流程示意：你的電腦、GitHub、Cloudflare、客人的瀏覽器，依序傳下去">
+        <ol class="dp-flow-list">
+          <li class="dp-node">
+            <span class="dp-node-tag">第一站</span>
+            <span class="dp-node-name">你的電腦</span>
+            <span class="dp-node-note">書桌。Claude 在這裡做頁面、改頁面</span>
+          </li>
+          <li class="dp-arrow"><span class="dp-arrow-sym" aria-hidden="true">→</span><span>存檔、推上去</span></li>
+          <li class="dp-node">
+            <span class="dp-node-tag">第二站</span>
+            <span class="dp-node-name">GitHub</span>
+            <span class="dp-node-note">存檔櫃。每一版都留著，改壞了翻得回去</span>
+          </li>
+          <li class="dp-arrow"><span class="dp-arrow-sym" aria-hidden="true">→</span><span>自動部署</span></li>
+          <li class="dp-node dp-node-cf">
+            <span class="dp-node-tag">第三站</span>
+            <span class="dp-node-name">Cloudflare</span>
+            <span class="dp-node-note">街口的架子。一直開著，給你一個網址</span>
+          </li>
+          <li class="dp-arrow"><span class="dp-arrow-sym" aria-hidden="true">→</span><span>打開網址</span></li>
+          <li class="dp-node">
+            <span class="dp-node-tag">第四站</span>
+            <span class="dp-node-name">客人的瀏覽器</span>
+            <span class="dp-node-note">路人。用手機或電腦打開預約表</span>
+          </li>
+        </ol>
+        <figcaption>還沒接上 GitHub 之前（下面第 1 到第 5 步），是從你的電腦直接用指令上傳到 Cloudflare，跳過第二站。第 6、7 步把 GitHub 接進來，以後改內容就照這張圖走一圈。</figcaption>
+      </figure>
+
+      <!-- ========== 3. 為什麼靜態頁面好部署 ========== -->
+      <h2 id="static">為什麼純靜態頁面好部署</h2>
+
+      <p>B 咖啡店的預約表，本身就是一張純靜態頁面：HTML 管內容、CSS 管長相、JS 管按下去之後的動作。「靜態」的意思是，檔案做好就放著，每個打開的人拿到的都是同一份。</p>
+
+      <p><a href="/chapter11/">第十一章</a>會把「什麼需要一直跑、什麼不用」整個攤開來講。這裡先借那一章的兩句比喻：</p>
+
+      <div class="analogy">
+        <strong>靜態網站</strong>＝傳單。印好放在架子上，有人來就拿走看，不用有人顧。<br><br>
+        <strong>VM</strong>（在雲端租一台一直開著的電腦）＝請一個人 24 小時站櫃檯。沒客人也要付薪水。
+      </div>
+
+      <p>傳單比櫃檯好處理太多了：</p>
+
+      <ul>
+        <li><strong>沒有打包這一步</strong>：改完就上傳，上傳的就是你看到的那幾個檔，不用等</li>
+        <li><strong>不會睡著</strong>：沒有一台機器要開著等客人，也就不會有「第一個客人要等一分鐘才打得開」這種事（後面講 Render 時會看到）</li>
+        <li><strong>便宜</strong>：Cloudflare 對靜態檔案被瀏覽不收費、不限次數</li>
+        <li><strong>你看得懂</strong>：資料夾裡有哪些檔，網站上就是哪些檔，沒有中間的魔術</li>
+      </ul>
+
+      <p>請 Claude 做網站，它常會順手選 Next.js，或是 React、Vue 加打包工具。這類做法都要先打包才能上線，我不推薦：每改一次都要等打包，用到的套件還要一直跟著升級；部署出問題時，你也看不出是哪一層壞了。純靜態頁面改完直接上傳就好。</p>
+
+      <div class="box box-tip">
+        <div class="box-label">跟 Claude 怎麼說</div>
+        「這個預約表用純 HTML、CSS、JS 做，不要用需要打包的框架。做好之後要能直接部署到 Cloudflare。」
+      </div>
+
+      <!-- ========== 4. 開工前 ========== -->
+      <h2 id="prepare">開工前：要準備什麼、誰來做</h2>
+
+      <p>整章的分工只有一條原則：<strong>打字、下指令、寫設定檔、看錯誤訊息，交給 Claude；用你的名字簽的東西，你自己來。</strong>註冊帳號、登入、按允許、付款、輸入驗證碼，都是後者。這些 Claude 不該替你做，很多也做不了。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>要準備的</th>
+              <th>誰來</th>
+              <th>說明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Claude Code</strong></td>
+              <td>你（裝一次）</td>
+              <td>裝法和基本用法見<a href="/chapter10/">第十章</a></td>
+            </tr>
+            <tr>
+              <td><strong>Cloudflare 帳號</strong></td>
+              <td>你</td>
+              <td>放網站的地方。第 2 步註冊</td>
+            </tr>
+            <tr>
+              <td><strong>GitHub 帳號</strong></td>
+              <td>你</td>
+              <td>存程式碼和每一版紀錄的地方。第 6 步才用到</td>
+            </tr>
+            <tr>
+              <td><strong>Node.js</strong></td>
+              <td>Claude</td>
+              <td>wrangler 要靠它才能跑。電腦沒有的話，Claude 會說要先裝</td>
+            </tr>
+            <tr>
+              <td><strong>wrangler</strong></td>
+              <td>Claude</td>
+              <td>Cloudflare 的官方 CLI，第 3 步裝</td>
+            </tr>
+            <tr>
+              <td><strong>Git</strong></td>
+              <td>Claude（跳視窗時你按）</td>
+              <td>在你電腦上記下每一版修改的工具，第 6 步用到。Mac 第一次用，系統會跳出視窗問要不要安裝開發者工具（Command Line Tools），按「安裝」，等它跑完再叫 Claude 繼續</td>
+            </tr>
+            <tr>
+              <td><strong>gh</strong></td>
+              <td>Claude</td>
+              <td>GitHub 的官方 CLI，第 6 步裝</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>複習一下兩個詞：<strong>終端機</strong>是打字下指令的那個視窗；<strong>CLI</strong> 是在終端機裡用打字操作的工具。<code>claude</code>、<code>gh</code>（GitHub 的）、<code>wrangler</code>（Cloudflare 的）都是 CLI。這一章幾乎每件事都靠這三個完成，不用裝 MCP。</p>
+
+      <div class="analogy">
+        「你在電腦上的工作，幾乎 99% 都可以丟給它自己處理。」<br><br>
+        丟給它的是動手。做到哪裡為止、哪裡不准碰，還是你要定。這一章後面<a href="#boundary">「哪裡有邊界」</a>那一節，就是在講這條線畫在哪。
+      </div>
+
+      <p>新版 Claude Code 在終端機預設是 Auto 模式：多數指令不會先問你，有風險的才會被另一個把關的模型攔下來。第一次部署，想每一步都先看過再放行，按 <code>Shift</code> + <code>Tab</code>，直到輸入框下方出現 <code>manual mode on</code>（見<a href="/chapter10/">第十章</a>步驟 6）。之後它每次要跑指令都會先問你，看一眼它要跑什麼再按，看不懂就問它「這行在做什麼」。</p>
+
+      <!-- ========== 5. 七個步驟 ========== -->
+      <h2 id="steps">第一次放上網：先做出頁面，再走七個步驟</h2>
+
+      <p>第 0 步先請 Claude 把預約表做出來；第 1 到第 7 步把它放上網。每一步都分成五格：</p>
+
+      <ul>
+        <li><strong>要做什麼</strong>：這一步的目的</li>
+        <li><strong>跟 Claude 怎麼說</strong>：可以直接複製的一句話</li>
+        <li><strong>你自己動手</strong>：Claude 不該、也不能替你做的事</li>
+        <li><strong>做完會看到</strong>：用來確認自己有沒有做對</li>
+        <li><strong>常見卡住</strong>：卡住時怎麼辦</li>
+      </ul>
+
+      <p>畫面上的按鈕名稱照 Cloudflare、GitHub 官方文件寫（2026-11-13 查）。服務商改版後名字可能不同，對不上就把畫面截圖給 Claude，問它現在該按哪裡。</p>
+
+      <!-- 第 0 步 -->
+      <div class="dp-step" id="step-0">
+        <div class="dp-step-head">
+          <span class="dp-step-no">第 0 步</span>
+          <h3>開一個資料夾，請 Claude 做出預約表</h3>
+        </div>
+        <dl class="dp-step-body">
+          <div class="dp-row">
+            <dt>要做什麼</dt>
+            <dd>
+              <p>給這個網站一個專用的資料夾，在裡面啟動 Claude Code，請它做出 B 咖啡店的預約表頁面。後面七步都在這個資料夾裡做。</p>
+              <ol>
+                <li>在桌面開一個新資料夾，取名 <code>b-cafe-booking</code>（英文小寫加連字號，後面設定檔也用這個名字）。</li>
+                <li>打開終端機，走進這個資料夾，打 <code>claude</code> 啟動。還沒裝 Claude Code、不知道終端機怎麼開，照<a href="/chapter10/">第十章</a>「照著做：從安裝到第一個任務」的步驟 2 到 4 做，做完回來這裡。</li>
+              </ol>
+            </dd>
+          </div>
+          <div class="dp-row dp-say">
+            <dt>跟 Claude 怎麼說</dt>
+            <dd>「幫我做 B 咖啡店的線上預約表頁面，欄位有姓名、電話、日期、時間、人數、備註，用純 HTML、CSS、JS，不要用需要打包的框架。這一版先不用存資料，按送出顯示『已收到預約』就好。做好打開給我看。」</dd>
+          </div>
+          <div class="dp-row dp-you">
+            <dt>你自己動手</dt>
+            <dd>看它做出來的頁面。哪裡不像你要的，用<a href="/chapter6/">第六章</a>學的名字跟它說，例如「時間改成下拉選單，只列營業時段」「送出按鈕放大一點，手機上比較好按」。改到你覺得可以，再往下一步。</dd>
+          </div>
+          <div class="dp-row dp-see">
+            <dt>做完會看到</dt>
+            <dd>資料夾裡多了 <code>index.html</code>，可能還有 <code>styles.css</code>、<code>script.js</code>。瀏覽器打開，看得到一張可以填的預約表。</dd>
+          </div>
+          <div class="dp-row dp-stuck">
+            <dt>常見卡住</dt>
+            <dd>
+              <ul>
+                <li><strong>打 claude 出現 command not found</strong>：還沒裝好，回<a href="/chapter10/">第十章</a>步驟 3。</li>
+                <li><strong>它說要先裝一堆套件、跑 npm install</strong>：代表它選了要打包的做法。跟它說「改用純 HTML、CSS、JS，不要框架」。</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- 第 1 步 -->
+      <div class="dp-step" id="step-1">
+        <div class="dp-step-head">
+          <span class="dp-step-no">第 1 步</span>
+          <h3>把頁面整理好，自己先看一遍</h3>
+        </div>
+        <dl class="dp-step-body">
+          <div class="dp-row">
+            <dt>要做什麼</dt>
+            <dd>
+              <p>把要放上網的檔案集中到一個資料夾，首頁叫 <code>index.html</code>。筆記、草稿、設定檔留在外面，不要放進這個資料夾。</p>
+              <p>原因很簡單：這個資料夾裡的每一個檔，上線後任何人都拿得到。</p>
+            </dd>
+          </div>
+          <div class="dp-row dp-say">
+            <dt>跟 Claude 怎麼說</dt>
+            <dd>「幫我把剛才做好的預約表整理成可以部署的樣子：要上網的檔案放在 public 資料夾，首頁叫 index.html，圖片和樣式都用相對路徑。整理完列出資料夾裡有哪些檔，再打開給我看。」</dd>
+          </div>
+          <div class="dp-row dp-you">
+            <dt>你自己動手</dt>
+            <dd>在瀏覽器裡看一遍：字對不對、營業時段對不對、手機寬度排得好不好（請 Claude 教你把瀏覽器縮成手機寬度）、每個按鈕按得到。內容對不對，只有你知道。</dd>
+          </div>
+          <div class="dp-row dp-see">
+            <dt>做完會看到</dt>
+            <dd>一個 <code>public</code> 資料夾，裡面至少有 <code>index.html</code>，可能還有 <code>styles.css</code>、圖片。這時的預覽網址是 <code>localhost</code> 或 <code>file://</code> 開頭，只有你的電腦打得開。</dd>
+          </div>
+          <div class="dp-row dp-stuck">
+            <dt>常見卡住</dt>
+            <dd>
+              <ul>
+                <li><strong>在你電腦上有圖，上線後破圖</strong>：圖片路徑寫成你電腦裡的完整位置（像 <code>/Users/你的名字/桌面/…</code>）。跟 Claude 說「圖片路徑都改成相對路徑」。路徑是什麼，見<a href="/chapter5/">第五章</a>「根目錄與路徑」。</li>
+                <li><strong>Claude 說要先跑 build 才能看</strong>：代表它做成要打包的專案了。把上一節那句話再講一次，請它改回純靜態頁面。</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- 第 2 步 -->
+      <div class="dp-step" id="step-2">
+        <div class="dp-step-head">
+          <span class="dp-step-no">第 2 步</span>
+          <h3>註冊 Cloudflare 帳號</h3>
+        </div>
+        <dl class="dp-step-body">
+          <div class="dp-row">
+            <dt>要做什麼</dt>
+            <dd>開一個 Cloudflare 帳號。這是街口的架子，用你的名字租。</dd>
+          </div>
+          <div class="dp-row dp-say">
+            <dt>跟 Claude 怎麼說</dt>
+            <dd>這一步不用它。註冊完跟它說：「Cloudflare 帳號註冊好了，接下來帶我把預約表放上去。」</dd>
+          </div>
+          <div class="dp-row dp-you">
+            <dt>你自己動手</dt>
+            <dd>
+              <ol>
+                <li>到 <code>dash.cloudflare.com/sign-up</code>，填 Email 和密碼，按 <strong>Create Account</strong>。</li>
+                <li>Cloudflare 會自動寄一封驗證信到你的信箱，點信裡的連結完成驗證。</li>
+              </ol>
+              <p>密碼用密碼管理工具產生、存起來。幫公司做的話，用公司的信箱註冊，不要用你私人的。哪天換人接手，帳號才交得出去。</p>
+            </dd>
+          </div>
+          <div class="dp-row dp-see">
+            <dt>做完會看到</dt>
+            <dd>登入後進到 Cloudflare 的後台（dashboard）。後台裡有一個叫 <strong>Workers &amp; Pages</strong> 的頁面，後面幾步會一直回來這裡。</dd>
+          </div>
+          <div class="dp-row dp-stuck">
+            <dt>常見卡住</dt>
+            <dd>
+              <ul>
+                <li><strong>驗證信沒收到</strong>：先看垃圾信件匣，再確認 Email 有沒有打錯。</li>
+                <li><strong>Claude 問你密碼</strong>：不用給，它也不需要。下一步登入是在瀏覽器裡由你自己按的。</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- 第 3 步 -->
+      <div class="dp-step" id="step-3">
+        <div class="dp-step-head">
+          <span class="dp-step-no">第 3 步</span>
+          <h3>讓 Claude 裝 wrangler，登入你的帳號</h3>
+        </div>
+        <dl class="dp-step-body">
+          <div class="dp-row">
+            <dt>要做什麼</dt>
+            <dd>wrangler 是 Cloudflare 的官方 CLI。裝好、登入一次，Claude 之後就能用打字的方式，替你把檔案送上 Cloudflare。</dd>
+          </div>
+          <div class="dp-row dp-say">
+            <dt>跟 Claude 怎麼說</dt>
+            <dd>「幫我在這個專案裝 wrangler，用 Cloudflare 官方文件現在建議的方式。裝好之後跑 wrangler login，瀏覽器跳出來我自己按。登入完用 wrangler whoami 確認登的是哪個帳號。」</dd>
+          </div>
+          <div class="dp-row dp-you">
+            <dt>你自己動手</dt>
+            <dd>
+              <ul>
+                <li>電腦還沒有 Node.js 的話，Claude 會先說要裝。安裝過程如果跳出視窗要你輸入電腦的登入密碼，那個你自己打，不要打在對話框裡給 Claude。</li>
+                <li><code>wrangler login</code> 會打開瀏覽器，進到 Cloudflare 的授權頁。先確認頁面上是你第 2 步註冊的那個帳號，再按同意授權。</li>
+              </ul>
+            </dd>
+          </div>
+          <div class="dp-row dp-see">
+            <dt>做完會看到</dt>
+            <dd>瀏覽器顯示授權完成。回到終端機，<code>wrangler whoami</code> 印出你的 Email，表示 Claude 現在可以用這個帳號做事了。</dd>
+          </div>
+          <div class="dp-row dp-stuck">
+            <dt>常見卡住</dt>
+            <dd>
+              <ul>
+                <li><strong>瀏覽器沒有自己打開</strong>：終端機裡會印出一串網址，複製貼到瀏覽器，一樣能授權。</li>
+                <li><strong>登到別人的帳號</strong>（例如電腦上之前登過家人或前同事的）：跟 Claude 說「先 wrangler logout，再重新登入」。</li>
+                <li><strong>出現 command not found 或找不到 npm</strong>：電腦還沒有 Node.js。不用自己查，請 Claude 看錯誤訊息、處理好再繼續。</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- 第 4 步 -->
+      <div class="dp-step" id="step-4">
+        <div class="dp-step-head">
+          <span class="dp-step-no">第 4 步</span>
+          <h3>寫設定檔：告訴 Cloudflare 要放哪些檔</h3>
+        </div>
+        <dl class="dp-step-body">
+          <div class="dp-row">
+            <dt>要做什麼</dt>
+            <dd>
+              <p>在專案最外層放一個設定檔 <code>wrangler.jsonc</code>。Cloudflare 官方建議新專案用這種格式。它只交代三件事：網站叫什麼、用哪一天的規則、哪個資料夾要放上網。</p>
+<div class="code-block dp-code">{
+  <span class="dp-cm">// 網站在 Cloudflare 裡的名字，也是網址最前面那一段</span>
+  "name": "b-cafe-booking",
+  <span class="dp-cm">// 用哪一天的 Cloudflare 規則，填建立當天的日期</span>
+  "compatibility_date": "2026-11-13",
+  "assets": {
+    <span class="dp-cm">// 只有這個資料夾會被放上網</span>
+    "directory": "./public"
+  }
+}</div>
+              <ul>
+                <li><strong>name</strong>：用英文小寫加連字號（-），不要用中文和空格。</li>
+                <li><strong>compatibility_date</strong>：Cloudflare 照這個日期決定用哪一版的執行環境。填一次就好，之後不用常改。</li>
+                <li><strong>assets.directory</strong>：只把 <code>public</code> 放上網。設定檔、筆記，還有之後可能出現的金鑰檔都不在裡面，就不會被一起送出去。</li>
+                <li><strong>沒有 main 這一行</strong>：main 指的是後端小程式的入口。只放頁面的網站可以不寫。</li>
+              </ul>
+            </dd>
+          </div>
+          <div class="dp-row dp-say">
+            <dt>跟 Claude 怎麼說</dt>
+            <dd>「幫我寫 wrangler.jsonc：只放靜態頁面，不要 Worker 程式；名字叫 b-cafe-booking；只上傳 public 資料夾；compatibility_date 填今天。寫完一行一行用白話跟我說它在做什麼，然後用 wrangler dev 在本機跑一次給我看。」</dd>
+          </div>
+          <div class="dp-row dp-you">
+            <dt>你自己動手</dt>
+            <dd>看 Claude 的解釋，確認 <code>directory</code> 指的是 <code>./public</code>，不是整個專案資料夾（寫成 <code>.</code> 或 <code>./</code> 就是整個專案）。這一格寫錯，整個專案都會被放上網。</dd>
+          </div>
+          <div class="dp-row dp-see">
+            <dt>做完會看到</dt>
+            <dd>專案最外層多了 <code>wrangler.jsonc</code>。<code>wrangler dev</code> 給你一個本機網址，打開跟第 1 步看到的一樣。</dd>
+          </div>
+          <div class="dp-row dp-stuck">
+            <dt>常見卡住</dt>
+            <dd>
+              <ul>
+                <li><strong>Claude 寫成 wrangler.toml</strong>：也能用，舊專案很多是這種。新專案請它改成 wrangler.jsonc，兩種不要同時存在。</li>
+                <li><strong>Claude 多加了 main 和一個 src/index.js</strong>：它以為你要後端。跟它說「這一章只放頁面，先拿掉」。什麼時候才需要後端，<a href="/chapter16/">第十六章</a>會講。</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- 第 5 步 -->
+      <div class="dp-step" id="step-5">
+        <div class="dp-step-head">
+          <span class="dp-step-no">第 5 步</span>
+          <h3>第一次上傳，拿到網址</h3>
+        </div>
+        <dl class="dp-step-body">
+          <div class="dp-row">
+            <dt>要做什麼</dt>
+            <dd>跑 <code>npx wrangler deploy</code>。wrangler 會把 <code>public</code> 裡的檔案送上 Cloudflare，給你一個網址。</dd>
+          </div>
+          <div class="dp-row dp-say">
+            <dt>跟 Claude 怎麼說</dt>
+            <dd>「部署到 Cloudflare，完成後把網址給我。」</dd>
+          </div>
+          <div class="dp-row dp-you">
+            <dt>你自己動手</dt>
+            <dd>拿出手機，關掉 Wi-Fi、改用行動網路，打開那個網址。用手機網路打得開，才是真的「別人也打得開」。再傳給一個朋友試試看。</dd>
+          </div>
+          <div class="dp-row dp-see">
+            <dt>做完會看到</dt>
+            <dd>
+              <p>終端機最後印出一個網址，長得像：</p>
+              <div class="code-block dp-code">https://b-cafe-booking.你的子網域.workers.dev</div>
+              <p>手機上看到預約表。Cloudflare 後台的 Workers &amp; Pages 頁面裡，多了一個 b-cafe-booking。</p>
+            </dd>
+          </div>
+          <div class="dp-row dp-stuck">
+            <dt>常見卡住</dt>
+            <dd>
+              <ul>
+                <li><strong>打開是空白或 404</strong>：<code>public</code> 裡的首頁不叫 <code>index.html</code>，或設定檔的 directory 指錯資料夾。請 Claude 對照第 4 步檢查。</li>
+                <li><strong>中間那段子網域不是你想要的</strong>：那是整個帳號共用的名字。到後台 Workers &amp; Pages 頁面，在 <strong>Your subdomain</strong> 旁邊按 <strong>Change</strong> 改。趁還沒把網址給客人之前改。</li>
+                <li><strong>Claude 說要先 npm run build</strong>：代表它做成要打包的專案了，回到第 1 步。</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <p>做到這裡，網站已經在網路上了。後面兩步是讓它好維護：存一份到 GitHub，再讓它自動更新。</p>
+
+      <!-- 第 6 步 -->
+      <div class="dp-step" id="step-6">
+        <div class="dp-step-head">
+          <span class="dp-step-no">第 6 步</span>
+          <h3>存一份到 GitHub</h3>
+        </div>
+        <dl class="dp-step-body">
+          <div class="dp-row">
+            <dt>要做什麼</dt>
+            <dd>
+              <p>GitHub 是放程式碼和每一版修改紀錄的地方。一個專案在 GitHub 上叫一個 <strong>repo</strong>。存上去有兩個好處：電腦壞了東西還在；下一步可以讓 Cloudflare 盯著它，自動更新網站。</p>
+              <p>兩個動詞先認識：<strong>commit</strong> 是在你電腦上存一個版本，寫一句這次改了什麼；<strong>push（推上去）</strong>是把這些版本送到 GitHub。</p>
+              <p>順序是：你先到 GitHub 註冊帳號，再請 Claude 裝 Git 和 gh、用 gh 登入、建 repo、推上去。</p>
+            </dd>
+          </div>
+          <div class="dp-row dp-say">
+            <dt>跟 Claude 怎麼說</dt>
+            <dd>先註冊好 GitHub 帳號（見下一格），再說：「GitHub 帳號註冊好了。幫我確認電腦有沒有 Git 和 gh，沒有就用官方建議的方式裝。裝好用 gh 幫我登入 GitHub，瀏覽器跳出來我自己按。登入好之後，建一個私人的 repo 叫 b-cafe-booking，把這個專案推上去。推之前先列出會上傳哪些檔給我看，node_modules、.env 和任何金鑰都不要推。」</dd>
+          </div>
+          <div class="dp-row dp-you">
+            <dt>你自己動手</dt>
+            <dd>
+              <ul>
+                <li><strong>先註冊 GitHub</strong>：到 <code>github.com/signup</code>，或選 <strong>Continue with Google</strong> 用 Google 帳號註冊，照畫面走。過程中要驗證 Email。GitHub 強烈建議開兩步驟驗證，開。</li>
+                <li><strong>Mac 跳出安裝開發者工具的視窗</strong>：第一次用 Git 時，系統可能問你要不要安裝 Command Line Tools。按「安裝」，等它跑完，再跟 Claude 說「裝好了，繼續」。</li>
+                <li><strong>登入授權</strong>：<code>gh auth login</code> 會帶你到瀏覽器授權，有時會給你一組一次性的代碼，要你在瀏覽器裡輸入。代碼你自己輸入。</li>
+                <li><strong>看清單</strong>：Claude 列出要上傳的檔，掃一眼有沒有你不想給人看的東西。</li>
+                <li><strong>選私人</strong>：公開 repo 的程式碼，任何上得了 GitHub 的人都看得到。B 咖啡店的預約表沒有理由公開。</li>
+              </ul>
+            </dd>
+          </div>
+          <div class="dp-row dp-see">
+            <dt>做完會看到</dt>
+            <dd>瀏覽器打開 <code>github.com/你的帳號/b-cafe-booking</code>，看得到 <code>public</code> 資料夾和 <code>wrangler.jsonc</code>，這個 repo 標示為私人（Private）。</dd>
+          </div>
+          <div class="dp-row dp-stuck">
+            <dt>常見卡住</dt>
+            <dd>
+              <ul>
+                <li><strong>不小心建成公開</strong>：請 Claude 用 gh 改成私人。但改之前別人已經複製走（fork）的，GitHub 官方說會繼續公開，收不回來。</li>
+                <li><strong>推上去才發現有金鑰</strong>：刪掉那個檔不夠，舊版紀錄裡還在。那把金鑰要到發它的服務那邊作廢、換一把新的。這件事你要自己確認做完。</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- 第 7 步 -->
+      <div class="dp-step" id="step-7">
+        <div class="dp-step-head">
+          <span class="dp-step-no">第 7 步</span>
+          <h3>接上 GitHub：以後推上去就自動上線</h3>
+        </div>
+        <dl class="dp-step-body">
+          <div class="dp-row">
+            <dt>要做什麼</dt>
+            <dd>讓 Cloudflare 盯著 GitHub 上的 b-cafe-booking。只要 <code>main</code> 這條主線有新的修改推上去，它就照 <code>wrangler.jsonc</code> 自動再部署一次。這叫自動部署，Cloudflare 把這個功能叫 Workers Builds。</dd>
+          </div>
+          <div class="dp-row dp-say">
+            <dt>跟 Claude 怎麼說</dt>
+            <dd>「我要在 Cloudflare 後台把 b-cafe-booking 接上 GitHub 的 b-cafe-booking repo。照官方文件告訴我每一格要填什麼：分支、打包指令（Build command）、部署指令。我自己去按。」</dd>
+          </div>
+          <div class="dp-row dp-you">
+            <dt>你自己動手</dt>
+            <dd>
+              <ol>
+                <li>後台 <strong>Workers &amp; Pages</strong> → 點 b-cafe-booking → <strong>Settings</strong> → <strong>Builds</strong> → <strong>Connect</strong>。</li>
+                <li>第一次接，會要你在 GitHub 上授權 Cloudflare 的 GitHub App（Cloudflare Workers &amp; Pages）。能選的話選 <strong>Only select repositories</strong>，只勾 b-cafe-booking，不要整個帳號都給。</li>
+                <li>分支選 <code>main</code>。打包指令（畫面上叫 Build command）是選填，純靜態頁面沒有打包這一步，留空。部署指令預設就是 <code>npx wrangler deploy</code>，不用改。</li>
+              </ol>
+            </dd>
+          </div>
+          <div class="dp-row dp-see">
+            <dt>做完會看到</dt>
+            <dd>請 Claude 改一個字、commit、推上去。過一下，後台這個 Worker 底下出現一筆新的部署紀錄，成功之後網址上的頁面跟著變。</dd>
+          </div>
+          <div class="dp-row dp-stuck">
+            <dt>常見卡住</dt>
+            <dd>
+              <ul>
+                <li><strong>自動部署失敗，紀錄裡說名字對不上</strong>：後台的 Worker 名字，要跟 <code>wrangler.jsonc</code> 裡的 name 一模一樣。</li>
+                <li><strong>授權時選錯 GitHub 帳號</strong>：到 GitHub 設定裡的 Authorized GitHub Apps 頁面撤銷授權，再接一次。</li>
+                <li><strong>推了但網站沒變</strong>：先看是不是推到 <code>main</code> 以外的分支。其他分支不會改到正式網址，而是產生一個預覽版本，網址在這個 Worker 的 <strong>Previews</strong> 區塊。這其實好用：想先給老闆看再上線，就推到別的分支。</li>
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- ========== 6. 改了怎麼重新上線 ========== -->
+      <h2 id="update">改了內容，怎麼重新上線</h2>
+
+      <p>接上 GitHub 之後，改內容固定走這一條路：</p>
 
       <ol>
-        <li>
-          <strong>有 CLI 優先</strong><br>
-          CLI（Command Line Interface）= 命令列工具。Claude Code 的母語就是 Terminal，有 CLI 代表 Claude Code 可以直接用指令操作，不用截圖找按鈕。後面會詳細解釋為什麼這很省 Token。
-        </li>
-        <li>
-          <strong>API 好接、省 Token</strong><br>
-          好的 API = 一行指令就能拿到資料。不好的 API = 要寫一大堆程式碼才能拿到同樣的東西。Claude Code 多寫一行程式碼，就多花一點 Token。
-        </li>
-        <li>
-          <strong>免費額度夠用</strong><br>
-          初期的個人專案，免費額度通常就夠了。等真的有流量再升級，不要一開始就花錢。
-        </li>
+        <li>跟 Claude 說要改什麼</li>
+        <li>它改完，先在你的電腦上看過</li>
+        <li>你說可以，它才 commit、推上 GitHub</li>
+        <li>Cloudflare 自動部署，你用手機打開確認</li>
       </ol>
 
       <div class="box box-tip">
-        <div class="box-label">重點</div>
-        你不是在選「最厲害的工具」。你是在選「跟 Claude Code 配合最好的工具」。一個有 CLI、有好 API、有免費額度的工具，比一個功能強大但只能在網頁上操作的工具有用一萬倍。
+        <div class="box-label">跟 Claude 怎麼說</div>
+        「把預約表的營業時段改成早上九點到晚上六點。改完先在本機給我看，我說可以，再 commit、推上 GitHub。」
       </div>
 
-      <!-- ========== B. 什麼需要一直跑 ========== -->
-      <h2>什麼需要「一直跑」、什麼不用</h2>
+      <p>還沒接 GitHub 的話，改完請 Claude 再跑一次 <code>npx wrangler deploy</code> 就好。</p>
 
-      <p>在選技術方案之前，你必須先搞懂一個根本問題：<strong>你做的東西，需不需要一台「一直開著」的機器？</strong></p>
+      <div class="box box-warning">
+        <div class="box-label">兩條路只走一條</div>
+        接上 GitHub 之後，就不要再從你的電腦直接 <code>wrangler deploy</code>。不然網站上的版本跟 GitHub 上的不一樣；下一次有人推上去，你從電腦上傳的修改就被蓋掉了。同一份東西放兩個地方、各改各的，正是<a href="/chapter17/">第十七章</a>「單一資料來源」那一節講的壞法。<br><br>
+        跟 Claude 說一次就好：「這個專案已經接上 GitHub 自動部署，以後一律推上 GitHub，不要直接 wrangler deploy。」也可以請它把這句寫進專案的 CLAUDE.md，以後每次開工它都會先讀到。
+      </div>
+
+      <p><strong>改了卻沒看到變化？</strong>先重新整理頁面。瀏覽器有時會拿它之前存的舊檔給你看；新版本傳到世界各地的機器上，也需要一點時間。等一下再看，還是沒變，再請 Claude 查後台的部署紀錄有沒有失敗。</p>
+
+      <!-- ========== 7. 退回上一版 ========== -->
+      <h2 id="rollback">改壞了，怎麼退回上一版</h2>
 
       <div class="analogy">
-        <strong>白話比喻：</strong><br><br>
-        <strong>靜態網站</strong> = 傳單。你印好放在架子上，有人來就拿走看。傳單不需要一個人一直站在那邊發。<br><br>
-        <strong>後端 API</strong> = 櫃檯人員。有人來問問題，櫃檯要有人接待。櫃檯人員得一直在。<br><br>
-        <strong>資料庫</strong> = 檔案櫃。資料要隨時可以查，檔案櫃得一直開著。
+        <strong>比喻：</strong>架子上的傳單換錯了，印錯營業時間。先把上一版放回架上止血，再回家把錯的那張改好。兩件事都要做，只做第一件，下次補貨又會補到錯的那張。
       </div>
+
+      <h3>第一件：Cloudflare 上先退版（止血）</h3>
+
+      <p>Cloudflare 會記住你每一次部署的版本，可以直接換回之前的。兩種方式擇一：</p>
+
+      <ul>
+        <li><strong>後台</strong>：Workers &amp; Pages → 點 b-cafe-booking → <strong>Deployments</strong> → 在要退回的那一版打開三個點的選單 → <strong>Rollback</strong></li>
+        <li><strong>指令</strong>：請 Claude 跑 <code>npx wrangler rollback</code>，它會列出最近的版本讓你挑</li>
+      </ul>
+
+      <p>官方文件寫明只能退回最近發布的 100 個版本。一般小網站很夠用。</p>
+
+      <h3>第二件：GitHub 上也要退（根治）</h3>
+
+      <p>Cloudflare 退版，只換掉架子上那一份，GitHub 上壞掉的那個版本還在。下次有人推上去，壞的又跟著上線。所以止完血，要請 Claude 在 Git 裡把壞掉的那次修改退掉（這個動作叫 revert，它會新增一個「把那次修改反過來」的版本，舊紀錄都還在）。</p>
+
+      <div class="box box-tip">
+        <div class="box-label">跟 Claude 怎麼說</div>
+        「網站壞了。先用 wrangler rollback 退回上一個正常的版本，退之前跟我確認是哪一版。再在 Git 裡把壞掉的那次修改 revert 掉，推上去之前先給我看。」
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">退版退不到的東西</div>
+        退版只換頁面和程式，不會把資料退回去。Cloudflare 官方文件也寫了：連接的資料庫這類資源不會跟著退。<br><br>
+        現在的預約表還沒有資料庫，沒差。到<a href="/chapter9/">第九章</a>接上資料庫之後要記得：如果新版本改過資料的樣子（例如多了一個欄位），退回舊頁面反而可能出錯。資料的樣子怎麼改才不會出事，見<a href="/chapter15/">第十五章</a>。
+      </div>
+
+      <!-- ========== 8. 網址 ========== -->
+      <h2 id="url">為什麼網址是一串 xxx.workers.dev</h2>
+
+      <p>第 5 步拿到的網址長這樣：</p>
+
+      <div class="code-block dp-code">https://b-cafe-booking.你的子網域.workers.dev</div>
+
+      <div class="analogy">
+        <strong>比喻：</strong>你在一個大市集裡租了攤位。地址是「市集名字＋你的區＋攤位名稱」。<br><br>
+        <strong>workers.dev</strong>＝Cloudflare 這個市集的名字<br>
+        <strong>你的子網域</strong>＝你的帳號在市集裡的那一區，整個帳號共用<br>
+        <strong>b-cafe-booking</strong>＝攤位名稱，就是設定檔裡的 name
+      </div>
+
+      <p>用 Cloudflare Pages 放的網站，網址則是 <code>專案名.pages.dev</code>，道理一樣。</p>
+
+      <p>這種網址能用，但有三個問題：長、不好記、看起來不像正式店家。Cloudflare 自己的文件也說，workers.dev 適合個人或興趣專案，正式上線建議用自己的網域。</p>
+
+      <p><a href="/chapter8/">下一章</a>就做這件事：幫 B 咖啡店買一個自己的網域（網址的門牌），再到這個 Worker 的 <strong>Settings</strong> → <strong>Domains &amp; Routes</strong> 把它接上。接好之後，workers.dev 這個網址可以留著自己測試，也可以關掉。</p>
+
+      <!-- ========== 9. Workers vs Pages ========== -->
+      <h2 id="workers-pages">Cloudflare 的 Workers 和 Pages：選哪個</h2>
+
+      <p>Cloudflare 有兩個能放網站的服務：<strong>Workers</strong> 和 <strong>Pages</strong>。網路上的教學兩種都有，Claude 也可能兩種都提。</p>
+
+      <ul>
+        <li><strong>新專案用 Workers</strong>：Cloudflare 的 Pages 文件首頁現在掛著一句「新專案從 Workers 開始」（Start new projects with Workers），並說 Workers 是它主要的應用程式平台。這一章用的就是 Workers</li>
+        <li><strong>Pages 還能用</strong>：舊專案不用急著搬。兩邊的靜態檔案被瀏覽都不計費。Pages 的上傳指令是 <code>npx wrangler pages deploy 資料夾名稱</code>，網址是 <code>專案名.pages.dev</code></li>
+        <li><strong>自動部署的免費額度算法不同</strong>：Workers 每月 3,000 分鐘，Pages 每月 500 次。純靜態頁面不用打包，兩邊都用得很少</li>
+      </ul>
+
+      <p>你不用自己研究差別。跟 Claude 這樣說就好：</p>
+
+      <div class="box box-tip">
+        <div class="box-label">跟 Claude 怎麼說</div>
+        「幫我把這個靜態網站部署到 Cloudflare，用官方文件現在建議的方式。動手前先上官方文件查，告訴我你查到的是哪一頁。」
+      </div>
+
+      <!-- ========== 10. 免費額度 ========== -->
+      <h2 id="free">免費額度：放一個預約表要花多少</h2>
+
+      <p>先講結論：<strong>這一章做完，B 咖啡店一毛錢都不用花。</strong>要花錢是下一章買網域的時候。</p>
 
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>類型</th>
-              <th>需要機器？</th>
-              <th>白話</th>
-              <th>推薦方案</th>
-              <th>費用</th>
+              <th>項目</th>
+              <th>免費版</th>
+              <th>跟這一章的關係</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>靜態網站</strong></td>
-              <td style="color: var(--green);">不用</td>
-              <td>傳單放著就好</td>
-              <td>Cloudflare Pages</td>
-              <td>免費</td>
+              <td><strong>靜態檔案被瀏覽</strong></td>
+              <td>免費、不限次數</td>
+              <td>預約表就是靜態檔案，客人怎麼看都不計費</td>
             </tr>
             <tr>
-              <td><strong>前端 App</strong><br>（SPA）</td>
-              <td style="color: var(--green);">不用</td>
-              <td>比較互動的傳單（有按鈕、有動畫）</td>
-              <td>Cloudflare Pages</td>
-              <td>免費</td>
+              <td><strong>一個網站的檔案數</strong></td>
+              <td>每個版本最多 20,000 個（付費版 100,000 個）</td>
+              <td>預約表只有幾個檔</td>
             </tr>
             <tr>
-              <td><strong>後端 API</strong></td>
-              <td style="color: var(--red);">要</td>
-              <td>櫃檯人員要一直在</td>
-              <td>Supabase（Edge Functions）<br>或 GCP VM</td>
-              <td>Supabase 免費額度<br>VM 約 $5-25/月</td>
+              <td><strong>單一檔案大小</strong></td>
+              <td>最大 25 MiB</td>
+              <td>大張照片、影片要先壓縮</td>
             </tr>
             <tr>
-              <td><strong>資料庫</strong></td>
-              <td style="color: var(--red);">要</td>
-              <td>檔案櫃要一直開著</td>
-              <td>Supabase（PostgreSQL）</td>
-              <td>免費額度 500MB</td>
+              <td><strong>後端小程式被呼叫</strong></td>
+              <td>每天 100,000 次</td>
+              <td>只放頁面用不到。加了後端程式才開始算（<a href="/chapter12/">第十二章</a>、<a href="/chapter16/">第十六章</a>）</td>
             </tr>
             <tr>
-              <td><strong>排程 Cron Job</strong></td>
-              <td style="color: var(--yellow);">看情況</td>
-              <td>鬧鐘定時做事</td>
-              <td>Supabase Cron<br>或 GCP Cloud Scheduler</td>
-              <td>免費~幾毛</td>
+              <td><strong>自動部署（Cloudflare 叫 Workers Builds）</strong></td>
+              <td>每月 3,000 分鐘，一次跑 1 個，每次最多 20 分鐘</td>
+              <td>沒有打包這一步，每次用掉的時間很少</td>
             </tr>
             <tr>
-              <td><strong>LINE Bot</strong></td>
-              <td style="color: var(--red);">要</td>
-              <td>自動回訊息的客服，隨時待命</td>
-              <td>Supabase Edge Functions<br>或 GCP VM</td>
-              <td>免費~$10/月</td>
-            </tr>
-            <tr>
-              <td><strong>爬蟲</strong></td>
-              <td style="color: var(--yellow);">看情況</td>
-              <td>派人去別的網站抄資料，做完就閒著</td>
-              <td>GCP VM（需要時開）<br>或本機跑</td>
-              <td>免費~幾元/月</td>
+              <td><strong>GitHub</strong></td>
+              <td>公開、私人的 repo 都不限數量（私人 repo 的進階功能比較少）</td>
+              <td>第 6 步用免費帳號就夠</td>
             </tr>
           </tbody>
         </table>
       </div>
 
+      <p>Cloudflare Workers 付費版每個帳號每月最低 5 美元。真的有付費客人、流量變大，再考慮升級。</p>
+
       <div class="box box-info">
-        <div class="box-label">為什麼要在意「需不需要機器」？</div>
-        因為這直接影響你的成本和維護難度。不需要機器的東西（靜態網站、前端 App），部署到 Cloudflare Pages 就是免費、零維護。需要機器的東西，你就得選方案、付錢、監控它有沒有掛掉。
+        <div class="box-label">數字以官方頁面為準</div>
+        以上額度和價格查自 Cloudflare、GitHub 官方文件，查詢日期 2026-11-13。服務商常調整方案，要做決定之前，請 Claude 再查一次官方頁面：「幫我查 Cloudflare Workers 現在的免費額度，附上官方網址。」
       </div>
 
-      <!-- ========== C. 推薦組合 ========== -->
-      <h2>推薦組合</h2>
+      <!-- ========== 11. 常用部署工具選擇（舊版工具生態章搬來） ========== -->
+      <h2 id="tools">常用部署工具選擇</h2>
 
-      <p>以下是經過實戰驗證、跟 Claude Code 搭配最好的技術棧組合：</p>
+      <p>你寫好了程式，接下來要讓別人看到。部署就是把你電腦上的東西搬到網路上。能做這件事的服務很多，你一定會聽到其他名字。</p>
 
-      <h3>1. 前端：React 或 Vue + Vite</h3>
-      <p><strong>React</strong> 和 <strong>Vue</strong> 是目前最主流的兩個前端框架。Vite 是讓開發速度變快的工具（你改了程式碼，瀏覽器幾乎立刻就更新）。</p>
-      <p>部署到 <strong>Cloudflare Pages</strong>：</p>
-      <ul>
-        <li>免費額度非常大方（每月 500 次建構、不限流量）</li>
-        <li>有 CLI 工具 <code>wrangler</code>，Claude Code 可以直接用指令部署</li>
-        <li>全球 CDN，速度很快</li>
-      </ul>
+      <p>先講結論，跟<a href="/chapter11/">第十一章</a>一樣：<strong>網站做成純靜態頁面（HTML、CSS、JS）放 Cloudflare，資料庫用 Supabase（資料單純的話用 Cloudflare D1 也行），版控用 GitHub。</strong>大部分小專案用這三樣就夠了。</p>
 
-      <h3>2. 後端 / 資料庫：Supabase</h3>
-      <p>Supabase 是一個「開箱即用」的後端服務。它底層用的是 PostgreSQL（目前最受歡迎的資料庫之一），但它幫你處理了很多複雜的設定。</p>
-      <p>為什麼特別推薦？</p>
-      <ul>
-        <li><strong>API 好接</strong>——它用 PostgREST，意思是你只要在 Supabase 裡建好資料表，它就自動幫你生成 API。不用自己寫後端程式碼</li>
-        <li><strong>View 包複雜邏輯</strong>——如果你的查詢很複雜（例如：查出「最近 7 天、金額超過 1000 元、狀態是已付款」的訂單），你可以在資料庫裡建一個 View（虛擬表），把複雜邏輯藏在裡面。前端只要簡單呼叫 View 就好</li>
-        <li><strong>有 CLI 管 Migration</strong>——Migration 是資料庫結構的版本控制。Claude Code 可以用 <code>supabase</code> CLI 來管理資料庫變更，不用你手動去網站上操作</li>
-      </ul>
-
-      <div class="analogy">
-        <strong>白話：</strong>Supabase 就像一個「自帶檔案管理員的檔案櫃」。你建好抽屜（資料表），它就自動幫你安排一個人坐在旁邊，別人來拿資料就直接給（API）。你不用自己雇一個人坐在那邊。
+      <div class="box box-tip">
+        <div class="box-label">跟 Claude 怎麼說</div>
+        「這個網站用純 HTML、CSS、JS 做，不要用需要打包的框架。做好直接部署到 Cloudflare。」<br><br>
+        「動手之前，先上 GitHub 找有沒有現成的，找到能用的就不要從零做。」
       </div>
 
-      <h3>3. 版控：GitHub</h3>
-      <p>GitHub 是程式碼的管理平台（像程式碼的 Google Drive）。為什麼選它？</p>
-      <ul>
-        <li>有 <code>gh</code> CLI——Claude Code 可以直接用指令建立 Repository、發 Pull Request、管理 Issue</li>
-        <li>是業界標準，跟所有工具都能整合</li>
-        <li>免費帳號就夠用</li>
-      </ul>
+      <p>這三樣各自拿來做什麼、免費額度多少、什麼情況選哪一個，<a href="/chapter11/#stack-combo">第十一章「我用的組合」</a>整理成一張表和一個簡單判斷法（只要讓人看的網站、要存資料、要定時自動做事，各選哪個），這裡不重複列，數字以那一章為準。</p>
+
+      <h3>其他你會聽到的名字</h3>
+
+      <p>下面四個我不會拿來當起點，但你一定會聽到。知道各自適合什麼、免費方案卡在哪就好：</p>
 
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>用途</th>
-              <th>推薦工具</th>
-              <th>CLI 工具</th>
+              <th>工具</th>
+              <th>什麼情況才用</th>
               <th>免費額度</th>
+              <th style="white-space: nowrap;">難度</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>前端部署</td>
-              <td>Cloudflare Pages</td>
-              <td><code>wrangler</code></td>
-              <td>非常充裕</td>
+              <td><strong>Vercel</strong></td>
+              <td>你手上已經有一個 Next.js 專案。它就是做 Next.js 的公司，兩者整合得很好；新專案我不會從這裡開始</td>
+              <td>有，但免費方案（Hobby）只能做個人、非商業的專案。網站上有賣東西、放廣告，或是收錢幫人做的，都要用付費方案</td>
+              <td style="color: var(--green); white-space: nowrap;">簡單</td>
             </tr>
             <tr>
-              <td>後端 / 資料庫</td>
-              <td>Supabase</td>
-              <td><code>supabase</code></td>
-              <td>500MB 資料庫 + 50K API calls/月</td>
+              <td><strong>Netlify</strong></td>
+              <td>別人交給你的專案，原本就放在 Netlify</td>
+              <td>有。每月 300 點、用完不能加購；正式部署一次扣 15 點、流量每 GB 扣 20 點</td>
+              <td style="color: var(--green); white-space: nowrap;">簡單</td>
             </tr>
             <tr>
-              <td>版控</td>
-              <td>GitHub</td>
-              <td><code>gh</code></td>
-              <td>免費（公開/私有 repo 都行）</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- ========== D. GCP VM 什麼時候需要 ========== -->
-      <h2>GCP VM 什麼時候需要</h2>
-
-      <h3>VM 是什麼？</h3>
-      <p>VM（Virtual Machine）= 在雲端租一台 24 小時開著的電腦。它不在你桌上，但你可以遠端連上去操作，就像遠端遙控一台電腦。</p>
-
-      <h3>VM 規格的白話翻譯</h3>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>規格</th>
-              <th>白話</th>
-              <th>例子</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>CPU</strong></td>
-              <td>腦袋聰不聰明（同時處理幾件事）</td>
-              <td>1 vCPU = 一次做一件事<br>4 vCPU = 同時做四件事</td>
+              <td><strong>Render</strong></td>
+              <td>想要一台一直開著的小型後端，拿來練習、測試</td>
+              <td>有。閒置 15 分鐘會休眠；Render 自己也說免費方案不要拿來跑正式服務</td>
+              <td style="color: var(--yellow); white-space: nowrap;">中等</td>
             </tr>
             <tr>
-              <td><strong>RAM（記憶體）</strong></td>
-              <td>桌子夠不夠大（同時放幾份文件）</td>
-              <td>1GB = 小桌子，跑簡單程式<br>8GB = 大桌子，跑資料庫沒問題</td>
-            </tr>
-            <tr>
-              <td><strong>Disk（硬碟）</strong></td>
-              <td>儲藏室的容量</td>
-              <td>10GB = 放程式碼夠了<br>100GB = 可以存大量資料</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>什麼時候需要 VM？三個場景</h3>
-
-      <div class="compare">
-        <div class="compare-good">
-          <div class="compare-label">免費方案就夠的情況</div>
-          <div class="code-block">
-<strong>場景一：個人網站 + 簡單後端</strong><br><br>
-- 前端用 Cloudflare Pages（免費）<br>
-- 後端用 Supabase Edge Functions（免費）<br>
-- 資料庫用 Supabase PostgreSQL（免費 500MB）<br><br>
-月流量幾千人以內，完全不用花錢。<br><br>
-<span style="color: var(--green);">總成本：$0/月</span>
-          </div>
-        </div>
-        <div class="compare-bad">
-          <div class="compare-label">需要 VM 的情況</div>
-          <div class="code-block">
-<strong>場景二：LINE Bot + 爬蟲 + 排程</strong><br><br>
-- LINE Bot 要 24 小時待命<br>
-- 爬蟲每天定時跑<br>
-- 需要自訂的背景程式<br><br>
-這些 Supabase 免費方案做不到，<br>
-你需要一台自己的機器。<br><br>
-<span style="color: var(--yellow);">GCP e2-micro：免費~$5/月</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="box box-info">
-        <div class="box-label">場景三：正式產品上線</div>
-        當你的產品有付費使用者、需要高可靠度、需要自訂環境時，就該考慮正式的 VM 了。例如 GCP 的 e2-small 或 e2-medium，月費約 $15-25 美元。但在那之前，先用免費方案驗證你的想法值不值得花錢。
-      </div>
-
-      <!-- ========== E. CLI 省 Token 的觀念 ========== -->
-      <h2>CLI 省 Token 的觀念</h2>
-
-      <p>這是很多人忽略但<strong>極度影響成本</strong>的觀念。讓 Claude Code 操作一個服務，有兩種方式：</p>
-
-      <h3>瀏覽器操作 vs CLI 操作</h3>
-
-      <div class="compare">
-        <div class="compare-bad">
-          <div class="compare-label">用瀏覽器操作（很花 Token）</div>
-          <div class="code-block">
-Claude Code 要做的事：<br>
-1. 截圖整個畫面 → 花 Token<br>
-2. 分析圖片找按鈕位置 → 花 Token<br>
-3. 點擊按鈕 → 花 Token<br>
-4. 等頁面載入 → 花時間<br>
-5. 再截圖確認結果 → 花 Token<br>
-6. 分析結果圖片 → 花 Token<br><br>
-一個簡單的「部署網站」動作<br>
-= 6+ 個步驟 = 大量 Token<br><br>
-<span style="color: var(--red);">Token 成本：高</span>
-          </div>
-        </div>
-        <div class="compare-good">
-          <div class="compare-label">用 CLI 操作（超省 Token）</div>
-          <div class="code-block">
-Claude Code 要做的事：<br>
-1. 打一行指令<br><br>
-<code>wrangler pages deploy ./dist</code><br><br>
-結束。<br><br>
-<span style="color: var(--green);">Token 成本：極低</span>
-          </div>
-        </div>
-      </div>
-
-      <p>差距有多大？用瀏覽器操作一個動作可能要花幾千到幾萬個 Token（因為截圖轉成的 Token 量非常驚人）。用 CLI 只要幾十個 Token。<strong>差距可以到 100 倍以上</strong>。</p>
-
-      <h3>常用 CLI 工具一覽</h3>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>CLI 工具</th>
-              <th>用途</th>
-              <th>對應服務</th>
-              <th>一行指令範例</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>wrangler</code></td>
-              <td>部署網站、管理 Workers</td>
-              <td>Cloudflare</td>
-              <td><code>wrangler pages deploy ./dist</code></td>
-            </tr>
-            <tr>
-              <td><code>gh</code></td>
-              <td>管理 GitHub repo、PR、Issue</td>
-              <td>GitHub</td>
-              <td><code>gh pr create --title "修 bug"</code></td>
-            </tr>
-            <tr>
-              <td><code>supabase</code></td>
-              <td>管理資料庫、跑 Migration</td>
-              <td>Supabase</td>
-              <td><code>supabase db push</code></td>
-            </tr>
-            <tr>
-              <td><code>gcloud</code></td>
-              <td>管理 VM、雲端資源</td>
-              <td>Google Cloud</td>
-              <td><code>gcloud compute ssh my-vm</code></td>
-            </tr>
-            <tr>
-              <td><code>vercel</code></td>
-              <td>部署前端/全端專案</td>
-              <td>Vercel</td>
-              <td><code>vercel deploy --prod</code></td>
-            </tr>
-            <tr>
-              <td><code>npm</code></td>
-              <td>管理套件、跑腳本</td>
-              <td>Node.js 生態</td>
-              <td><code>npm run build</code></td>
+              <td><strong>GCP（Google Cloud）</strong></td>
+              <td>一定要有一台自己管的機器：一跑很久的爬蟲、要一直連線的程式、要裝特殊軟體。什麼都能做，但機器要自己顧；什麼時候才需要，見<a href="/chapter11/#stack-vm">第十一章</a></td>
+              <td>新用戶有 300 美元試用額度，90 天內有效，要先綁付款方式；另有部分產品的每月免費用量</td>
+              <td style="color: var(--red); white-space: nowrap;">較難</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <div class="box box-warning">
-        <div class="box-label">選工具的鐵則</div>
-        如果一個服務沒有 CLI，Claude Code 就只能用截圖+點按鈕的方式操作，<strong>Token 成本會暴增</strong>。所以在選服務的時候，「有沒有 CLI」是最優先的考量。
+        <div class="box-label">Render 免費方案的「休眠」問題</div>
+        Render 的免費方案，如果 15 分鐘沒人使用，服務會「睡著」。下一個使用者要等大約一分鐘才會醒過來。這段從睡著到醒過來要等的時間，叫冷啟動（Cold Start）。<br><br>
+        解法：用 cron job（定時自動執行的小工作）每 10 分鐘 ping 一次你的服務，讓它一直醒著。要注意免費方案每個月只有 750 小時的運轉時數：一個服務整個月不睡還夠用，兩個都不睡就會超過，超過後所有免費服務會被停到下個月。這也是我不拿它當起點的原因：純靜態頁面根本沒有睡著這回事。
       </div>
 
-      <!-- ========== F. Computer Use 延伸 ========== -->
-      <h2>Computer Use 延伸</h2>
+      <p>上面的數字和價格以各家官方頁面為準，查詢日期 2026-11-13。</p>
 
-      <p>前面說 CLI 很省 Token，那 Claude 操作瀏覽器（Computer Use）就完全不能用嗎？不是的。Computer Use 有它適合的場景。</p>
+      <!-- ========== 12. 哪裡有邊界 ========== -->
+      <h2 id="boundary">哪裡有邊界：什麼交給 Claude，什麼你自己確認</h2>
 
-      <h3>什麼是 Computer Use？</h3>
-      <p>在 Claude Desktop 上，Claude 可以直接操控你的電腦畫面——移動滑鼠、點擊按鈕、打字、滾動頁面。就像有一隻看不見的手在操作你的電腦。</p>
+      <p>這一章的動作，大部分可以放心交給 Claude。但有幾件事，做錯了收不回來，或者是用你的名字、你的錢在做。這幾件要你自己看過才放行。</p>
 
-      <h3>什麼時候適合用 Computer Use？</h3>
+      <div class="table-wrapper">
+        <table class="dp-bound">
+          <thead>
+            <tr>
+              <th>這一章的動作</th>
+              <th>放心交給 Claude</th>
+              <th>你一定要自己確認</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>整理檔案、寫設定檔</strong></td>
+              <td>寫 wrangler.jsonc、整理 public 資料夾、改路徑</td>
+              <td>directory 只指 public，不是整個專案</td>
+            </tr>
+            <tr>
+              <td><strong>上傳、重新上線</strong></td>
+              <td>跑 deploy、看錯誤訊息、修到成功</td>
+              <td>上線前在本機看過一次；上線後用手機打開</td>
+            </tr>
+            <tr>
+              <td><strong>金鑰</strong></td>
+              <td>告訴你哪些東西算金鑰、該放哪裡</td>
+              <td>金鑰不能放進頁面。頁面上的每一個字，打開網頁的人都看得到</td>
+            </tr>
+            <tr>
+              <td><strong>帳號與授權</strong></td>
+              <td>告訴你要去哪裡按、按完確認有沒有成功</td>
+              <td>註冊、登入、按允許都你自己來；GitHub App 只給需要的 repo</td>
+            </tr>
+            <tr>
+              <td><strong>付款與續約</strong></td>
+              <td>查價格、比方案、算每月大概多少</td>
+              <td>綁信用卡、升級付費版、網域自動續約（<a href="/chapter8/">第八章</a>），都你自己決定、自己按</td>
+            </tr>
+            <tr>
+              <td><strong>刪除</strong></td>
+              <td>列出刪了會影響什麼</td>
+              <td>刪 Worker、刪 repo、刪資料庫（<a href="/chapter9/">第九章</a>）多半救不回來。它說要刪任何東西，先問「刪了能不能救回來」</td>
+            </tr>
+            <tr>
+              <td><strong>退版</strong></td>
+              <td>跑 rollback、在 Git 裡 revert</td>
+              <td>退到哪一版；接了資料庫之後，退版會不會跟資料對不上</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>還有一條比較看不見的邊界：<strong>Claude 會一直加東西。</strong>你只是請它把預約表放上網，它可能順手說「我幫你加一個後端」「我建一張表存預約」。AI 會改會修，但會一直改：前端、後端、加欄位、加表，改到後面纏在一起，誰也動不了。這一章只放頁面。它開始往外加東西的時候，先停下來問它要加什麼、加在哪一層。</p>
+
+      <p>這些判斷，後面五章一章講一塊：</p>
+
       <ul>
-        <li><strong>沒有 CLI / API 的服務</strong>——有些網站或應用程式就是只有網頁介面，沒有其他選擇。例如某些政府網站、銀行後台</li>
-        <li><strong>一次性的設定工作</strong>——例如第一次設定某個服務帳號、填表單。反正只做一次，Token 多花一點也還好</li>
-        <li><strong>視覺確認</strong>——需要「看一下畫面長什麼樣」的場景。例如確認網頁排版有沒有跑版</li>
-        <li><strong>教學示範</strong>——Claude 可以一步一步在畫面上標示給你看，像一個老師在你螢幕上畫圈圈指導你</li>
+        <li><a href="/chapter13/">第十三章 架構拓樸</a>：先畫出整個東西有哪幾塊、怎麼連，才知道它加的東西放在哪</li>
+        <li><a href="/chapter14/">第十四章 功能怎麼切</a>：一塊只做一件事，改一個地方不會牽動全部</li>
+        <li><a href="/chapter15/">第十五章 資料表與欄位</a>：資料的家要先蓋好，不要讓它一直加欄位</li>
+        <li><a href="/chapter16/">第十六章 前後端邊界</a>：什麼可以放在頁面上，什麼（例如金鑰）一定要放後面</li>
+        <li><a href="/chapter17/">第十七章 會出事的地方</a>：兩條上線路線各改各的，就是這一章講的單一資料來源問題</li>
       </ul>
 
-      <div class="compare">
-        <div class="compare-good">
-          <div class="compare-label">適合 Computer Use</div>
-          <div class="code-block">
-- 在沒有 API 的網站上操作<br>
-- 一次性的帳號設定<br>
-- 確認網頁視覺效果<br>
-- 填寫線上表單<br>
-- 教學示範步驟
-          </div>
-        </div>
-        <div class="compare-bad">
-          <div class="compare-label">不適合 Computer Use</div>
-          <div class="code-block">
-- 重複執行的日常操作<br>
-  （用 CLI 取代）<br>
-- 大量資料處理<br>
-  （用 API 取代）<br>
-- 部署和版控<br>
-  （用 wrangler/gh 取代）
-          </div>
-        </div>
+      <!-- ========== 13. 本章術語 ========== -->
+      <h2 id="terms">本章術語</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>術語</th>
+              <th>白話</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>部署</strong>（Deploy）</td><td>把做好的檔案放到一直開著、大家連得到的機器上，配一個網址</td></tr>
+            <tr><td><strong>靜態頁面</strong></td><td>做好就放著、每個人拿到同一份的頁面。傳單</td></tr>
+            <tr><td><strong>localhost</strong></td><td>「這台電腦自己」。只有你打得開</td></tr>
+            <tr><td><strong>wrangler</strong></td><td>Cloudflare 的官方 CLI，負責登入、上傳、退版</td></tr>
+            <tr><td><strong>設定檔</strong>（wrangler.jsonc）</td><td>告訴 Cloudflare 網站叫什麼、哪個資料夾要放上網</td></tr>
+            <tr><td><strong>repo</strong></td><td>GitHub 上的一個專案，裡面有檔案和每一版的紀錄</td></tr>
+            <tr><td><strong>commit</strong></td><td>在你電腦上存一個版本，附一句這次改了什麼</td></tr>
+            <tr><td><strong>push（推上去）</strong></td><td>把電腦上的版本送到 GitHub</td></tr>
+            <tr><td><strong>分支</strong>（branch）／<strong>main</strong></td><td>同一個專案的不同支線。main 是正式那一條</td></tr>
+            <tr><td><strong>退版</strong>（Rollback）</td><td>把網站換回之前的某一版</td></tr>
+            <tr><td><strong>revert</strong></td><td>在 Git 裡新增一個「把某次修改反過來」的版本</td></tr>
+            <tr><td><strong>子網域</strong></td><td>網址前面多加的一段。workers.dev 網址裡，中間那段是整個帳號共用的子網域（後台 Your subdomain 改的就是它），最前面那段 b-cafe-booking 是網站名稱，也就是設定檔的 name</td></tr>
+          </tbody>
+        </table>
       </div>
 
+      <p>全部術語見<a href="/glossary/">術語字典</a>。</p>
+
+      <!-- ========== 14. 這章帶走什麼 ========== -->
+      <h2 id="takeaway">這章帶走什麼</h2>
+
+      <ul>
+        <li><strong>部署是把傳單從書桌放到街口的架子上</strong>。在你電腦上打得開，不等於別人打得開；用手機網路打開才算數</li>
+        <li><strong>純靜態頁面放 Cloudflare</strong>：不用打包、不會睡著、靜態檔案被瀏覽不計費</li>
+        <li><strong>新專案用 Workers</strong>，設定檔用 wrangler.jsonc，只上傳 public 資料夾</li>
+        <li><strong>接上 GitHub 之後只走一條路</strong>：改、本機看過、推上去、自動上線。不要再從電腦直接上傳</li>
+        <li><strong>退版要退兩邊</strong>：Cloudflare 先止血，GitHub 再根治。資料不會跟著退</li>
+        <li><strong>xxx.workers.dev 是借來的攤位地址</strong>，下一章換成自己的門牌</li>
+        <li><strong>註冊、登入、授權、付款、刪除，你自己來</strong>；打字、下指令、看錯誤，交給 Claude</li>
+      </ul>
+
       <div class="box box-tip">
-        <div class="box-label">總結</div>
-        能用 CLI 就用 CLI（省 Token、快、穩定）。沒有 CLI 的時候才用 Computer Use。混合使用才是最聰明的策略。
+        <div class="box-label">跟 Claude 怎麼說</div>
+        第一次部署：<br>
+        「這個預約表要放上 Cloudflare。用純靜態頁面，不要打包；照 Cloudflare 官方文件現在建議的方式，用 wrangler 部署。設定檔只上傳 public 資料夾。需要我登入或按允許的地方，先停下來告訴我在哪個視窗。」<br><br>
+        之後每次改：<br>
+        「改完先在本機給我看，我說可以再 commit、推上 GitHub，不要直接 wrangler deploy。」<br><br>
+        出事時：<br>
+        「網站壞了。先退回上一個正常的版本，跟我確認是哪一版；再在 Git 裡把壞的修改 revert 掉。」
       </div>
+
+      <p>下一章，B 咖啡店的預約表要換上自己的網址：網域是什麼、去哪裡買、怎麼接到這個 Worker 上。</p>
 
       <!-- Chapter Navigation -->
       <div class="chapter-nav">
         <a href="/chapter6/" class="prev">
           <span class="nav-label">上一章</span>
-          <span class="nav-title">Claude Code 是什麼</span>
+          <span class="nav-title">描述力</span>
         </a>
         <a href="/chapter8/" class="next">
           <span class="nav-label">下一章</span>
-          <span class="nav-title">API 是什麼</span>
+          <span class="nav-title">網域</span>
         </a>
       </div>
 

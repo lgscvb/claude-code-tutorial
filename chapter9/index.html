@@ -3,8 +3,191 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第九章：術語快速理解 — Claude Code 指南</title>
+  <title>第九章：資料庫 — Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ===== 第九章自用樣式（前綴 db-） ===== */
+
+    /* 流程示意圖：純 HTML/CSS，不用 JS 也看得懂 */
+    .db-flow {
+      margin: 24px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .db-flow-row {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      padding: 18px 18px 20px;
+    }
+    .db-flow-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .db-flow-steps {
+      list-style: none;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: 0;
+    }
+    .db-flow-steps li {
+      margin: 0 !important;
+      display: flex;
+      align-items: center;
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .db-node {
+      flex: 1 1 auto;
+      min-width: 0;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .db-node strong { display: block; color: var(--text-heading); font-size: 15px; }
+    .db-node span { color: var(--text-muted); font-size: 13px; }
+    .db-node-key { border-color: var(--accent); }
+    .db-flow-steps li + li::before {
+      content: "→";
+      color: var(--accent);
+      font-weight: 700;
+      padding: 0 8px;
+      flex: 0 0 auto;
+    }
+    @media (max-width: 768px) {
+      .db-flow-steps { flex-direction: column; }
+      .db-flow-steps li { flex-direction: column; align-items: stretch; }
+      .db-flow-steps li + li::before {
+        content: "↓";
+        text-align: center;
+        padding: 4px 0;
+      }
+    }
+
+    /* 步驟卡：要做什麼／跟 Claude 怎麼說／你自己動手／做完會看到／常見卡住 */
+    .db-step {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      margin: 24px 0 32px;
+      overflow: hidden;
+    }
+    .db-step-head {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .db-step-num {
+      flex: 0 0 auto;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .db-step-head h3 {
+      margin: 0 !important;
+      font-size: 19px;
+      line-height: 1.4;
+    }
+    .db-cells {
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+    .db-cell {
+      padding: 14px 20px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 15px;
+    }
+    .db-cell:last-child { border-bottom: none; }
+    .db-cell > p:first-of-type { margin-top: 4px; }
+    .db-cell ul, .db-cell ol { margin: 6px 0 !important; }
+    .db-cell-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .db-cell-do .db-cell-label { color: var(--text-muted); }
+    .db-cell-say { background: rgba(74, 222, 128, 0.05); }
+    .db-cell-say .db-cell-label { color: var(--green); }
+    .db-cell-you { background: rgba(251, 191, 36, 0.06); }
+    .db-cell-you .db-cell-label { color: var(--yellow); }
+    .db-cell-see .db-cell-label { color: var(--blue); }
+    .db-cell-stuck .db-cell-label { color: var(--red); }
+    .db-say {
+      margin: 6px 0 0;
+      padding: 10px 14px;
+      border: 1px dashed rgba(74, 222, 128, 0.35);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    .db-say + .db-say { margin-top: 8px; }
+
+    /* 程式碼區塊裡保留換行 */
+    .db-code {
+      white-space: pre;
+      color: var(--text);
+    }
+    .db-code .db-c { color: var(--text-muted); }
+
+    /* 互動示範：誰來敲門 */
+    .db-door-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0 16px;
+    }
+    .db-door-q {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin: 4px 0 0;
+    }
+    .db-door-result {
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      background: var(--bg);
+      padding: 14px 16px;
+      font-size: 15px;
+      min-height: 84px;
+      transition: border-color 0.25s, background 0.25s;
+    }
+    .db-door-result strong { display: block; margin-bottom: 4px; color: var(--text-heading); }
+    .db-door-result.is-ok { border-color: rgba(74, 222, 128, 0.5); background: rgba(74, 222, 128, 0.06); }
+    .db-door-result.is-no { border-color: rgba(248, 113, 113, 0.5); background: rgba(248, 113, 113, 0.06); }
+    .db-door-result.is-all { border-color: rgba(251, 191, 36, 0.6); background: rgba(251, 191, 36, 0.07); }
+    .db-door-result.is-flash { animation: db-flash 0.4s ease-out; }
+    .db-door-note {
+      font-size: 13px;
+      color: var(--text-muted, inherit);
+      margin: 12px 0 0;
+      line-height: 1.7;
+    }
+    @keyframes db-flash {
+      from { transform: translateY(4px); opacity: 0.4; }
+      to { transform: none; opacity: 1; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .db-door-result { transition: none; }
+      .db-door-result.is-flash { animation: none; }
+    }
+
+    /* 分工表的勾叉 */
+    .db-who { white-space: nowrap; font-weight: 700; }
+  </style>
 </head>
 <body>
 
@@ -13,11 +196,11 @@
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
       <a href="/">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/">下指令</a>
-      <a href="/chapter3/">工作流程</a>
-      <a href="/chapter9/" class="active">術語字典</a>
-      <a href="/appendix/">附錄</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,582 +210,765 @@
 
 <nav class="mobile-nav">
   <a href="/">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/">第二章：下指令</a>
-  <a href="/chapter3/">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/">第六章：Claude Code</a>
-  <a href="/chapter7/">第七章：技術棧</a>
-  <a href="/chapter8/">第八章：API</a>
-  <a href="/chapter9/" class="active">第九章：術語字典</a>
-  <a href="/chapter10/">第十章：進階問題</a>
-  <a href="/chapter11/">第十一章：工具生態</a>
-  <a href="/appendix/">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/" class="active">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
   <section class="container">
     <div class="page-header">
       <div class="chapter-label">第九章</div>
-      <h1>術語快速理解（字典頁）</h1>
-      <p class="lead">不用會操作，知道是什麼就好。遇到不懂的詞，來這裡查。</p>
+      <h1>資料庫：開一個，接到你的頁面</h1>
+      <p class="lead">第七章把 B 咖啡店的預約頁放上網，第八章替它接上自己的網址。現在客人打得開、填得了，可是按下送出，預約去哪了？哪裡都沒去。這一章開一個資料庫，讓每一筆預約真的存下來，老闆隔天打開就看得到。</p>
     </div>
 
     <div class="content">
 
-      <div class="box box-info">
-        <div class="box-label">使用方式</div>
-        這頁是字典，不是教科書。你不需要從頭讀到尾。<br>
-        遇到看不懂的術語 → 按 <code>Ctrl+F</code>（Mac 是 <code>Cmd+F</code>）搜尋 → 看「一句話白話」就夠了。
+      <!-- ========== A. 全貌 ========== -->
+      <h2 id="overview">先看全貌：這章做完會變成什麼樣</h2>
+
+      <p>前兩章做的是「讓人看得到」。這一章做的是「讓人留得下東西」。做完之後，整條路長這樣：</p>
+
+      <div class="db-flow" role="group" aria-label="預約資料的流向示意圖">
+        <div class="db-flow-row">
+          <div class="db-flow-title">頁面怎麼來的（第七、八章做好了）</div>
+          <ol class="db-flow-steps">
+            <li><div class="db-node"><strong>你的電腦</strong><span>Claude 在這裡改頁面</span></div></li>
+            <li><div class="db-node"><strong>GitHub</strong><span>留每一版的紀錄</span></div></li>
+            <li><div class="db-node"><strong>Cloudflare</strong><span>把頁面放上網</span></div></li>
+            <li><div class="db-node"><strong>客人的手機</strong><span>打開 B 咖啡店的網址</span></div></li>
+          </ol>
+        </div>
+        <div class="db-flow-row">
+          <div class="db-flow-title">預約怎麼存下來（這一章要做的）</div>
+          <ol class="db-flow-steps">
+            <li><div class="db-node"><strong>客人按送出</strong><span>頁面把資料打包好</span></div></li>
+            <li><div class="db-node db-node-key"><strong>Supabase 的門口</strong><span>先看規則：這個動作准不准</span></div></li>
+            <li><div class="db-node"><strong>預約表</strong><span>准的話，寫進一列</span></div></li>
+            <li><div class="db-node"><strong>老闆</strong><span>登入 Supabase 後台查看</span></div></li>
+          </ol>
+        </div>
       </div>
 
-      <!-- A. 資料相關 -->
-      <h2>資料相關</h2>
+      <p>第一排是頁面從你的電腦一路走到客人手上。第二排是客人填的東西反過來走：從客人手上，經過一道門，存進一張表。那道門是這一章的重點，最後一節會專門講。</p>
+
+      <!-- ========== B. 資料庫是什麼 ========== -->
+      <h2 id="what">資料庫是什麼</h2>
+
+      <p>先想想 B 咖啡店現在怎麼收預約。櫃檯放一本預約簿，客人打電話來，店員翻到那一天，寫下名字、電話、幾點、幾位。</p>
+
+      <p>資料庫就是一本放在網路上、有規矩的預約簿。差別在三件事：</p>
+
+      <ul>
+        <li><strong>它會擋錯</strong>：人數欄只收數字，日期欄只收日期。客人把電話填進人數那格，它直接退回，不會先收下來再讓你頭痛。</li>
+        <li><strong>它會看人</strong>：誰可以寫、誰可以看、誰可以改，事先講好。客人只能寫一筆新的，不能翻別人的。</li>
+        <li><strong>它不怕擠</strong>：十個客人同一秒按送出，它一筆一筆排好收，不會兩個人寫在同一行、互相蓋掉。</li>
+      </ul>
+
+      <div class="analogy">
+        <strong>白話比喻：</strong><br><br>
+        試算表像一本攤在櫃檯上的筆記本，誰經過都能翻、能改、能撕。<br><br>
+        資料庫像一個有管理員的登記處。你遞單子進去，管理員先看格式對不對、你有沒有資格，對了才幫你歸檔。你看不到抽屜裡別人的單子，也不能自己伸手進去改。
+      </div>
+
+      <p>這一章用的資料庫服務叫 <strong>Supabase</strong>。它底下是一個完整的 PostgreSQL 資料庫（一種很普遍的資料庫），外面再包好登記處需要的東西：一個讓頁面送資料進來的窗口（API，第十二章細講）、一套看人的規則、一個給你看資料的後台。你不用自己架機器，也不用自己寫窗口。</p>
+
+      <!-- ========== C. 跟 Excel 不一樣 ========== -->
+      <h2 id="not-a-spreadsheet">為什麼不能拿 Google 試算表當資料庫用到底</h2>
+
+      <p>很多人第一個念頭是：「預約丟進 Google 試算表就好，我天天在用，看得懂。」剛開始真的可以。客人少、只有你一個人在看，試算表撐得住。問題出在後面。</p>
 
       <div class="table-wrapper">
         <table>
           <thead>
-            <tr>
-              <th>術語</th>
-              <th>一句話白話</th>
-              <th>比喻</th>
-            </tr>
+            <tr><th>情況</th><th>Google 試算表</th><th>資料庫</th></tr>
           </thead>
           <tbody>
             <tr>
-              <td><code>SQL</code></td>
-              <td>高級 Excel，多張表可以互相查詢</td>
-              <td>檔案櫃，抽屜之間可以互相參照</td>
+              <td>客人把「三位」寫成「3 個人＋1 小孩」</td>
+              <td>照收。之後要算總人數，算不出來</td>
+              <td>人數欄設成數字，填不進去，頁面當場請客人改</td>
             </tr>
             <tr>
-              <td><code>NoSQL</code></td>
-              <td>不用固定格式的資料庫</td>
-              <td>百寶箱，什麼形狀都能丟進去</td>
+              <td>店員不小心刪掉一整排</td>
+              <td>刪了。要翻版本紀錄才找得回來，還不一定發現得了</td>
+              <td>店員帳號根本沒有刪除的權限</td>
             </tr>
             <tr>
-              <td><code>Migration</code></td>
-              <td>資料庫的版本控制，記錄每次結構變更</td>
-              <td>施工日誌，記錄什麼時候拆牆、什麼時候加插座</td>
+              <td>頁面要讓客人寫入</td>
+              <td>通常要把整份試算表開給程式寫，等於整本筆記本交出去</td>
+              <td>可以只開「新增一筆」這個動作，其他都不開</td>
             </tr>
             <tr>
-              <td><code>ORM</code></td>
-              <td>用程式語言操作資料庫，不用寫 SQL</td>
-              <td>翻譯官，你說中文他幫你翻成 SQL</td>
+              <td>兩個客人同時預約最後一個位子</td>
+              <td>兩筆都收，誰先誰後要人去判斷</td>
+              <td>可以設規則讓後到的那筆被擋下（第十七章講）</td>
             </tr>
             <tr>
-              <td><code>Schema</code></td>
-              <td>資料庫的設計藍圖，定義有哪些表、哪些欄位</td>
-              <td>建築平面圖，標好幾間房、每間放什麼</td>
-            </tr>
-            <tr>
-              <td><code>CRUD</code></td>
-              <td>Create / Read / Update / Delete 四種基本操作</td>
-              <td>新增、查詢、修改、刪除 — 資料操作的四個動作</td>
-            </tr>
-            <tr>
-              <td><code>Query</code></td>
-              <td>向資料庫「問問題」的指令</td>
-              <td>去檔案櫃找一份特定的文件</td>
-            </tr>
-            <tr>
-              <td><code>Index</code></td>
-              <td>資料庫的索引，加速查詢</td>
-              <td>書本的目錄，有了目錄就不用一頁一頁翻</td>
-            </tr>
-            <tr>
-              <td><code>Cache</code></td>
-              <td>暫存常用資料，下次不用重新算</td>
-              <td>便利貼，把常查的電話號碼貼在桌上</td>
-            </tr>
-            <tr>
-              <td><code>JSON</code></td>
-              <td>一種資料格式，用大括號 {} 和方括號 []</td>
-              <td>填好的表格，程式之間用來傳資料的標準格式</td>
+              <td>要接會員、查自己的預約、改狀態</td>
+              <td>越接越亂，公式和程式黏在一起</td>
+              <td>本來就是為這些事設計的</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- B. AI / LLM 相關 -->
-      <h2>AI / LLM 相關</h2>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>術語</th>
-              <th>一句話白話</th>
-              <th>比喻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>RAG</code></td>
-              <td>讓 AI 先翻你的資料再回答，不是只靠記憶</td>
-              <td>給 AI 一本公司手冊，讓它翻書回答</td>
-            </tr>
-            <tr>
-              <td><code>Token（LLM）</code></td>
-              <td>AI 處理文字的最小單位，講越多花越多</td>
-              <td>字數費，每個字都在跳表計費</td>
-            </tr>
-            <tr>
-              <td><code>Token（認證）</code></td>
-              <td>登入後拿到的通行證，下次不用再輸入密碼</td>
-              <td>遊樂園手環，戴著就能自由進出</td>
-            </tr>
-            <tr>
-              <td><code>Prompt</code></td>
-              <td>給 AI 的指令或問題</td>
-              <td>工作交辦事項，寫得越清楚結果越好</td>
-            </tr>
-            <tr>
-              <td><code>Fine-tuning</code></td>
-              <td>用自己的資料額外訓練 AI</td>
-              <td>新人職前訓練，讓 AI 更懂你的領域</td>
-            </tr>
-            <tr>
-              <td><code>Embedding</code></td>
-              <td>把文字轉成數字向量，讓電腦能計算語意距離</td>
-              <td>把書本內容變成地圖上的座標，相似的內容距離近</td>
-            </tr>
-            <tr>
-              <td><code>Context Window</code></td>
-              <td>AI 一次能記住多少內容的上限</td>
-              <td>桌面大小，桌面越大能同時攤開的資料越多</td>
-            </tr>
-            <tr>
-              <td><code>Hallucination</code></td>
-              <td>AI 一本正經地胡說八道</td>
-              <td>考生不會寫但硬掰一個看起來很像的答案</td>
-            </tr>
-            <tr>
-              <td><code>Agent</code></td>
-              <td>能自己規劃步驟、使用工具的 AI</td>
-              <td>不只會回答問題，還會自己動手做事的助理</td>
-            </tr>
-            <tr>
-              <td><code>MCP</code></td>
-              <td>Model Context Protocol，AI 連接外部工具的標準</td>
-              <td>USB 規格，讓 AI 能插上各種工具使用</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <p>試算表不是不能用。它的位置在「抄本」：每天從資料庫匯出一份，給會計看、給老闆做報表都很好。但真正以它為準、讓頁面直接寫進去，就是把店裡唯一一本預約簿攤在門口。</p>
 
       <div class="box box-warning">
-        <div class="box-label">注意：Token 有兩個意思</div>
-        在 AI 領域，Token 是「文字計費單位」。<br>
-        在網頁開發領域，Token 是「登入通行證」。<br>
-        看到 Token 這個詞，要看上下文判斷是哪個意思。
+        <div class="box-label">一份資料只能有一個家</div>
+        資料庫和試算表同時存預約、兩邊都能改，遲早對不起來：客人在頁面取消了，試算表那份還在；店員在試算表改了時間，頁面上查到的還是舊的。要兩份，就講清楚「以資料庫為準，試算表是抄本，誰都不准改抄本」。這件事在第十三章 <a href="/chapter13/">架構拓樸</a> 和第十七章 <a href="/chapter17/">會出事的地方</a> 會再講一次。
       </div>
 
-      <!-- C. 部署 / 維運相關 -->
-      <h2>部署 / 維運相關</h2>
+      <!-- ========== D. 分工 ========== -->
+      <h2 id="who-does-what">動手前：哪些事 Claude 做，哪些事你做</h2>
+
+      <p>這一章跟前兩章一樣，大部分的事可以交給 Claude。它會開表、寫規則、改頁面、測試。但有幾件事它不該做，也做不了：</p>
 
       <div class="table-wrapper">
         <table>
           <thead>
-            <tr>
-              <th>術語</th>
-              <th>一句話白話</th>
-              <th>比喻</th>
-            </tr>
+            <tr><th>事情</th><th>誰做</th><th>為什麼</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><code>Docker</code></td>
-              <td>把程式和它需要的環境打包成一個箱子</td>
-              <td>標準貨櫃，不管到哪個港口都能卸貨</td>
-            </tr>
-            <tr>
-              <td><code>CI/CD</code></td>
-              <td>程式碼推上去後，自動測試 + 自動部署</td>
-              <td>自動化產線，零件進去、成品出來</td>
-            </tr>
-            <tr>
-              <td><code>Cron Job</code></td>
-              <td>定時執行的任務</td>
-              <td>鬧鐘，每天固定時間叫你起床做事</td>
-            </tr>
-            <tr>
-              <td><code>Heartbeat</code></td>
-              <td>定時回報「我還活著」的機制</td>
-              <td>每 10 分鐘按一次門鈴，沒人按就代表出事了</td>
-            </tr>
-            <tr>
-              <td><code>Cold Start</code></td>
-              <td>服務休眠後重新啟動的等待時間</td>
-              <td>冬天熱車，放太久就要等引擎暖起來</td>
-            </tr>
-            <tr>
-              <td><code>Health Check</code></td>
-              <td>確認服務還活著、能正常回應</td>
-              <td>量血壓，定期確認身體機能正常</td>
-            </tr>
-            <tr>
-              <td><code>Uptime</code></td>
-              <td>服務不間斷運行的時間</td>
-              <td>連續營業天數，越長代表越穩定</td>
-            </tr>
-            <tr>
-              <td><code>Ping</code></td>
-              <td>敲一下對方看有沒有回應</td>
-              <td>打電話問「你在嗎？」有人接就代表還活著</td>
-            </tr>
-            <tr>
-              <td><code>Deploy</code></td>
-              <td>把寫好的程式放到伺服器上讓別人能用</td>
-              <td>把做好的菜端上桌，客人可以吃了</td>
-            </tr>
-            <tr>
-              <td><code>Rollback</code></td>
-              <td>發現新版有問題，退回上一個版本</td>
-              <td>菜炒壞了，趕快重做上一盤</td>
-            </tr>
-            <tr>
-              <td><code>Serverless</code></td>
-              <td>不用自己管伺服器，用多少付多少</td>
-              <td>不用自己買車養車，叫計程車就好</td>
-            </tr>
-            <tr>
-              <td><code>VM (Virtual Machine)</code></td>
-              <td>在一台電腦裡面虛擬出另一台電腦</td>
-              <td>大房子隔成小套房出租</td>
-            </tr>
+            <tr><td>註冊 Supabase 帳號、設密碼</td><td class="db-who">你</td><td>帳號是你的，密碼只有你該知道</td></tr>
+            <tr><td>在瀏覽器裡按「允許」讓 CLI 登入</td><td class="db-who">你</td><td>等於把一把鑰匙交給 Claude，要你本人點頭</td></tr>
+            <tr><td>升級付費、綁信用卡</td><td class="db-who">你</td><td>花錢的事一律自己按</td></tr>
+            <tr><td>開表、寫授權和規則、留 Migration 紀錄</td><td class="db-who">Claude</td><td>它寫得快；你看它列出來的清單</td></tr>
+            <tr><td>改預約頁、接上資料庫、測試</td><td class="db-who">Claude</td><td>改完你在手機上自己試一次</td></tr>
+            <tr><td>刪表、清空資料、刪整個專案</td><td class="db-who">你確認後才做</td><td>刪了就沒了，免費版沒有自動備份</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- D. 網路 / 安全相關 -->
-      <h2>網路 / 安全相關</h2>
+      <p>下面每一步都分成三格：<strong>要做什麼</strong>、<strong>跟 Claude 怎麼說</strong>（可以直接複製）、<strong>你自己要動手的地方</strong>。後面再附「做完會看到什麼」和「常見卡住的地方」，讓你知道自己有沒有做對。</p>
+
+      <div class="box box-info">
+        <div class="box-label">以下操作的依據</div>
+        步驟、畫面上的名稱、免費額度都照 Supabase 官方文件寫，查詢日期 2026-11-13。服務的畫面會改，看到的名稱跟這裡不一樣時，以官方畫面為準，或直接問 Claude：「Supabase 現在的畫面，這個功能在哪裡？去官方文件查。」
+      </div>
+
+      <!-- ========== E. 步驟一 ========== -->
+      <h2 id="step1">步驟一：註冊 Supabase，開一個專案</h2>
+
+      <p>Supabase 的「專案」就是一個獨立的資料庫，加上它的窗口和後台。B 咖啡店的預約開一個專案就夠了。</p>
+
+      <div class="db-step">
+        <div class="db-step-head"><span class="db-step-num">步驟一</span><h3>開一個 Supabase 專案</h3></div>
+        <div class="db-cells">
+          <div class="db-cell db-cell-do">
+            <div class="db-cell-label">要做什麼</div>
+            <p>到 supabase.com 註冊帳號，在後台建一個新專案，取一個好認的名字，例如 <code>b-coffee-booking</code>。</p>
+          </div>
+          <div class="db-cell db-cell-say">
+            <div class="db-cell-label">跟 Claude 怎麼說</div>
+            <p class="db-say">「我要幫 B 咖啡店的預約頁開一個 Supabase 專案。先去官方文件查現在註冊和開專案的流程、免費版的限制，用白話列給我，我自己去按。」</p>
+          </div>
+          <div class="db-cell db-cell-you">
+            <div class="db-cell-label">你自己要動手</div>
+            <ul>
+              <li>註冊帳號。官方註冊頁可以用 GitHub 帳號登入，也可以用 email 和密碼。第七章已經有 GitHub 帳號的話，用 GitHub 最省事。</li>
+              <li>開新專案時，畫面會要你填專案名稱、設一組<strong>資料庫密碼</strong>、選一個<strong>地區</strong>。地區選離客人近的（客人在台灣，就選亞洲的）。</li>
+              <li>資料庫密碼存進你的密碼管理工具。之後不要貼給 Claude 看，它用不到這組密碼也能做事（下一步用另一種登入）。</li>
+            </ul>
+          </div>
+          <div class="db-cell db-cell-see">
+            <div class="db-cell-label">做完會看到</div>
+            <p>專案準備好之後，你會進到這個專案的後台。專案有一個自己的網址，長得像 <code>https://一串英文字母.supabase.co</code>，那串字母叫專案代號。後台有一個 <strong>Connect</strong> 按鈕，點開看得到這個網址和一把金鑰，下一步會用到。</p>
+          </div>
+          <div class="db-cell db-cell-stuck">
+            <div class="db-cell-label">常見卡住的地方</div>
+            <ul>
+              <li><strong>專案一直在準備中</strong>：新專案要一點時間建好資料庫，先去做別的事再回來。</li>
+              <li><strong>開不了第三個專案</strong>：免費版同時只能有兩個在用的專案。不用的那個先暫停或刪掉（刪之前看下面的「刪除」提醒），或改用付費方案。</li>
+              <li><strong>註冊後要你去信箱確認</strong>：照畫面指示去收信，確認完再回來登入。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h3 id="free-plan">免費版先知道這幾件事</h3>
 
       <div class="table-wrapper">
         <table>
           <thead>
-            <tr>
-              <th>術語</th>
-              <th>一句話白話</th>
-              <th>比喻</th>
-            </tr>
+            <tr><th>項目</th><th>免費版</th><th>這對 B 咖啡店的意思</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td><code>SSL / HTTPS</code></td>
-              <td>加密連線，確保傳輸過程不被偷看</td>
-              <td>密封信封，只有收件人能打開</td>
-            </tr>
-            <tr>
-              <td><code>DNS</code></td>
-              <td>把網址翻譯成 IP 位址</td>
-              <td>電話簿，查「王小明」找到他的電話號碼</td>
-            </tr>
-            <tr>
-              <td><code>Webhook</code></td>
-              <td>有事主動通知你，不用你一直去問</td>
-              <td>快遞到了打電話叫你下來拿</td>
-            </tr>
-            <tr>
-              <td><code>env 環境變數</code></td>
-              <td>密碼和設定值，不寫在程式碼裡</td>
-              <td>保險箱密碼寫在另一張紙上，不刻在門上</td>
-            </tr>
-            <tr>
-              <td><code>CORS</code></td>
-              <td>跨網域存取限制，防止別人的網站偷你的資料</td>
-              <td>不同大樓之間的通行證，沒通行證不能進</td>
-            </tr>
-            <tr>
-              <td><code>Auth</code></td>
-              <td>身份驗證，確認「你是誰」</td>
-              <td>出示身份證，門衛確認你是本人</td>
-            </tr>
-            <tr>
-              <td><code>OAuth</code></td>
-              <td>用 Google / Facebook 帳號登入其他網站</td>
-              <td>用公司識別證進合作夥伴的辦公室</td>
-            </tr>
-            <tr>
-              <td><code>JWT</code></td>
-              <td>一種 Token 格式，裝著你的身份資訊</td>
-              <td>電子會員卡，掃一下就知道你是誰、有什麼權限</td>
-            </tr>
-            <tr>
-              <td><code>Rate Limiting</code></td>
-              <td>限制每秒能發幾次請求</td>
-              <td>排隊管制，一次只能進 10 個人</td>
-            </tr>
-            <tr>
-              <td><code>Firewall</code></td>
-              <td>網路防火牆，擋掉不該進來的流量</td>
-              <td>社區警衛室，檢查每個進出的人</td>
-            </tr>
+            <tr><td>專案數</td><td>同時最多 2 個在用的專案</td><td>預約一個、練習一個，剛好</td></tr>
+            <tr><td>資料庫大小</td><td>每個專案 500 MB</td><td>只存文字的預約，夠用很久</td></tr>
+            <tr><td>一週沒動靜</td><td>會被暫停</td><td>淡季沒人預約，頁面可能突然送不出去（下面細講）</td></tr>
+            <tr><td>自動備份</td><td>沒有</td><td>備份要自己做（步驟七）</td></tr>
+            <tr><td>付費方案</td><td>Pro 每月 25 美元起，含每日備份、保留 7 天，不會因為沒動靜被暫停</td><td>有真的客人在用、停一天就損失生意時再考慮</td></tr>
           </tbody>
         </table>
       </div>
 
-      <!-- E. 開發工具相關 -->
-      <h2>開發工具相關</h2>
+      <p style="font-size:14px;color:var(--text-muted)">以上數字與價格以官方頁面為準（<a href="https://supabase.com/pricing" target="_blank" rel="noopener">supabase.com/pricing</a>，查詢日期 2026-11-13）。方案會改，升級之前自己再看一次。</p>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>術語</th>
-              <th>一句話白話</th>
-              <th>比喻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>Git</code></td>
-              <td>程式碼的版本控制系統</td>
-              <td>Word 的「追蹤修訂」功能，能看到每次改了什麼</td>
-            </tr>
-            <tr>
-              <td><code>npm / pnpm</code></td>
-              <td>安裝 JavaScript 套件的工具</td>
-              <td>App Store，別人寫好的工具你直接裝來用</td>
-            </tr>
-            <tr>
-              <td><code>Lint</code></td>
-              <td>程式碼風格檢查工具</td>
-              <td>校稿，自動抓錯字和格式不一致</td>
-            </tr>
-            <tr>
-              <td><code>TypeScript</code></td>
-              <td>有型別限制的 JavaScript</td>
-              <td>填表格有格式限制的版本 — 姓名欄不能填數字</td>
-            </tr>
-            <tr>
-              <td><code>Framework</code></td>
-              <td>開發框架，提供一整套結構和規範</td>
-              <td>蓋房子的鋼骨結構，有了骨架才好往上蓋</td>
-            </tr>
-            <tr>
-              <td><code>Library</code></td>
-              <td>工具庫，需要什麼拿什麼</td>
-              <td>工具箱裡的各種工具，你挑你要的用</td>
-            </tr>
-            <tr>
-              <td><code>IDE</code></td>
-              <td>寫程式用的編輯器（如 VS Code、Cursor）</td>
-              <td>程式設計師的 Word，但功能強大很多</td>
-            </tr>
-            <tr>
-              <td><code>Terminal</code></td>
-              <td>用打字下指令操作電腦的介面</td>
-              <td>電腦的對講機，不用滑鼠，用文字跟電腦說話</td>
-            </tr>
-            <tr>
-              <td><code>Package</code></td>
-              <td>別人寫好的程式碼打包成一包</td>
-              <td>預拌粉，不用自己磨麵粉，加水就能用</td>
-            </tr>
-            <tr>
-              <td><code>Dependency</code></td>
-              <td>你的程式依賴的其他套件</td>
-              <td>食材清單，少了一樣就煮不出這道菜</td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- ========== F. 步驟二 ========== -->
+      <h2 id="step2">步驟二：讓 Claude 接上你的專案</h2>
+
+      <p>接下來開表、寫規則，都可以在 Supabase 後台用滑鼠點出來。但這一套教的做法是讓 Claude 用 Supabase 的 <strong>CLI</strong>（在終端機裡用打字操作的工具）去做。理由跟第七章用 wrangler、gh 一樣：有官方 CLI 就先用 CLI。Claude 本來就會打指令，每一個動作都留在畫面上，你看得到它做了什麼；而且每次改資料庫結構都會留一份紀錄檔，之後查得到、退得回去。</p>
+
+      <div class="db-step">
+        <div class="db-step-head"><span class="db-step-num">步驟二</span><h3>裝好 Supabase CLI，登入一次，連到專案</h3></div>
+        <div class="db-cells">
+          <div class="db-cell db-cell-do">
+            <div class="db-cell-label">要做什麼</div>
+            <p>在預約頁的資料夾裡，讓 Claude 裝好 Supabase CLI、登入你的帳號，再把這個資料夾連到剛剛開的專案。</p>
+          </div>
+          <div class="db-cell db-cell-say">
+            <div class="db-cell-label">跟 Claude 怎麼說</div>
+            <p class="db-say">「幫我裝 Supabase 的官方 CLI，照官方文件的方式。裝好之後登入，再把這個資料夾連到我剛開的 b-coffee-booking 專案。需要我在瀏覽器按什麼，先告訴我在哪個視窗、要按什麼。」</p>
+          </div>
+          <div class="db-cell db-cell-you">
+            <div class="db-cell-label">你自己要動手</div>
+            <ul>
+              <li>登入時，瀏覽器會打開 Supabase 的頁面，請你登入並確認。先看網址是 supabase.com，再按。畫面如果給你一組驗證碼，照指示貼回終端機。</li>
+              <li>登入這一步要在終端機輸入東西的話，請 Claude 把指令給你，你自己在終端機打。登入後的權杖會存在電腦系統的鑰匙圈裡，不用你另外記。</li>
+              <li>如果你切在 Manual 模式，它安裝東西前會先問你；預設的 Auto 模式不一定會問。所以開工前先跟它說：「安裝任何東西前先告訴我要裝什麼、從哪裡裝。」它說了，看一眼是不是 Supabase 官方的 CLI，再讓它裝。</li>
+            </ul>
+          </div>
+          <div class="db-cell db-cell-see">
+            <div class="db-cell-label">做完會看到</div>
+            <p>Claude 回報登入成功、已經連到 b-coffee-booking。你的資料夾裡多了一個 <code>supabase</code> 資料夾，之後每一次改資料庫結構的紀錄都會放在 <code>supabase/migrations</code> 裡。</p>
+          </div>
+          <div class="db-cell db-cell-stuck">
+            <div class="db-cell-label">常見卡住的地方</div>
+            <ul>
+              <li><strong>登入的網頁沒跳出來</strong>：請 Claude 把登入網址印出來，你自己複製到瀏覽器打開。</li>
+              <li><strong>連錯專案</strong>：你有兩個專案時特別容易發生。請 Claude「列出目前連到的專案名稱和代號」，跟後台網址裡那串字母對一下。</li>
+              <li><strong>Claude 跟你要資料庫密碼</strong>：多數動作用登入就夠了。它真的需要時，請它說明為什麼、要用在哪一個指令；密碼由你自己在終端機輸入，不要貼進對話。</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       <div class="box box-tip">
-        <div class="box-label">Framework vs Library 差在哪？</div>
-        <strong>Framework</strong>（框架）= 它規定你怎麼寫，你在它的架構裡填東西。像是蓋房子先有鋼骨，你往裡面塞隔間。<br>
-        <strong>Library</strong>（工具庫）= 你需要什麼就拿什麼，主導權在你手上。像是工具箱，你決定用扳手還是螺絲起子。<br><br>
-        例：Next.js 是 Framework（規定你檔案怎麼放、路由怎麼走）；lodash 是 Library（你想用哪個函式就 import 哪個）。
+        <div class="box-label">不想裝 CLI 也可以</div>
+        Supabase 有官方的 MCP，也可以讓 Claude 開表、查資料；再不行，後台的 <strong>SQL Editor</strong> 可以讓你把 Claude 寫好的 SQL 貼進去執行。順序照第十章 <a href="/chapter10/#cli-mcp">Claude Code 怎麼用</a> 講的：有官方 CLI 先用 CLI，沒有才裝 MCP。用後台貼 SQL 的缺點是沒有自動留紀錄，要自己記得存一份。
       </div>
 
-      <!-- F. 常用套件 / 概念補充 -->
-      <h2>常用套件與概念</h2>
+      <!-- ========== G. 步驟三 ========== -->
+      <h2 id="step3">步驟三：開一張「預約」表</h2>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>術語</th>
-              <th>一句話白話</th>
-              <th>比喻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>i18n</code></td>
-              <td>internationalization，多國語言套件</td>
-              <td>網站的翻譯年糕，讓同一個網站能顯示不同語言</td>
-            </tr>
-            <tr>
-              <td><code>Tailwind CSS</code></td>
-              <td>用 class 名稱直接寫樣式的 CSS 工具</td>
-              <td>樂高積木式的排版，用小積木組合出畫面</td>
-            </tr>
-            <tr>
-              <td><code>Zustand / Redux</code></td>
-              <td>前端的狀態管理工具</td>
-              <td>中央控制室，所有頁面的資料都從這裡拿</td>
-            </tr>
-            <tr>
-              <td><code>Supabase</code></td>
-              <td>開源的 Firebase 替代品，提供資料庫 + 認證 + 儲存</td>
-              <td>後端懶人包，不用自己架伺服器</td>
-            </tr>
-            <tr>
-              <td><code>Prisma</code></td>
-              <td>Node.js 的 ORM 工具，用 TypeScript 操作資料庫</td>
-              <td>翻譯官的 TypeScript 版</td>
-            </tr>
-            <tr>
-              <td><code>Vercel</code></td>
-              <td>前端部署平台，推上去就能自動部署</td>
-              <td>一鍵開店平台，程式碼放上去就變成網站</td>
-            </tr>
-            <tr>
-              <td><code>Next.js</code></td>
-              <td>React 的全端框架，前後端都能做</td>
-              <td>全能廚房，從食材處理到擺盤上桌全包</td>
-            </tr>
-            <tr>
-              <td><code>React</code></td>
-              <td>最流行的前端 UI 工具庫</td>
-              <td>蓋網頁的積木系統，用元件組合出畫面</td>
-            </tr>
-          </tbody>
-        </table>
+      <p>資料庫裡裝資料的地方叫<strong>表</strong>，長得很像試算表的一個分頁：每一<strong>列</strong>是一筆預約，每一<strong>欄</strong>是一種資料（名字、電話、日期）。差別在每一欄都要先講好放什麼，講好就不能亂放。</p>
+
+      <p>B 咖啡店的預約頁有哪些格子，表就開哪些欄。第七章做的頁面有姓名、電話、日期、時間、人數、備註，那就是這六欄，再加兩個資料庫自己會填的：每筆的編號、收到的時間。</p>
+
+      <div class="db-step">
+        <div class="db-step-head"><span class="db-step-num">步驟三</span><h3>讓 Claude 開表，並留下 Migration 紀錄</h3></div>
+        <div class="db-cells">
+          <div class="db-cell db-cell-do">
+            <div class="db-cell-label">要做什麼</div>
+            <p>照預約頁上的格子開一張 <code>reservations</code>（預約）表。用 Migration 的方式開：先寫成一個紀錄檔，再套用到資料庫上。</p>
+          </div>
+          <div class="db-cell db-cell-say">
+            <div class="db-cell-label">跟 Claude 怎麼說</div>
+            <p class="db-say">「先讀預約頁的表單有哪些欄位。照這些欄位，用 Supabase CLI 開一個 migration，建一張 reservations 表。人數只收 1 到 20 的整數，姓名、電話、日期、時間不能空白。寫好先給我看 SQL，用白話解釋每一欄，我說可以再套用到資料庫。」</p>
+          </div>
+          <div class="db-cell db-cell-you">
+            <div class="db-cell-label">你自己要動手</div>
+            <ul>
+              <li>看 Claude 列出來的欄位，跟頁面上的格子一個一個對。少一欄，客人填了也存不進去；多一欄，問它那是做什麼的。</li>
+              <li>確認之後，回它一句「可以，套用」。</li>
+            </ul>
+          </div>
+          <div class="db-cell db-cell-see">
+            <div class="db-cell-label">做完會看到</div>
+            <p><code>supabase/migrations</code> 裡多一個檔，檔名開頭是日期時間。到 Supabase 後台的 <strong>Table Editor</strong>，看得到一張空的 reservations 表，欄位跟你剛剛確認的一樣。</p>
+          </div>
+          <div class="db-cell db-cell-stuck">
+            <div class="db-cell-label">常見卡住的地方</div>
+            <ul>
+              <li><strong>後台看不到新表</strong>：先確認 Claude 是套用到「遠端的專案」，不是只在你電腦上的練習資料庫。請它說清楚套用到哪裡。</li>
+              <li><strong>Claude 直接在後台改，沒留紀錄檔</strong>：請它補一份 migration，讓紀錄跟資料庫現況一致。</li>
+              <li><strong>欄位名稱是中文</strong>：請它用英文小寫加底線（例如 <code>party_size</code>），中文留在說明裡。程式和資料庫都比較不會出事。</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
-      <!-- G. 前端 / 後端概念 -->
-      <h2>前端 / 後端概念</h2>
+      <p>Claude 寫出來的 SQL 大概長這樣。你不用會寫，看得懂在說什麼就好：</p>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>術語</th>
-              <th>一句話白話</th>
-              <th>比喻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>Frontend（前端）</code></td>
-              <td>使用者看到的畫面</td>
-              <td>餐廳的用餐區，客人看到的一切</td>
-            </tr>
-            <tr>
-              <td><code>Backend（後端）</code></td>
-              <td>使用者看不到的邏輯和資料處理</td>
-              <td>廚房，客人看不到但真正做事的地方</td>
-            </tr>
-            <tr>
-              <td><code>Full-stack</code></td>
-              <td>前端 + 後端都會</td>
-              <td>從外場到廚房都能做的全能員工</td>
-            </tr>
-            <tr>
-              <td><code>SSR</code></td>
-              <td>Server-Side Rendering，在伺服器端先畫好頁面再送出</td>
-              <td>餐廳直接端成品，不用你自己組裝</td>
-            </tr>
-            <tr>
-              <td><code>CSR</code></td>
-              <td>Client-Side Rendering，在瀏覽器端才畫頁面</td>
-              <td>自助餐，食材送到你面前你自己夾</td>
-            </tr>
-            <tr>
-              <td><code>SPA</code></td>
-              <td>Single Page Application，整個網站只有一個 HTML 頁面</td>
-              <td>像 App 一樣順暢，不用每次換頁都重新載入</td>
-            </tr>
-            <tr>
-              <td><code>Component</code></td>
-              <td>可重複使用的 UI 零件</td>
-              <td>樂高積木塊，一個按鈕、一張卡片就是一個元件</td>
-            </tr>
-            <tr>
-              <td><code>State</code></td>
-              <td>元件的「目前狀態」</td>
-              <td>開關的「開」或「關」、購物車裡有幾件商品</td>
-            </tr>
-            <tr>
-              <td><code>Middleware</code></td>
-              <td>請求到達目的地之前經過的「關卡」</td>
-              <td>機場安檢，在你到達登機門之前先檢查一輪</td>
-            </tr>
-            <tr>
-              <td><code>Route（路由）</code></td>
-              <td>網址對應到哪個頁面或功能</td>
-              <td>門牌號碼，/about 對應「關於我們」頁面</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <div class="code-block db-code"><span class="db-c">-- 建一張預約表</span>
+create table public.reservations (
+  id           bigint generated by default as identity primary key, <span class="db-c">-- 每筆的編號，自動給</span>
+  created_at   timestamptz not null default now(),  <span class="db-c">-- 收到的時間，自動填</span>
+  name         text not null,                       <span class="db-c">-- 姓名，必填</span>
+  phone        text not null,                       <span class="db-c">-- 電話，必填</span>
+  reserve_date date not null,                       <span class="db-c">-- 預約日期</span>
+  reserve_time time not null,                       <span class="db-c">-- 預約時間</span>
+  party_size   int  not null check (party_size between 1 and 20), <span class="db-c">-- 人數 1 到 20</span>
+  note         text                                 <span class="db-c">-- 備註，可以空白</span>
+);</div>
 
-      <!-- H. 版本控制 / 協作 -->
-      <h2>版本控制 / 協作</h2>
+      <p>幾個字看懂就夠：<code>text</code> 是文字，<code>date</code> 是日期，<code>int</code> 是整數，<code>not null</code> 是不能空白，<code>check</code> 是額外的檢查。電話用文字不用數字，因為電話開頭的 0 不能被吃掉。</p>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>術語</th>
-              <th>一句話白話</th>
-              <th>比喻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>Branch</code></td>
-              <td>程式碼的分支，讓你在不影響主線的情況下開發</td>
-              <td>平行宇宙，在另一個世界改東西不會影響本尊</td>
-            </tr>
-            <tr>
-              <td><code>Merge</code></td>
-              <td>把分支的改動合併回主線</td>
-              <td>把平行宇宙的成果搬回本尊</td>
-            </tr>
-            <tr>
-              <td><code>Pull Request (PR)</code></td>
-              <td>請求把你的分支合併到主線，讓人審核</td>
-              <td>交作業請老師批改，老師 OK 才能交卷</td>
-            </tr>
-            <tr>
-              <td><code>Commit</code></td>
-              <td>存一個版本紀錄，附上說明</td>
-              <td>存檔點，遊戲裡的 Save Point</td>
-            </tr>
-            <tr>
-              <td><code>Conflict</code></td>
-              <td>兩個人改了同一段程式碼，Git 不知道用哪個</td>
-              <td>兩個人同時改同一份文件的同一段，要人工決定留哪個</td>
-            </tr>
-            <tr>
-              <td><code>Repository (Repo)</code></td>
-              <td>專案的程式碼倉庫</td>
-              <td>一個專案的所有檔案 + 歷史紀錄的資料夾</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="analogy">
+        <strong>Migration 是什麼：</strong><br><br>
+        裝潢店面時，每次改格局都留一張施工單：哪天、拆了哪面牆、加了哪個插座。半年後要查「這個插座是誰裝的」，翻施工單就知道。<br><br>
+        Migration 就是資料庫的施工單。每改一次表的結構，就留一個檔，照時間排好。哪天出問題，看得到是哪一次改壞的；要在另一個專案重建一樣的表，照單施工一次就好。
       </div>
 
       <div class="box box-info">
-        <div class="box-label">本章重點</div>
-        這頁的目的不是要你全部背起來。<br><br>
-        當你跟 Claude Code 對話時看到不懂的詞，回來這裡查一下就好。<br>
-        知道「那個詞是什麼意思」，就能減少好幾輪來回對話，直接省 Token。
+        <div class="box-label">這章只開到夠用</div>
+        一張預約表、八個欄位，夠 B 咖啡店起步。之後要加「狀態」（已確認、已取消）、要分店、要會員，表怎麼拆、欄位怎麼定、表跟表怎麼連，留給第十五章 <a href="/chapter15/">資料表與欄位</a>。現在先記一句：<strong>欄位不要讓 Claude 想加就加</strong>，每加一欄都要它先講為什麼。
       </div>
+
+      <!-- ========== H. 步驟四 ========== -->
+      <h2 id="step4">步驟四：開門，再上鎖（授權與 RLS）</h2>
+
+      <p>表開好了，但現在預約頁還連不進來。這是對的。Supabase 的規矩是：<strong>沒交代的，一律不開</strong>。要讓頁面寫得進來，要做兩件事。</p>
+
+      <h3>第一層：授權，決定這張表的門開不開</h3>
+
+      <p>授權（SQL 裡叫 <code>grant</code>）決定「從頁面來的人，能對這張表做哪幾種動作」。動作有四種：讀、新增、修改、刪除。B 咖啡店的預約頁只需要一種：<strong>新增</strong>。客人不需要讀別人的預約，更不需要改或刪。</p>
+
+      <p>Supabase 在 2026 年改了預設：<strong>新建的表不再自動開放給頁面，要明確授權才開</strong>。照官方公告，新專案從 2026 年 5 月 30 日起陸續改成這樣，舊專案從 2026 年 10 月 30 日起也一樣。改之前就建好的表，原本開放的動作照舊留著；以前的預設是讀、新增、修改、刪除全開。</p>
+
+      <p>所以你的表可能是「什麼都沒開」，也可能是「全部都開」。不用去分是哪一種：請 Claude <strong>先把這張表給頁面的授權全部收回，再明確寫出要開哪幾個動作</strong>，最後檢查有沒有多開。這樣新舊專案做完的結果都一樣。後台的 Data API 設定裡有一個 <strong>Automatically expose new tables</strong>（自動開放新表）的開關，建議關著。</p>
+
+      <p>授權沒開的表，頁面連過去會看到「permission denied for table」，代碼 42501。這是門沒開，不是資料不見，請 Claude 只補需要的那幾個動作。</p>
+
+      <h3>第二層：RLS，決定每一筆准不准</h3>
+
+      <p>RLS 是 Row Level Security 的縮寫，白話是「逐列的存取規則」。門開了之後，每一個動作還要過一關：這一筆，這個人，准不准？</p>
+
+      <p>RLS 有一個很重要的性質：<strong>打開之後，沒有寫規則的動作一律擋掉</strong>。所以做法是先打開，再一條一條寫「准什麼」，沒寫到的自然都不准。用 SQL 開表時，RLS 不會自動打開，一定要記得開；在後台用滑鼠開表的話，Supabase 會替你打開。</p>
+
+      <div class="analogy">
+        <strong>白話比喻：</strong><br><br>
+        授權是店門口的告示：「本店只收預約單」。沒寫在告示上的事，店員連聽都不聽。<br><br>
+        RLS 是櫃檯店員手上的檢查表：收到一張預約單，看它准不准收。檢查表上只寫了一條「客人可以交新的預約單」，所以客人要求「讓我看今天所有人的預約」，店員照表回答：不行。
+      </div>
+
+      <div class="db-step">
+        <div class="db-step-head"><span class="db-step-num">步驟四</span><h3>只開「新增」，打開 RLS，寫一條規則</h3></div>
+        <div class="db-cells">
+          <div class="db-cell db-cell-do">
+            <div class="db-cell-label">要做什麼</div>
+            <p>讓沒登入的客人（Supabase 叫這種身分 <code>anon</code>）只能對 reservations 表做「新增」；打開 RLS；寫一條規則准許新增。讀、改、刪全部不開。</p>
+          </div>
+          <div class="db-cell db-cell-say">
+            <div class="db-cell-label">跟 Claude 怎麼說</div>
+            <p class="db-say">「再開一個 migration：reservations 表打開 RLS；先收回 anon 和 authenticated 原本的所有授權，再只授權 anon 新增（insert），不要授權讀取、修改、刪除；加一條 RLS 規則，允許 anon 新增預約。寫完列一張表給我看：每個身分能做哪些動作。」</p>
+            <p class="db-say">「套用之後，用頁面會用的那把 publishable key 實際試三件事：新增一筆、讀全部、刪一筆。告訴我哪個成功、哪個被擋，被擋的錯誤訊息是什麼。」</p>
+          </div>
+          <div class="db-cell db-cell-you">
+            <div class="db-cell-label">你自己要動手</div>
+            <ul>
+              <li>看 Claude 列出來的那張表，確認只有「客人：新增」是打勾的。</li>
+              <li>看它回報的三個測試結果。新增成功、讀取和刪除被擋，才算過關。</li>
+            </ul>
+          </div>
+          <div class="db-cell db-cell-see">
+            <div class="db-cell-label">做完會看到</div>
+            <p>Claude 回報：用頁面的金鑰新增一筆，成功；讀全部，被擋；刪一筆，被擋。後台的 Table Editor 裡多了一筆測試資料（看完可以請它刪掉）。</p>
+            <p>「被擋」有兩種樣子，都算過關：</p>
+            <ul>
+              <li>回 42501（permission denied）：門根本沒開，最乾淨。</li>
+              <li>不報錯，但讀全部回一個空清單、刪除刪到 0 筆：門有開，RLS 沒准，所以一筆都碰不到。RLS 擋讀和刪的方式就是這樣，安靜地當作沒有。這時順手請 Claude 到後台確認那筆測試資料還在。</li>
+            </ul>
+          </div>
+          <div class="db-cell db-cell-stuck">
+            <div class="db-cell-label">常見卡住的地方</div>
+            <ul>
+              <li><strong>新增時出現「permission denied for table」，代碼 42501</strong>：門還沒開，授權少了。（讀全部、刪一筆出現 42501 是對的，那是過關。）不是資料不見。請 Claude 只補「新增」的授權。</li>
+              <li><strong>新增也被擋，代碼一樣是 42501</strong>：門開了，但 RLS 沒有准許新增的規則，或規則寫錯身分。請 Claude 檢查規則是不是寫給 <code>anon</code>。</li>
+              <li><strong>Claude 說「為了方便，先把 RLS 關掉」</strong>：不要答應。關掉 RLS 等於檢查表撕掉，任何拿到金鑰的人想讀就讀、想刪就刪。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <p>這一步的 SQL 大概是這樣：</p>
+
+      <div class="code-block db-code"><span class="db-c">-- 打開 RLS：沒寫規則的動作一律擋掉</span>
+alter table public.reservations enable row level security;
+
+<span class="db-c">-- 先收回：舊專案的表可能本來就全開，先全部收回，新舊專案結果才一樣</span>
+revoke all on table public.reservations from anon, authenticated;
+
+<span class="db-c">-- 授權：沒登入的客人（anon）只能新增</span>
+grant insert on table public.reservations to anon;
+
+<span class="db-c">-- 規則：准許 anon 新增預約</span>
+create policy "客人可以新增預約"
+  on public.reservations
+  for insert
+  to anon
+  with check (true);</div>
+
+      <p>最後那條規則的 <code>with check (true)</code> 意思是「新的這一筆，不另外檢查，收」。欄位本身的檢查（必填、人數 1 到 20）在開表時已經設好了，還是會擋。想再嚴一點，例如「不能預約今天以前的日期」，可以請 Claude 把條件寫進這裡。</p>
+
+      <p>下面這個小示範，把剛剛設好的規則跑一遍。換不同的人、做不同的事，看門口怎麼回答。</p>
+
+      <div class="demo-container" data-demo-title="互動示範：誰來敲門">
+        <p class="demo-label">先選一個人，再選一個動作。規則就是步驟四設好的那一套。</p>
+        <p class="db-door-q" id="db-who-label">誰來敲門？</p>
+        <div class="db-door-group" role="group" aria-labelledby="db-who-label">
+          <button type="button" class="demo-btn" data-db-who="guest" aria-pressed="true">來預約的客人</button>
+          <button type="button" class="demo-btn" data-db-who="stranger" aria-pressed="false">想偷看名單的路人</button>
+          <button type="button" class="demo-btn" data-db-who="owner" aria-pressed="false">你（登入後台）</button>
+          <button type="button" class="demo-btn" data-db-who="secret" aria-pressed="false">拿到 secret key 的人</button>
+        </div>
+        <p class="db-door-q" id="db-act-label">想做什麼？</p>
+        <div class="db-door-group" role="group" aria-labelledby="db-act-label">
+          <button type="button" class="demo-btn" data-db-act="insert" aria-pressed="true">新增一筆預約</button>
+          <button type="button" class="demo-btn" data-db-act="select" aria-pressed="false">讀出全部預約</button>
+          <button type="button" class="demo-btn" data-db-act="delete" aria-pressed="false">刪掉一筆預約</button>
+        </div>
+        <div class="db-door-result is-ok" id="db-door-result" aria-live="polite">
+          <strong>收下。</strong>
+          有授權新增，RLS 也有准許新增的規則。欄位格式對，就寫進一列。
+        </div>
+        <noscript>
+          <div class="table-wrapper" style="margin-top:16px">
+            <table>
+              <thead><tr><th>誰</th><th>新增一筆</th><th>讀出全部</th><th>刪掉一筆</th></tr></thead>
+              <tbody>
+                <tr><td>來預約的客人</td><td>收下</td><td>擋下</td><td>擋下</td></tr>
+                <tr><td>想偷看名單的路人</td><td>收下（跟客人一樣）</td><td>擋下</td><td>擋下</td></tr>
+                <tr><td>你（登入後台）</td><td>可以</td><td>可以</td><td>可以，而且刪了就沒了</td></tr>
+                <tr><td>拿到 secret key 的人</td><td>可以</td><td>可以</td><td>可以，略過所有規則</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </noscript>
+        <p class="db-door-note">註：secret key 略過的是 RLS 規則，不是授權。照本章的設定，reservations 只授權給 anon，所以 secret key 也要另外授權給 <code>service_role</code>（secret key 用的身分）才進得去，之後寫後端時記得補。示範裡畫的是補好之後的樣子。外流的危險不會因此變小：補上授權的那一天，它就是萬用鑰匙。</p>
+      </div>
+
+      <p>注意前兩個人：<strong>來預約的客人和想偷看名單的路人，結果一模一樣</strong>。因為他們手上拿的是同一把金鑰，就是寫在頁面裡、誰都看得到的那一把。門口分辨不出誰是好人，只看規則。這就是為什麼把關要靠規則，下一步會再講一次。</p>
+
+      <!-- ========== I. 步驟五 ========== -->
+      <h2 id="step5">步驟五：讓預約頁把資料存進去</h2>
+
+      <p>資料庫準備好了，最後是讓第七章那個預約頁在客人按送出時，把資料交給 Supabase。第七章說過，這一套不用打包：頁面就是 HTML、CSS、JS，改完直接上傳。所以 Supabase 的程式庫也用不打包的方式載入，在頁面上加一行 <code>&lt;script&gt;</code> 就好。</p>
+
+      <h3>兩把金鑰：一把可以放頁面，一把絕對不行</h3>
+
+      <p>Supabase 每個專案有兩種金鑰。分清楚這兩把，是這一章最重要的一件事。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th></th><th>publishable key</th><th>secret key</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>長相</td><td>開頭是 <code>sb_publishable_</code></td><td>開頭是 <code>sb_secret_</code></td></tr>
+            <tr><td>可以放哪</td><td>頁面、手機 App、公開的程式碼，官方說可以公開</td><td>只能放在後端（伺服器、小函式），官方寫明只在後端用</td></tr>
+            <tr><td>拿著它能做什麼</td><td>只能做 RLS 准許的事</td><td><strong>略過所有 RLS 規則</strong>；只要那張表有授權給它，就什麼都能做</td></tr>
+            <tr><td>比喻</td><td>店門口的門鈴：誰都能按，開不開門看規則</td><td>店裡的萬用鑰匙：拿到就能進每一個抽屜</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>比較早開的專案，後台可能還看得到舊名字：<code>anon</code> key 對應 publishable key，<code>service_role</code> key 對應 secret key。舊的兩把開頭都是 <code>eyJ</code>，長很多。分法一樣：anon 可以放頁面，service_role 不行。官方說舊金鑰預計 2026 年底前淘汰，新專案直接用新的兩把。</p>
+
+      <div class="box box-danger">
+        <div class="box-label">secret key 一律不放頁面、不進 GitHub</div>
+        Supabase 會擋掉從瀏覽器送來的 secret key，但官方也提醒：外流的金鑰還是能從別的工具拿來用，被擋不等於安全。哪天發現 secret key 出現在頁面、對話紀錄、公開的 GitHub 上，第一件事是到後台把它作廢、換一把新的，再處理別的。
+      </div>
+
+      <div class="db-step">
+        <div class="db-step-head"><span class="db-step-num">步驟五</span><h3>預約頁接上 Supabase</h3></div>
+        <div class="db-cells">
+          <div class="db-cell db-cell-do">
+            <div class="db-cell-label">要做什麼</div>
+            <p>在預約頁加上 Supabase 的程式庫，放專案網址和 publishable key；客人按送出時，把表單內容新增到 reservations 表；成功顯示「預約已送出」，失敗顯示看得懂的錯誤，並保留客人填的內容。</p>
+          </div>
+          <div class="db-cell db-cell-say">
+            <div class="db-cell-label">跟 Claude 怎麼說</div>
+            <p class="db-say">「預約頁接上 Supabase。不要打包，用官方文件寫的 script 標籤從 CDN 載入 supabase-js 第 2 版。只用 publishable key，絕對不要用 secret key。送出時新增一筆到 reservations，不要在新增後面接 select，因為客人沒有讀取的權限。成功顯示『預約已送出，我們會再跟你確認』；失敗用中文說明，表單內容不要清掉。」</p>
+            <p class="db-say">「改完先在本機開起來，送一筆測試預約，告訴我後台有沒有多一筆。沒問題再照第七章的方式上傳。」</p>
+          </div>
+          <div class="db-cell db-cell-you">
+            <div class="db-cell-label">你自己要動手</div>
+            <ul>
+              <li>Claude 可以用 CLI 查到專案網址和 publishable key，不用你去複製。它跟你要的話，從後台 <strong>Connect</strong> 或 <strong>Settings › API Keys</strong> 複製 <strong>publishable</strong> 那一把給它。</li>
+              <li>secret key 不要複製給它。它說需要，問它要拿去哪裡用；答案是「放頁面」，就是做錯了。</li>
+              <li>上傳後，用自己的手機打開 B 咖啡店的網址，送一筆真的試試看。</li>
+            </ul>
+          </div>
+          <div class="db-cell db-cell-see">
+            <div class="db-cell-label">做完會看到</div>
+            <p>按下送出，頁面顯示「預約已送出」。到後台的 Table Editor 打開 reservations，最上面或最下面多了你剛剛那一筆，收到時間是剛剛。</p>
+          </div>
+          <div class="db-cell db-cell-stuck">
+            <div class="db-cell-label">常見卡住的地方</div>
+            <ul>
+              <li><strong>按送出沒反應</strong>：多半是程式庫沒載入，或頁面上的程式出錯。請 Claude「用無頭瀏覽器打開頁面，看主控台有沒有錯誤」。</li>
+              <li><strong>出現 42501</strong>：回去看步驟四。授權和規則都要在。</li>
+              <li><strong>後台有資料，但頁面顯示失敗</strong>：常見原因是程式在新增後面接了「把剛新增的那筆讀回來」。客人沒有讀取權限，這一段就會失敗。請 Claude 拿掉，只新增、不讀回。</li>
+              <li><strong>本機可以，上線後不行</strong>：確認上傳的是改過的那一版，再確認頁面裡的專案網址沒打錯。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <p>頁面上加的程式大概是這樣（只列跟資料庫有關的部分）：</p>
+
+      <div class="code-block db-code"><span class="db-c">&lt;!-- 載入 Supabase 的程式庫（官方文件的寫法，不用打包） --&gt;</span>
+&lt;script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const { createClient } = supabase
+  const db = createClient(
+    'https://你的專案代號.supabase.co',  <span class="db-c">// 專案網址</span>
+    'sb_publishable_……'                  <span class="db-c">// 可以公開的那把，不是 secret</span>
+  )
+
+  const form = document.querySelector('#reserve-form')
+  form.addEventListener('submit', async (e) =&gt; {
+    e.preventDefault()
+    const d = new FormData(form)
+    const { error } = await db.from('reservations').insert({
+      name: d.get('name'),
+      phone: d.get('phone'),
+      reserve_date: d.get('date'),
+      reserve_time: d.get('time'),
+      party_size: Number(d.get('party_size')),
+      note: d.get('note')
+    })
+    <span class="db-c">// 有 error 就顯示中文說明；沒有就顯示「預約已送出」</span>
+  })
+&lt;/script&gt;</div>
+
+      <p>看懂三件事就好：第一行從網路上載入 Supabase 的程式庫；<code>createClient</code> 那段放專案網址和 publishable key；<code>insert</code> 那段把表單的每一格對到表的每一欄。<code>@2</code> 是鎖住第 2 版，避免哪天程式庫大改版，頁面跟著壞掉。</p>
+
+      <!-- ========== J. 步驟六 ========== -->
+      <h2 id="step6">步驟六：怎麼看資料有沒有進來</h2>
+
+      <p>資料進來了，老闆要看得到。最簡單的方法是 Supabase 後台。</p>
+
+      <div class="db-step">
+        <div class="db-step-head"><span class="db-step-num">步驟六</span><h3>在後台看預約，也讓 Claude 幫你查</h3></div>
+        <div class="db-cells">
+          <div class="db-cell db-cell-do">
+            <div class="db-cell-label">要做什麼</div>
+            <p>學會兩種看法：自己在後台 Table Editor 看；或請 Claude 用一句話查出你要的。</p>
+          </div>
+          <div class="db-cell db-cell-say">
+            <div class="db-cell-label">跟 Claude 怎麼說</div>
+            <p class="db-say">「查 reservations 表，列出明天的所有預約，照時間排，只要姓名、時間、人數。只能讀，不要改任何資料。」</p>
+            <p class="db-say">「這週每天各有幾筆預約、總共幾位客人？用表格給我。」</p>
+          </div>
+          <div class="db-cell db-cell-you">
+            <div class="db-cell-label">你自己要動手</div>
+            <ul>
+              <li>登入 Supabase 後台，進專案，打開 <strong>Table Editor</strong>，點 reservations。</li>
+              <li>在後台你有全部的權限，看得到也刪得掉。看就好，要改要刪，先想清楚。</li>
+            </ul>
+          </div>
+          <div class="db-cell db-cell-see">
+            <div class="db-cell-label">做完會看到</div>
+            <p>一張像試算表的畫面，每一列是一筆預約。Claude 查的話，會回你一張整理好的表格。</p>
+          </div>
+          <div class="db-cell db-cell-stuck">
+            <div class="db-cell-label">常見卡住的地方</div>
+            <ul>
+              <li><strong>Table Editor 裡看不到剛送的那筆</strong>：重新整理一次。還是沒有，回到步驟五看頁面有沒有顯示失敗。</li>
+              <li><strong>Claude 查詢時順手改了資料</strong>：每次都講「只能讀」。它要動資料之前，請它先講要改哪幾筆、改成什麼。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">店員要看預約，怎麼辦</div>
+        不要把你的 Supabase 帳號密碼給店員。店員要看今天的預約，比較好的做法是做一個只給店內用的查詢頁，讓店員登入、只看得到今天的預約。這就要用到 Supabase 的會員登入和更細的規則，是下一步的事了。動手前先讀第十四章 <a href="/chapter14/">功能怎麼切</a>，想清楚這個功能要多大。
+      </div>
+
+      <!-- ========== K. 步驟七：備份 ========== -->
+      <h2 id="step7">步驟七：備份</h2>
+
+      <p>Supabase 免費版沒有自動備份。官方文件的建議是：免費專案要定期用 CLI 把資料匯出，另外存一份在別的地方。換句話說，資料庫出事時，你手上有幾天前的備份，就能救回到那天；沒有，就沒有。</p>
+
+      <div class="db-step">
+        <div class="db-step-head"><span class="db-step-num">步驟七</span><h3>匯出一份，存到別的地方</h3></div>
+        <div class="db-cells">
+          <div class="db-cell db-cell-do">
+            <div class="db-cell-label">要做什麼</div>
+            <p>用 Supabase CLI 把資料庫匯出成檔案（Supabase 的指令叫 <code>db dump</code>），結構和資料各一份，存到你電腦以外的地方。然後定一個固定的頻率。</p>
+          </div>
+          <div class="db-cell db-cell-say">
+            <div class="db-cell-label">跟 Claude 怎麼說</div>
+            <p class="db-say">「用 Supabase CLI 的 db dump，把 b-coffee-booking 的結構和資料各匯出一份，檔名加今天的日期。查官方文件確認現在的寫法。匯出的檔放在不會推上 GitHub 的資料夾，幫我把這個資料夾加進 .gitignore。」</p>
+            <p class="db-say">「寫一份備份步驟說明，存在專案資料夾裡，下次我說『備份預約』你就照做。」</p>
+          </div>
+          <div class="db-cell db-cell-you">
+            <div class="db-cell-label">你自己要動手</div>
+            <ul>
+              <li>決定備份要多久做一次。B 咖啡店一週一次可能就夠；預約一天幾十筆，就改成每天。</li>
+              <li>把備份檔放到你信得過的地方（公司的雲端硬碟、外接硬碟）。備份裡有客人的姓名和電話，<strong>是個人資料</strong>，不能放在公開的地方。</li>
+            </ul>
+          </div>
+          <div class="db-cell db-cell-see">
+            <div class="db-cell-label">做完會看到</div>
+            <p>兩個檔，一個是結構（表長什麼樣），一個是資料（每一筆預約），檔名上有日期。請 Claude 打開資料那份，數一下筆數，跟後台對得上。</p>
+          </div>
+          <div class="db-cell db-cell-stuck">
+            <div class="db-cell-label">常見卡住的地方</div>
+            <ul>
+              <li><strong>指令要你裝別的東西</strong>：這個匯出指令在背後要用到 Docker（一個在你電腦上開小隔間跑程式的工具）。請 Claude 說明要裝什麼、為什麼，你同意再裝。</li>
+              <li><strong>備份檔被推上 GitHub</strong>：馬上請 Claude 從紀錄裡移除。只刪檔案不夠，GitHub 的歷史紀錄裡還有。公開的 repo 更要當作已經外流處理。</li>
+              <li><strong>從來沒試過還原</strong>：沒試過還原的備份，不算備份。找一天請 Claude 把備份還原到你的練習專案，看資料齊不齊。</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <h3 id="pause">別忘了：一週沒動靜會被暫停</h3>
+
+      <p>免費專案一週內沒有足夠的資料庫活動，會被暫停。官方的說法是，每天有幾次正常的請求，通常就不會被暫停；但沒有寫明確的門檻。</p>
+
+      <p>對 B 咖啡店的意思是：淡季一週沒人預約，專案可能被暫停。暫停的時候，客人按送出會失敗，你不一定會馬上發現。</p>
+
+      <ul>
+        <li><strong>救回來</strong>：登入後台，進那個專案，按 <strong>Resume project</strong> 確認。資料和設定會回到暫停前的樣子。官方說暫停後一年內都可以在後台恢復。</li>
+        <li><strong>不想被暫停</strong>：升級成付費方案，付費專案不會因為沒動靜被暫停。有真的客人在用、停一天就是損失的時候，這筆錢值得花。</li>
+        <li><strong>不要用「定時去戳它」的方法硬撐</strong>：網路上有人教排程每天自動送請求，避免暫停。這是在跟服務的規則捉迷藏，規則一改就失靈。正式給客人用的，就付費。</li>
+      </ul>
+
+      <!-- ========== L. D1 ========== -->
+      <h2 id="d1">另一個選擇：Cloudflare D1</h2>
+
+      <p>第七章頁面放在 Cloudflare，Cloudflare 自己也有資料庫，叫 <strong>D1</strong>（SQLite 語法）。資料單純、不需要會員登入時，跟頁面放同一家，少管一個帳號。免費版每個資料庫 500 MB、整個帳號合計 5 GB、每天可以讀 500 萬列、寫 10 萬列（以 <a href="https://developers.cloudflare.com/d1/platform/pricing/" target="_blank" rel="noopener">Cloudflare 官方頁面</a>為準，查詢日期 2026-11-13）。</p>
+
+      <p>跟 Supabase 最大的差別：<strong>D1 不能從頁面直接連</strong>。頁面要讀寫 D1，得經過一支放在 Cloudflare 上的小函式（Worker）。另外的 REST API 和 wrangler 指令是給你管理資料庫用的，要用帳號的金鑰，不能放進頁面。所以預約頁送出時，是交給這支小函式，小函式檢查完再寫進 D1。門是你（或 Claude）一扇一扇開出來的，每一扇都要自己檢查。用 Supabase 時那套「頁面金鑰加 RLS 規則」，在 D1 這邊換成「小函式裡的檢查」。</p>
+
+      <p>這一章用 Supabase 示範，因為它不用多寫一支小函式，B 咖啡店的預約一個晚上就接得起來。要改用 D1，跟 Claude 說：「改用 Cloudflare D1，用 wrangler 開資料庫，寫一支 Worker 接預約頁的送出，在 Worker 裡檢查欄位，再寫進 D1。」兩邊怎麼選，第十一章 <a href="/chapter11/">技術棧</a> 有比較。</p>
+
+      <!-- ========== M. 邊界 ========== -->
+      <h2 id="boundary">哪裡有邊界</h2>
+
+      <p>這一章的動作，大部分可以放心交給 Claude。但有幾條線，一定要你自己看過才算數。</p>
+
+      <h3>最重要的一條：頁面上的金鑰誰都看得到</h3>
+
+      <p>預約頁上的 publishable key，任何人在瀏覽器按右鍵看原始碼就看得到。這不是漏洞，是本來就這樣設計的。所以<strong>把關靠的是資料庫的規則，不是把金鑰藏好</strong>。</p>
+
+      <p>常見的錯誤想法是：「金鑰藏深一點、拆成兩半、加密一下，別人就找不到。」找得到的。頁面要用它，就得把它送到客人的瀏覽器；送得到客人那裡，就送得到任何人那裡。與其花力氣藏，不如確認規則寫對：<strong>這把金鑰被任何人拿去用，最壞能做什麼？</strong>照步驟四的設定，答案是「新增一筆預約」，就這樣。</p>
+
+      <div class="box box-warning">
+        <div class="box-label">「最壞只能新增一筆」也不是零風險</div>
+        有人可以寫程式，一秒送一百筆假預約進來。規則擋不了這種事，因為每一筆都是「新增」，都是准的。要擋，得再加一層：例如送出前的人機驗證、同一支電話一天只能預約幾次、或改成經過一支小函式檢查。這已經是「什麼要放在後面檢查」的問題，第十六章 <a href="/chapter16/">前後端邊界</a> 講怎麼判斷。B 咖啡店剛起步，先跟 Claude 說：「預約頁先加人機驗證；同一支電話一天最多預約三次，這個檢查放在資料庫或小函式裡，不要只寫在頁面上。」
+      </div>
+
+      <h3>放心交給 Claude，跟一定要你確認的</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr><th>放心交給 Claude</th><th>一定要你自己確認</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>照頁面的格子開表、寫 SQL、留 Migration</td>
+              <td>欄位跟頁面一個一個對過；之後每加一欄，它先講為什麼</td>
+            </tr>
+            <tr>
+              <td>寫授權和 RLS 規則</td>
+              <td>它列出的「誰能做什麼」表，只有你要的那幾格打勾；而且它實際測過被擋</td>
+            </tr>
+            <tr>
+              <td>把 publishable key 和專案網址放進頁面</td>
+              <td>頁面裡沒有 secret key；secret key 沒出現在 GitHub、對話、截圖裡</td>
+            </tr>
+            <tr>
+              <td>查資料、做統計</td>
+              <td>每次都說「只能讀」；要改資料，它先列出要改哪幾筆</td>
+            </tr>
+            <tr>
+              <td>匯出備份、寫備份說明</td>
+              <td>備份放在哪裡、多久一次；備份有個資，不放公開的地方</td>
+            </tr>
+            <tr>
+              <td>查官方文件、告訴你免費額度和價格</td>
+              <td>升級付費、綁卡、續約由你自己按；帳單寄到你的信箱，自己看</td>
+            </tr>
+            <tr>
+              <td>—</td>
+              <td><strong>刪表、清空資料、重設資料庫、刪整個專案</strong>：一律你說了才做。免費版沒有自動備份，刪了就沒了</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-danger">
+        <div class="box-label">聽到這幾句，先停下來</div>
+        <ul style="margin:6px 0 0">
+          <li>「先把 RLS 關掉，比較好測試。」</li>
+          <li>「用 secret key 比較簡單，權限問題就沒了。」</li>
+          <li>「我把資料庫重設（reset）一下，重新套用 migration。」對練習專案可以；對有客人資料的專案，資料會不見。</li>
+          <li>「這個欄位用不到，我把它刪掉。」刪欄位，那一欄的資料跟著沒了。</li>
+        </ul>
+        <p style="margin:10px 0 0">這幾句都會讓問題「看起來」解決。請它停下來，說明這樣做會影響什麼、有沒有不動資料的做法。</p>
+      </div>
+
+      <p>這一章是照著做。後面的章節是讓你自己判斷，什麼時候這樣做會出事：</p>
+
+      <ul>
+        <li>第十三章 <a href="/chapter13/">架構拓樸</a>：把頁面、資料庫、外部服務畫成一張圖，看金鑰放在哪一塊、資料的家在哪</li>
+        <li>第十四章 <a href="/chapter14/">功能怎麼切</a>：預約之後想加會員、加取消、加提醒，怎麼切才不會越做越黏</li>
+        <li>第十五章 <a href="/chapter15/">資料表與欄位</a>：表怎麼拆、欄位怎麼定，為什麼不能讓 Claude 想加就加</li>
+        <li>第十六章 <a href="/chapter16/">前後端邊界</a>：什麼可以在頁面上做、什麼一定要放到後面；兩把金鑰的道理在那裡細講</li>
+        <li>第十七章 <a href="/chapter17/">會出事的地方</a>：同時預約搶同一個時段、客人連按兩次送出，這類事怎麼先防</li>
+      </ul>
+
+      <!-- ========== N. 帶走 ========== -->
+      <h2 id="takeaway">這章帶走什麼</h2>
+
+      <ul>
+        <li><strong>資料庫是有規矩的預約簿</strong>：會擋錯、會看人、不怕擠。試算表可以當抄本，不要當正本</li>
+        <li><strong>開專案、登入、付錢是你的事</strong>：開表、寫規則、接頁面交給 Claude，你看它列出來的清單</li>
+        <li><strong>改結構留 Migration</strong>：每一次改表都有一張施工單，查得到、重建得了</li>
+        <li><strong>兩層把關</strong>：授權決定門開不開，RLS 決定每一筆准不准。RLS 一定開，只開需要的動作</li>
+        <li><strong>兩把金鑰</strong>：publishable 可以放頁面，secret 絕對不行</li>
+        <li><strong>頁面上的金鑰誰都看得到</strong>：把關靠規則，不是靠藏</li>
+        <li><strong>免費版沒有自動備份，一週沒動靜會暫停</strong>：備份自己做，正式給客人用就考慮付費</li>
+        <li><strong>D1 也行</strong>：但要經過一支小函式，不能從頁面直接連</li>
+      </ul>
+
+      <div class="box box-tip">
+        <div class="box-label">跟 Claude 怎麼說</div>
+        「預約頁要把資料存進 Supabase。先讀頁面的表單欄位，用 CLI 開 migration 建表。RLS 一定開，先收回這張表原本給頁面的授權，再只授權新增，不准讀、改、刪。頁面只用 publishable key，不准出現 secret key。」<br>
+        「做完用頁面的金鑰實際測一次：新增、讀取、刪除各試一次，告訴我哪個成功、哪個被擋。」<br>
+        「列出 Supabase 裡每一張表開放給誰、有沒有開 RLS、規則是什麼。」<br>
+        「要刪表、刪欄位、清資料、重設資料庫之前，先停下來問我，並說明會少掉什麼。」<br>
+        「每週幫我匯出一份備份，檔名加日期，不要推上 GitHub。」
+      </div>
+
+      <p>到這裡，B 咖啡店有了頁面、有了網址、預約也真的存得下來。這三章是照著做；下一章退一步，看清楚 Claude Code 這個工具本身怎麼用：怎麼讓它記得你的規矩、什麼時候該讓它先想再做，第十章 <a href="/chapter10/">Claude Code 怎麼用</a>。</p>
 
       <!-- Chapter Navigation -->
       <div class="chapter-nav">
         <a href="/chapter8/" class="prev">
           <span class="nav-label">上一章</span>
-          <span class="nav-title">API 是什麼（房子怎麼接水接電）</span>
+          <span class="nav-title">網域</span>
         </a>
         <a href="/chapter10/" class="next">
           <span class="nav-label">下一章</span>
-          <span class="nav-title">蓋大樓才會遇到的問題（進階觀念）</span>
+          <span class="nav-title">Claude Code 怎麼用</span>
         </a>
       </div>
 
@@ -620,6 +986,64 @@
   </div>
 </footer>
 
+<script>
+  // 互動示範：誰來敲門（前綴 db-）
+  (function () {
+    var result = document.getElementById('db-door-result');
+    if (!result) return;
+    var whoBtns = document.querySelectorAll('[data-db-who]');
+    var actBtns = document.querySelectorAll('[data-db-act]');
+    var state = { who: 'guest', act: 'insert' };
+
+    var table = {
+      guest: {
+        insert: ['ok', '收下。', '有授權新增，RLS 也有准許新增的規則。欄位格式對，就寫進一列。'],
+        select: ['no', '擋下。', '沒有授權讀取，門根本沒開。客人只能交單子，看不到別人的預約。'],
+        delete: ['no', '擋下。', '沒有授權刪除。客人要取消，得另外設計取消的方式（第十四章）。']
+      },
+      stranger: {
+        insert: ['ok', '收下，跟客人一模一樣。', '路人拿的是同一把寫在頁面上的金鑰，門口分不出他是誰。他也能新增一筆。被灌假預約怎麼擋，看下面「哪裡有邊界」那一段。'],
+        select: ['no', '擋下。', '想偷看名單，跟客人一樣沒有讀取的授權。金鑰拿到了也沒用，因為規則沒准。'],
+        delete: ['no', '擋下。', '沒有授權刪除。頁面上的金鑰能做的，只有規則准的那一件事。']
+      },
+      owner: {
+        insert: ['all', '可以。', '你登入的是後台，權限是全部。所以你的 Supabase 帳號密碼要設好、不要跟別人共用。'],
+        select: ['all', '可以。', '你在 Table Editor 看得到全部預約。這是老闆該有的權限。'],
+        delete: ['all', '可以，而且刪了就沒了。', '後台沒有規則擋你。免費版沒有自動備份，按刪除之前先想清楚。']
+      },
+      secret: {
+        insert: ['all', '可以，略過所有規則。', 'secret key 會略過 RLS，只要這張表有授權給它（service_role）。拿到它的人，等於拿到店裡的萬用鑰匙。'],
+        select: ['all', '可以，整份名單都拿得走。', '這就是 secret key 絕對不能放進頁面、不能推上 GitHub 的原因。'],
+        delete: ['all', '可以，想刪什麼就刪什麼。', '發現 secret key 外流，第一件事是到後台作廢、換一把新的。']
+      }
+    };
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function render() {
+      var r = table[state.who][state.act];
+      result.className = 'db-door-result is-' + r[0];
+      result.innerHTML = '<strong>' + r[1] + '</strong>' + r[2];
+      if (!reduce) {
+        void result.offsetWidth;
+        result.classList.add('is-flash');
+      }
+    }
+
+    function bind(btns, key, attr) {
+      btns.forEach(function (b) {
+        b.addEventListener('click', function () {
+          state[key] = b.getAttribute(attr);
+          btns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+          render();
+        });
+      });
+    }
+
+    bind(whoBtns, 'who', 'data-db-who');
+    bind(actBtns, 'act', 'data-db-act');
+  })();
+</script>
 <script src="/main.js"></script>
 </body>
 </html>

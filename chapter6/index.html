@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第六章：Claude Code 是什麼 — Claude Code 非工程師指南</title>
+  <title>第六章：描述力 — Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -13,11 +13,11 @@
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
       <a href="/">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/">下指令</a>
-      <a href="/chapter3/">工作流程</a>
-      <a href="/chapter9/">術語字典</a>
-      <a href="/appendix/">附錄</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,451 +27,2515 @@
 
 <nav class="mobile-nav">
   <a href="/">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/">第二章：下指令</a>
-  <a href="/chapter3/">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/" class="active">第六章：Claude Code</a>
-  <a href="/chapter7/">第七章：技術棧</a>
-  <a href="/chapter8/">第八章：API</a>
-  <a href="/chapter9/">第九章：術語字典</a>
-  <a href="/chapter10/">第十章：進階問題</a>
-  <a href="/chapter11/">第十一章：工具生態</a>
-  <a href="/appendix/">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/" class="active">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
   <section class="container">
     <div class="page-header">
       <div class="chapter-label">第六章</div>
-      <h1>Claude Code 是什麼，跟其他 LLM 差在哪</h1>
-      <p class="lead">一般 LLM 是只能出嘴巴的顧問，Claude Code 是有手有腳能實際動工的工人。這一章讓你搞懂它到底多了什麼。</p>
+      <h1>學會描述你看到的東西</h1>
+      <p class="lead">這是整本指南最有「字典」功能的一章。你在網頁上看到的每一個元件、每一個行為，都有名字。學會這些名字，你就能用一句話讓 AI 精準理解你要什麼。</p>
     </div>
 
     <div class="content">
 
-      <!-- ========== A. Claude Code vs 一般 LLM ========== -->
-      <h2>Claude Code vs 一般 LLM（ChatGPT / Gemini 網頁版）</h2>
+      <p><a href="/chapter5/">第五章</a>補的是路徑、網址、前端後端這些「看不到的」基本詞。這一章換成你眼睛看得到的東西：網頁上的每一塊、每一種動作。叫得出名字，跟 Claude 講一句它就知道你指哪裡；叫不出來，就只能「那個上面的東西」來回猜。</p>
 
-      <p>你在 ChatGPT 或 Gemini 的網頁上問問題，它會給你很好的答案、甚至幫你寫一段程式碼。但有個致命的問題：<strong>它只能用嘴巴</strong>。</p>
+      <p>這章很長，不用背。先整章滑過一遍，看過長相就好；之後做東西卡住，回來查名字，照旁邊那句「跟 Claude 說」去講。</p>
 
-      <p>它可以告訴你「你應該在 index.html 的第 37 行加一段程式碼」，但它不能幫你開檔案、不能幫你存檔、不能幫你跑指令。你還是得自己動手。</p>
+      <!-- ===== A. 網頁結構 ===== -->
+      <h2 id="structure">A. 網頁結構（骨架）</h2>
 
-      <div class="analogy">
-        <strong>白話比喻：</strong><br><br>
-        一般 LLM（ChatGPT / Gemini 網頁版）= <strong>只能用嘴巴的顧問</strong><br>
-        他坐在旁邊給你建議，但不能碰你的電腦。你問他「這個 bug 怎麼修？」他會說「你去那個檔案改第 37 行」，但他自己不能改。<br><br>
-        Claude Code = <strong>有手有腳的工人</strong><br>
-        他可以直接打開你的檔案、改程式碼、存檔、跑測試、甚至幫你把東西上傳到網路上。你只需要下指令，他就去做。
-      </div>
-
-      <div class="compare">
-        <div class="compare-bad">
-          <div class="compare-label">一般 LLM（只能出嘴巴）</div>
-          <div class="code-block">
-你：「幫我把首頁標題改成紅色」<br><br>
-AI：「請在 styles.css 裡找到 .title，<br>
-加上 color: red;」<br><br>
-然後你要自己：<br>
-1. 打開 styles.css<br>
-2. 找到 .title<br>
-3. 加上那行程式碼<br>
-4. 存檔<br>
-5. 重新整理瀏覽器確認<br><br>
-<span style="color: var(--red);">你還是得自己動手</span>
-          </div>
-        </div>
-        <div class="compare-good">
-          <div class="compare-label">Claude Code（直接動手做）</div>
-          <div class="code-block">
-你：「幫我把首頁標題改成紅色」<br><br>
-Claude Code：<br>
-1. 自己打開 styles.css<br>
-2. 找到 .title<br>
-3. 加上 color: red;<br>
-4. 存檔<br>
-5. 告訴你「改好了」<br><br>
-<span style="color: var(--green);">你只負責下指令，它負責執行</span>
-          </div>
-        </div>
-      </div>
-
-      <p>簡單來說，一般 LLM 是你的「軍師」，Claude Code 是你的「施工隊」。軍師能出好主意，但施工隊能直接把房子蓋起來。</p>
-
-      <!-- ========== B. 控制面向 ========== -->
-      <h2>Claude Code 的核心差異：控制面向</h2>
-
-      <p>Claude Code 最厲害的地方，不只是「能動手」，更是「<strong>你可以精準控制它能做什麼</strong>」。就像你雇了一個工人，你可以規定他能進哪些房間、能碰哪些東西。</p>
+      <p>一個網頁就像一棟房子，有屋頂、牆壁、地板、房間。每個部位都有專門的名字。你不會跟裝潢師傅說「那個上面的東西」，你會說「天花板」。</p>
 
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>面向</th>
-              <th>說明</th>
+              <th>術語</th>
               <th>白話</th>
+              <th>在哪裡</th>
+              <th>你可以這樣跟 Claude 說</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><strong>電腦權限</strong></td>
-              <td>可以讀寫檔案、執行 Terminal 指令、操作瀏覽器、管理 Git 版控</td>
-              <td>有手有腳的工人，能搬磚、釘釘子、刷油漆</td>
+              <td><strong>Header</strong></td>
+              <td>頁首，最上面那一條</td>
+              <td>網頁最頂部，通常放 Logo 和導覽列</td>
+              <td>「Header 的背景色改成深藍色」</td>
             </tr>
             <tr>
-              <td><strong>控制程度</strong></td>
-              <td>透過 CLAUDE.md 設定邊界、Hook 做自動防護、Permission 系統管理權限</td>
-              <td>你可以設定這個工人「能做什麼、不能做什麼」，就像給員工一本規範手冊</td>
+              <td><strong>Footer</strong></td>
+              <td>頁尾，最下面那一條</td>
+              <td>網頁最底部，通常放版權、聯絡資訊</td>
+              <td>「Footer 加一個 Email 聯絡連結」</td>
+            </tr>
+            <tr>
+              <td><strong>Hero</strong></td>
+              <td>首頁最大的那塊區域</td>
+              <td>進入網站第一眼看到的大圖+大標題</td>
+              <td>「Hero 的標題改成『歡迎光臨』」</td>
+            </tr>
+            <tr>
+              <td><strong>Section</strong></td>
+              <td>一個區塊</td>
+              <td>頁面中的每個主題段落</td>
+              <td>「在『功能介紹』section 下面加一個新的 section」</td>
+            </tr>
+            <tr>
+              <td><strong>Sidebar</strong></td>
+              <td>側邊欄</td>
+              <td>頁面左側或右側的窄欄</td>
+              <td>「Sidebar 要固定不動，不跟著滾」</td>
+            </tr>
+            <tr>
+              <td><strong>Modal</strong></td>
+              <td>彈出視窗</td>
+              <td>畫面中間跳出的白色方塊，背後變暗</td>
+              <td>「按『刪除』的時候要彈一個 Modal 確認」</td>
+            </tr>
+            <tr>
+              <td><strong>Navbar</strong></td>
+              <td>導覽列</td>
+              <td>Header 裡面那排連結按鈕</td>
+              <td>「Navbar 多加一個『部落格』的連結」</td>
+            </tr>
+            <tr>
+              <td><strong>Card</strong></td>
+              <td>卡片</td>
+              <td>一個有邊框的小區塊，裡面放圖+文字</td>
+              <td>「商品列表用 Card 排列，一排三張」</td>
+            </tr>
+            <tr>
+              <td><strong>Button</strong></td>
+              <td>按鈕</td>
+              <td>你可以點擊的那個東西</td>
+              <td>「『送出』Button 改成綠色，hover 時變深綠」</td>
+            </tr>
+            <tr>
+              <td><strong>Form</strong></td>
+              <td>表單</td>
+              <td>讓你填資料的區域（輸入框+按鈕）</td>
+              <td>「聯絡 Form 加一個『手機號碼』欄位」</td>
             </tr>
           </tbody>
         </table>
       </div>
 
       <div class="box box-tip">
-        <div class="box-label">重點</div>
-        Claude Code 不是「失控的 AI 自己亂做事」。它更像是一個聽話的員工——你給規範，它就照規範做；你說不能碰的東西，它就不碰。
+        <div class="box-label">記憶技巧</div>
+        Header / Footer = 頭 / 腳<br>
+        Hero = 英雄（首頁最醒目的那一塊，像英雄一樣站 C 位）<br>
+        Modal = 「強制對話框」（你不處理它，後面的東西都按不到）<br>
+        Card = 卡片（想像 Pinterest 或 IG 的方塊排列）
       </div>
 
-      <!-- ========== C. 三種使用方式 ========== -->
-      <h2>三種使用 Claude Code 的方式</h2>
+      <!-- ===== B. UI 元件 ===== -->
+      <h2 id="components">B. UI 元件（互動元件圖鑑）</h2>
 
-      <p>Claude Code 不是只有一種打開方式。根據你的習慣和需求，有三條路可以走：</p>
-
-      <h3>1. Terminal 原生方式</h3>
-      <p>在終端機（Terminal）裡直接打 <code>claude</code> 指令，就可以開始對話。</p>
-      <div class="code-block">
-$ claude<br>
-> 幫我看一下這個專案的結構<br><br>
-Claude Code 會直接讀取你的檔案，然後回答你
-      </div>
-      <div class="analogy">
-        <strong>白話：</strong>像直接跟工人面對面說話。沒有花俏的介面，但最直接、最快。
-      </div>
-
-      <h3>2. VS Code 編輯器</h3>
-      <p>如果你用 VS Code 寫程式（或看程式碼），有兩種方式使用 Claude Code：</p>
-      <ul>
-        <li><strong>在 VS Code 的 Terminal 裡用</strong>——跟原生方式一模一樣，只是 Terminal 嵌在編輯器裡面</li>
-        <li><strong>用 Claude Code 插件（Extension）</strong>——會出現一個側邊欄的聊天視窗，像在 VS Code 裡面開了一個 LINE 聊天室</li>
-      </ul>
-      <div class="box box-info">
-        <div class="box-label">小知識</div>
-        用插件的好處是，你可以一邊看程式碼、一邊跟 Claude Code 聊天，它改了什麼你馬上在編輯器裡就看得到。
-      </div>
-
-      <h3>VS Code 的殺手級功能：Diff</h3>
-      <p>Diff 就是「比較兩個版本的差異」。你可以把它想成 Word 的「追蹤修訂」功能——紅色是刪除的部分、綠色是新增的部分。</p>
-      <p>VS Code 會在左邊欄顯示哪些檔案被改了，點進去就能看到每一行的差異。這是用 Claude Code 最大的好處之一：<strong>它改了什麼，你在 VS Code 裡一目瞭然</strong>。不用擔心 Claude 偷偷改了什麼你不知道的東西。</p>
-      <div class="analogy">
-        <strong>白話：</strong>Diff 就像老師用紅筆批改作業——哪裡被劃掉、哪裡是新寫的，全部清清楚楚。你不用逐行去比對「到底改了什麼」，VS Code 幫你標好了。
-      </div>
-
-      <h3>3. Claude Desktop（桌面應用程式）</h3>
-      <p>Anthropic 官方出的桌面 App。這個版本除了基本對話功能外，還有幾個獨家能力：</p>
-      <ul>
-        <li><strong>Computer Use（電腦操控）</strong>——可以操控你的電腦 GUI（圖形介面），像是幫你開 Chrome、點按鈕、填表單。就像你的手被 AI 附身了</li>
-        <li><strong>Pitch 功能</strong>——用對話的方式快速產出簡報或文件草稿</li>
-        <li><strong>Schedule 功能（排程任務）</strong>——可以設定排程，讓 Claude 在特定時間自動執行任務。例如「每天早上 9 點幫我整理 Email 摘要」</li>
-      </ul>
+      <p>這些是你天天在用但可能叫不出名字的東西。學會這些名字，你就能精準地告訴 AI「我要的是哪種東西」。</p>
 
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>使用方式</th>
-              <th>介面</th>
-              <th>適合誰</th>
-              <th>獨有功能</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Terminal 原生</td>
-              <td>純文字命令列</td>
-              <td>習慣 Terminal 的人</td>
-              <td>最快、最輕量</td>
-            </tr>
-            <tr>
-              <td>VS Code</td>
-              <td>Terminal 或側邊欄聊天</td>
-              <td>有在寫程式/看程式碼的人</td>
-              <td>邊看程式碼邊對話</td>
-            </tr>
-            <tr>
-              <td>Claude Desktop</td>
-              <td>圖形化桌面 App</td>
-              <td>不想碰 Terminal 的人</td>
-              <td>Computer Use、Pitch、Schedule</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <!-- ========== D. 核心功能介紹 ========== -->
-      <h2>核心功能介紹</h2>
-
-      <p>Claude Code 不只是「能幫你改檔案的 ChatGPT」。它有一整套工具和機制，讓你能像管理一個團隊一樣管理 AI。以下是你一定會碰到的核心功能：</p>
-
-      <h3>CLAUDE.md——員工的 SOP 手冊</h3>
-      <p>這是一個放在專案根目錄的純文字檔案。Claude Code 每次啟動時都會先讀它，就像員工每天上班前先看一次規範手冊。</p>
-      <p>你可以在裡面寫：</p>
-      <ul>
-        <li>這個專案用什麼語言、什麼框架</li>
-        <li>程式碼風格（例如：用 2 個空格縮排，不要用 Tab）</li>
-        <li>哪些檔案不能動</li>
-        <li>特殊的工作流程（例如：改完程式碼要先跑測試）</li>
-      </ul>
-      <div class="code-block">
-# CLAUDE.md 範例<br><br>
-## 專案規範<br>
-- 語言：TypeScript<br>
-- 框架：Next.js<br>
-- 程式碼風格：用 ESLint 標準<br>
-- 每次修改前先跑 npm run test<br><br>
-## 禁止事項<br>
-- 不要動 database/ 資料夾<br>
-- 不要在程式碼裡寫入任何密碼或 API Key
-      </div>
-
-      <h3>CLAUDE.md 的兩個層級</h3>
-      <p>CLAUDE.md 其實不只一個。Claude Code 的設定檔分成兩層，就像公司的規範有分「全公司通用」和「各部門專用」：</p>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>層級</th>
-              <th>位置</th>
-              <th>作用</th>
-              <th>比喻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>全域（Global）</strong></td>
-              <td><code>~/.claude/CLAUDE.md</code></td>
-              <td>所有專案都會讀到</td>
-              <td>公司的「員工守則」，不管你調到哪個部門都要遵守</td>
-            </tr>
-            <tr>
-              <td><strong>專案（Project）</strong></td>
-              <td>專案根目錄/<code>CLAUDE.md</code></td>
-              <td>只有這個專案會讀到</td>
-              <td>部門的「SOP」，只有這個部門的人要看</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p>全域設定放你的通用偏好（語言、風格、常用工具），專案設定放該專案特有的規則（技術棧、命名慣例、部署目標）。Claude 每次開工會先讀全域，再讀專案，專案的設定會覆蓋全域。</p>
-
-      <h3>MCP（Model Context Protocol）——Claude 的「手臂」</h3>
-      <p>MCP 是一種通訊協議，讓 Claude Code 可以去操作外部服務。你可以想像成：Claude Code 本身是一個人，MCP 就是它伸出去的手臂，每一隻手臂可以握住一個工具。</p>
-      <p>常見的 MCP 工具包括：</p>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>MCP 工具</th>
-              <th>能做什麼</th>
+              <th>你看到的</th>
+              <th>術語</th>
               <th>白話</th>
+              <th>你可以這樣跟 Claude 說</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Supabase MCP</td>
-              <td>操作資料庫、讀寫資料表</td>
-              <td>幫你開抽屜、找資料</td>
+              <td>三條橫線</td>
+              <td><strong>Hamburger Menu</strong>（漢堡選單）</td>
+              <td>手機版的選單按鈕，按了會展開完整選單</td>
+              <td>「手機版加一個 Hamburger Menu，點開後顯示所有連結」</td>
             </tr>
             <tr>
-              <td>GitHub MCP</td>
-              <td>管理原始碼、發 PR、查 Issue</td>
-              <td>幫你管理程式碼倉庫</td>
+              <td>按了往下展開的選單</td>
+              <td><strong>Dropdown</strong></td>
+              <td>下拉選單，點一下展開選項</td>
+              <td>「用 Dropdown 讓使用者選縣市」</td>
             </tr>
             <tr>
-              <td>Cloudflare MCP</td>
-              <td>部署網站、管理 DNS</td>
-              <td>幫你把網站放到網路上</td>
+              <td>左右切換的小開關</td>
+              <td><strong>Toggle / Switch</strong></td>
+              <td>開/關切換器，像電燈開關</td>
+              <td>「Dark Mode 用一個 Toggle 切換」</td>
             </tr>
             <tr>
-              <td>Brave Search MCP</td>
-              <td>搜尋網路資訊</td>
-              <td>幫你上網查資料</td>
+              <td>一排可以點的標籤</td>
+              <td><strong>Tab 頁籤</strong></td>
+              <td>同一個區域切換不同內容</td>
+              <td>「商品頁用 Tab 分『規格』和『評價』」</td>
             </tr>
             <tr>
-              <td>Google Calendar MCP</td>
-              <td>讀寫行事曆</td>
-              <td>幫你安排約會和會議</td>
+              <td>FAQ 展開收合的區塊</td>
+              <td><strong>Accordion（手風琴）</strong></td>
+              <td>點標題展開內容，再點收回去</td>
+              <td>「FAQ 用 Accordion，預設全部收合」</td>
+            </tr>
+            <tr>
+              <td>自動左右滑動的圖片</td>
+              <td><strong>Carousel / Slider（輪播）</strong></td>
+              <td>圖片或內容像跑馬燈一樣輪流顯示</td>
+              <td>「首頁 Banner 用 Carousel，3 秒換一張」</td>
+            </tr>
+            <tr>
+              <td>滑鼠移上去出現的小提示</td>
+              <td><strong>Tooltip（提示框）</strong></td>
+              <td>像便利貼一樣的小說明</td>
+              <td>「Icon 旁邊加 Tooltip 解釋功能」</td>
+            </tr>
+            <tr>
+              <td>右下角的圓形聊天按鈕</td>
+              <td><strong>Chat Widget / FAB</strong></td>
+              <td>浮動在右下角的圓形按鈕（FAB = Floating Action Button）</td>
+              <td>「右下角加一個 FAB，點了打開客服聊天室」</td>
+            </tr>
+            <tr>
+              <td>上方或下方滑出的通知條</td>
+              <td><strong>Banner / Toast</strong></td>
+              <td>Banner = 固定在最上面的通知條<br>Toast = 短暫出現幾秒後消失的提示</td>
+              <td>「存檔成功後顯示一個綠色 Toast」</td>
+            </tr>
+            <tr>
+              <td>轉圈圈的讀取動畫</td>
+              <td><strong>Spinner / Loading</strong></td>
+              <td>「等一下，東西還在載入」的視覺提示</td>
+              <td>「API 載入時顯示 Spinner，載完再顯示資料」</td>
+            </tr>
+            <tr>
+              <td>滑到底自動載入更多</td>
+              <td><strong>Infinite Scroll（無限滾動）</strong></td>
+              <td>滑到底部自動載入下一批內容（像 FB 動態牆）</td>
+              <td>「文章列表用 Infinite Scroll 取代分頁」</td>
+            </tr>
+            <tr>
+              <td>底部的 1 2 3 ... 下一頁</td>
+              <td><strong>Pagination（分頁）</strong></td>
+              <td>把內容分成多頁，底部有頁碼可以跳</td>
+              <td>「搜尋結果用 Pagination，每頁 20 筆」</td>
+            </tr>
+            <tr>
+              <td>方框打勾 / 圓形選一個</td>
+              <td><strong>Checkbox / Radio Button</strong></td>
+              <td>Checkbox = 可以多選（方框）<br>Radio = 只能選一個（圓形）</td>
+              <td>「興趣欄位用 Checkbox（可多選），性別用 Radio」</td>
+            </tr>
+            <tr>
+              <td>拖拉橫桿調整數值</td>
+              <td><strong>Slider / Range</strong></td>
+              <td>用拖拉的方式選數值範圍（像音量條）</td>
+              <td>「價格篩選用 Slider，範圍 0 到 10000」</td>
+            </tr>
+            <tr>
+              <td>「確定要刪除嗎？」的彈窗</td>
+              <td><strong>Dialog / Modal</strong></td>
+              <td>強制你回應的彈出視窗</td>
+              <td>「刪除前彈一個確認 Dialog」</td>
+            </tr>
+            <tr>
+              <td>從側邊滑出的面板</td>
+              <td><strong>Drawer（抽屜）</strong></td>
+              <td>從螢幕左邊或右邊滑出來的面板</td>
+              <td>「購物車用 Drawer，從右邊滑出」</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div class="analogy">
-        <strong>白話：</strong>沒有 MCP 的 Claude Code，只能在你的電腦裡面做事。有了 MCP，它就像長了好幾隻手，可以同時伸到 GitHub、Supabase、Cloudflare 等外部服務去操作。
+
+      <!-- ===== 互動 Demo 區域 ===== -->
+      <style>
+        /* Demo 共用容器 */
+        .demo-container {
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius);
+          padding: 24px;
+          margin: 20px 0;
+          background: var(--bg-card);
+          position: relative;
+        }
+        .demo-container::before {
+          content: attr(data-demo-title);
+          position: absolute;
+          top: -11px;
+          left: 16px;
+          background: var(--bg-card);
+          padding: 0 8px;
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--accent);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+        .demo-label {
+          font-size: 13px;
+          color: var(--text-muted);
+          margin-bottom: 16px;
+        }
+
+        /* 1. Hamburger Menu Demo */
+        .demo-hamburger-btn {
+          width: 44px;
+          height: 44px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          gap: 5px;
+          padding: 10px;
+          transition: background 0.2s;
+        }
+        .demo-hamburger-btn:hover { background: var(--bg-card-hover); }
+        .demo-hamburger-btn span {
+          display: block;
+          width: 22px;
+          height: 2px;
+          background: var(--text);
+          border-radius: 2px;
+          transition: all 0.3s ease;
+        }
+        .demo-hamburger-btn.demo-active span:nth-child(1) {
+          transform: rotate(45deg) translate(5px, 5px);
+        }
+        .demo-hamburger-btn.demo-active span:nth-child(2) { opacity: 0; }
+        .demo-hamburger-btn.demo-active span:nth-child(3) {
+          transform: rotate(-45deg) translate(5px, -5px);
+        }
+        .demo-hamburger-menu {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+          background: var(--bg);
+          border-radius: var(--radius-sm);
+          margin-top: 8px;
+          border: 1px solid transparent;
+        }
+        .demo-hamburger-menu.demo-active {
+          max-height: 200px;
+          border-color: var(--border-light);
+        }
+        .demo-hamburger-menu a {
+          display: block;
+          padding: 10px 16px;
+          color: var(--text);
+          text-decoration: none;
+          font-size: 14px;
+          transition: background 0.2s;
+          border-bottom: 1px solid var(--border);
+        }
+        .demo-hamburger-menu a:last-child { border-bottom: none; }
+        .demo-hamburger-menu a:hover { background: var(--bg-card-hover); color: var(--accent); }
+
+        /* 2. Dropdown Demo */
+        .demo-dropdown-wrap { position: relative; display: inline-block; }
+        .demo-dropdown-btn {
+          padding: 10px 20px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          color: var(--text);
+          cursor: pointer;
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          transition: border-color 0.2s;
+        }
+        .demo-dropdown-btn:hover { border-color: var(--accent); }
+        .demo-dropdown-btn .demo-arrow {
+          transition: transform 0.3s;
+          font-size: 10px;
+        }
+        .demo-dropdown-btn.demo-active .demo-arrow { transform: rotate(180deg); }
+        .demo-dropdown-list {
+          position: absolute;
+          top: calc(100% + 4px);
+          left: 0;
+          min-width: 180px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease, opacity 0.3s;
+          opacity: 0;
+          z-index: 10;
+        }
+        .demo-dropdown-list.demo-active {
+          max-height: 200px;
+          opacity: 1;
+        }
+        .demo-dropdown-list div {
+          padding: 10px 16px;
+          color: var(--text);
+          font-size: 14px;
+          cursor: pointer;
+          transition: background 0.2s;
+          border-bottom: 1px solid var(--border);
+        }
+        .demo-dropdown-list div:last-child { border-bottom: none; }
+        .demo-dropdown-list div:hover { background: var(--bg-card-hover); color: var(--accent); }
+
+        /* 3. Toggle/Switch Demo */
+        .demo-toggle-row { display: flex; align-items: center; gap: 12px; }
+        .demo-toggle {
+          width: 48px;
+          height: 26px;
+          background: var(--border-light);
+          border-radius: 13px;
+          cursor: pointer;
+          position: relative;
+          transition: background 0.3s;
+          border: none;
+          padding: 0;
+        }
+        .demo-toggle::after {
+          content: '';
+          position: absolute;
+          top: 3px;
+          left: 3px;
+          width: 20px;
+          height: 20px;
+          background: var(--text);
+          border-radius: 50%;
+          transition: all 0.3s;
+        }
+        .demo-toggle.demo-active {
+          background: var(--accent);
+        }
+        .demo-toggle.demo-active::after {
+          left: 25px;
+          background: #fff;
+        }
+        .demo-toggle-label {
+          font-size: 14px;
+          color: var(--text);
+          user-select: none;
+        }
+
+        /* 4. Tab Demo */
+        .demo-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border-light); margin-bottom: 16px; }
+        .demo-tab-btn {
+          padding: 10px 20px;
+          background: none;
+          border: none;
+          color: var(--text-muted);
+          font-size: 14px;
+          cursor: pointer;
+          border-bottom: 2px solid transparent;
+          transition: all 0.2s;
+          margin-bottom: -1px;
+        }
+        .demo-tab-btn:hover { color: var(--text); }
+        .demo-tab-btn.demo-active {
+          color: var(--accent);
+          border-bottom-color: var(--accent);
+        }
+        .demo-tab-content {
+          display: none;
+          font-size: 14px;
+          color: var(--text);
+          padding: 12px 4px;
+          animation: demo-fadeIn 0.3s;
+        }
+        .demo-tab-content.demo-active { display: block; }
+        @keyframes demo-fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 5. Accordion Demo */
+        .demo-accordion-item {
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          margin-bottom: 8px;
+          overflow: hidden;
+        }
+        .demo-accordion-header {
+          padding: 12px 16px;
+          background: var(--bg);
+          color: var(--text);
+          cursor: pointer;
+          font-size: 14px;
+          font-weight: 600;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border: none;
+          width: 100%;
+          text-align: left;
+          transition: background 0.2s;
+        }
+        .demo-accordion-header:hover { background: var(--bg-card-hover); }
+        .demo-accordion-icon {
+          transition: transform 0.3s;
+          font-size: 12px;
+          color: var(--text-muted);
+        }
+        .demo-accordion-header.demo-active .demo-accordion-icon { transform: rotate(180deg); }
+        .demo-accordion-body {
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+          background: var(--bg);
+        }
+        .demo-accordion-body-inner {
+          padding: 12px 16px;
+          font-size: 14px;
+          color: var(--text-muted);
+          border-top: 1px solid var(--border);
+        }
+
+        /* 6. Tooltip Demo */
+        .demo-tooltip-wrap { position: relative; display: inline-block; }
+        .demo-tooltip-trigger {
+          padding: 10px 20px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius-sm);
+          color: var(--text);
+          cursor: default;
+          font-size: 14px;
+          transition: border-color 0.2s;
+        }
+        .demo-tooltip-trigger:hover { border-color: var(--accent); }
+        .demo-tooltip-bubble {
+          position: absolute;
+          bottom: calc(100% + 8px);
+          left: 50%;
+          transform: translateX(-50%) translateY(4px);
+          background: var(--text);
+          color: var(--bg);
+          padding: 6px 12px;
+          border-radius: 6px;
+          font-size: 12px;
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: all 0.2s;
+        }
+        .demo-tooltip-bubble::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 50%;
+          transform: translateX(-50%);
+          border: 5px solid transparent;
+          border-top-color: var(--text);
+        }
+        .demo-tooltip-wrap:hover .demo-tooltip-bubble {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+
+        /* 7. Modal Demo */
+        .demo-modal-overlay {
+          display: none;
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.6);
+          z-index: 1000;
+          justify-content: center;
+          align-items: center;
+          animation: demo-fadeIn 0.2s;
+        }
+        .demo-modal-overlay.demo-active { display: flex; }
+        .demo-modal-box {
+          background: var(--bg-card);
+          border: 1px solid var(--border-light);
+          border-radius: var(--radius);
+          padding: 28px;
+          max-width: 380px;
+          width: 90%;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+        }
+        .demo-modal-title {
+          font-size: 18px;
+          font-weight: 700;
+          color: var(--text-heading);
+          margin-bottom: 12px;
+        }
+        .demo-modal-body {
+          font-size: 14px;
+          color: var(--text-muted);
+          margin-bottom: 20px;
+          line-height: 1.6;
+        }
+        .demo-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+        .demo-modal-btn {
+          padding: 8px 20px;
+          border-radius: var(--radius-sm);
+          font-size: 14px;
+          cursor: pointer;
+          border: none;
+          transition: all 0.2s;
+        }
+        .demo-modal-cancel {
+          background: var(--bg);
+          color: var(--text);
+          border: 1px solid var(--border-light);
+        }
+        .demo-modal-cancel:hover { border-color: var(--accent); }
+        .demo-modal-confirm {
+          background: var(--accent);
+          color: #fff;
+        }
+        .demo-modal-confirm:hover { background: var(--accent-light); }
+        .demo-open-modal {
+          padding: 10px 20px;
+          background: var(--accent);
+          color: #fff;
+          border: none;
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          font-size: 14px;
+          transition: background 0.2s;
+        }
+        .demo-open-modal:hover { background: var(--accent-light); }
+
+        /* 8. Spinner Demo */
+        .demo-spinner {
+          width: 36px;
+          height: 36px;
+          border: 3px solid var(--border-light);
+          border-top-color: var(--accent);
+          border-radius: 50%;
+          animation: demo-spin 0.8s linear infinite;
+        }
+        @keyframes demo-spin { to { transform: rotate(360deg); } }
+        .demo-spinner-row { display: flex; align-items: center; gap: 16px; }
+        .demo-spinner-text { font-size: 14px; color: var(--text-muted); }
+
+        /* 9. Toast Demo */
+        .demo-toast-btn {
+          padding: 10px 20px;
+          background: var(--accent);
+          color: #fff;
+          border: none;
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          font-size: 14px;
+          transition: background 0.2s;
+        }
+        .demo-toast-btn:hover { background: var(--accent-light); }
+        .demo-toast-area {
+          position: relative;
+          min-height: 50px;
+          margin-top: 12px;
+        }
+        .demo-toast {
+          display: none;
+          padding: 12px 20px;
+          background: var(--green);
+          color: #0f0f0f;
+          border-radius: var(--radius-sm);
+          font-size: 14px;
+          font-weight: 600;
+          animation: demo-toastIn 0.3s ease;
+          position: relative;
+        }
+        .demo-toast.demo-active { display: inline-block; }
+        @keyframes demo-toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .demo-toast-exit { animation: demo-toastOut 0.3s ease forwards; }
+        @keyframes demo-toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-8px); } }
+
+        /* 10. Carousel Demo */
+        .demo-carousel { position: relative; overflow: hidden; border-radius: var(--radius-sm); }
+        .demo-carousel-track {
+          display: flex;
+          transition: transform 0.4s ease;
+        }
+        .demo-carousel-slide {
+          min-width: 100%;
+          padding: 32px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 16px;
+          font-weight: 600;
+          color: var(--text-heading);
+          min-height: 100px;
+        }
+        .demo-carousel-slide:nth-child(1) { background: rgba(212,132,90,0.15); }
+        .demo-carousel-slide:nth-child(2) { background: rgba(96,165,250,0.15); }
+        .demo-carousel-slide:nth-child(3) { background: rgba(74,222,128,0.15); }
+        .demo-carousel-controls {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 16px;
+          margin-top: 12px;
+        }
+        .demo-carousel-btn {
+          width: 32px;
+          height: 32px;
+          background: var(--bg);
+          border: 1px solid var(--border-light);
+          border-radius: 50%;
+          color: var(--text);
+          cursor: pointer;
+          font-size: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+        }
+        .demo-carousel-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-carousel-dots { display: flex; gap: 6px; }
+        .demo-carousel-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--border-light);
+          border: none;
+          cursor: pointer;
+          transition: background 0.2s;
+          padding: 0;
+        }
+        .demo-carousel-dot.demo-active { background: var(--accent); }
+
+        /* 11. Checkbox/Radio Demo */
+        .demo-check-group { display: flex; flex-direction: column; gap: 10px; }
+        .demo-check-row { display: flex; gap: 24px; flex-wrap: wrap; }
+        .demo-check-label {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          font-size: 14px;
+          color: var(--text);
+          user-select: none;
+        }
+        .demo-check-label input[type="checkbox"],
+        .demo-check-label input[type="radio"] {
+          appearance: none;
+          -webkit-appearance: none;
+          width: 18px;
+          height: 18px;
+          border: 2px solid var(--border-light);
+          background: var(--bg);
+          cursor: pointer;
+          position: relative;
+          transition: all 0.2s;
+          flex-shrink: 0;
+        }
+        .demo-check-label input[type="checkbox"] { border-radius: 4px; }
+        .demo-check-label input[type="radio"] { border-radius: 50%; }
+        .demo-check-label input[type="checkbox"]:checked {
+          background: var(--accent);
+          border-color: var(--accent);
+        }
+        .demo-check-label input[type="checkbox"]:checked::after {
+          content: '';
+          position: absolute;
+          left: 5px;
+          top: 1px;
+          width: 5px;
+          height: 10px;
+          border: solid #fff;
+          border-width: 0 2px 2px 0;
+          transform: rotate(45deg);
+        }
+        .demo-check-label input[type="radio"]:checked {
+          border-color: var(--accent);
+        }
+        .demo-check-label input[type="radio"]:checked::after {
+          content: '';
+          position: absolute;
+          top: 3px;
+          left: 3px;
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--accent);
+        }
+        .demo-section-label {
+          font-size: 12px;
+          font-weight: 700;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 4px;
+        }
+
+        /* 12. Range Slider Demo */
+        .demo-range-row { display: flex; align-items: center; gap: 16px; }
+        .demo-range {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 200px;
+          height: 6px;
+          background: var(--border-light);
+          border-radius: 3px;
+          outline: none;
+          cursor: pointer;
+        }
+        .demo-range::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 20px;
+          height: 20px;
+          background: var(--accent);
+          border-radius: 50%;
+          cursor: pointer;
+          border: 2px solid var(--bg-card);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+          transition: background 0.2s;
+        }
+        .demo-range::-webkit-slider-thumb:hover { background: var(--accent-light); }
+        .demo-range::-moz-range-thumb {
+          width: 20px;
+          height: 20px;
+          background: var(--accent);
+          border-radius: 50%;
+          cursor: pointer;
+          border: 2px solid var(--bg-card);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        .demo-range-value {
+          font-size: 14px;
+          color: var(--accent);
+          font-weight: 700;
+          min-width: 40px;
+          text-align: center;
+        }
+        .demo-range-label-text { font-size: 14px; color: var(--text); }
+
+        /* ===== 補強：錨點、示範標題、手機點得到 Tooltip、窄螢幕、關閉動畫 ===== */
+        .content h2[id], .content h3[id] { scroll-margin-top: 80px; }
+        .demo-container::before { text-transform: none; letter-spacing: 0.5px; }
+        .demo-tooltip-trigger { font: inherit; font-size: 14px; cursor: pointer; }
+        .demo-tooltip-wrap:focus-within .demo-tooltip-bubble { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .demo-range { flex: 0 1 200px; min-width: 0; }
+        .demo-container button:focus-visible, .demo-modal-box button:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+        .ch6-steps { margin: 12px 0 0; padding-left: 1.4em; }
+        .ch6-steps li { margin: 6px 0; }
+        @media (prefers-reduced-motion: reduce) {
+          .demo-container *, .demo-container *::after, .demo-modal-overlay, .demo-modal-overlay * { animation: none !important; transition: none !important; }
+        }
+      </style>
+
+      <h3>互動示範</h3>
+      <p>以下是上方表格裡會動的元件，每個都可以直接點點看。</p>
+
+      <!-- Demo 1: Hamburger Menu -->
+      <div class="demo-container" data-demo-title="互動示範：Hamburger Menu">
+        <div class="demo-label">點擊漢堡按鈕，三條線會變成 X，下方展開選單。</div>
+        <button type="button" class="demo-hamburger-btn" id="demoHamburger" aria-label="示範：漢堡選單" aria-expanded="false" aria-controls="demoHamburgerMenu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="demo-hamburger-menu" id="demoHamburgerMenu">
+          <a href="#components" tabindex="-1">首頁</a>
+          <a href="#components" tabindex="-1">關於我們</a>
+          <a href="#components" tabindex="-1">產品服務</a>
+          <a href="#components" tabindex="-1">聯絡我們</a>
+        </div>
       </div>
 
-      <h3>Subagent——帶一個團隊做事</h3>
-      <p>Claude Code 不只是一個人。它可以「派出」子代理人（Subagent），讓多個任務同時進行。就像工頭把工作分給不同工人平行處理：</p>
-      <ul>
-        <li>Subagent A：去查這個 API 的文件</li>
-        <li>Subagent B：同時幫我改首頁的 CSS</li>
-        <li>Subagent C：同時去跑測試</li>
-      </ul>
-      <p>三個任務同時進行，比一個一個排隊做快很多。</p>
-
-      <h3>Memory——跨 Session 記憶系統</h3>
-      <p>一般的 LLM 對話，關掉視窗就全忘了。Claude Code 有記憶系統，可以把重要的事情記住，下次開新的 Session 還是知道。</p>
-      <div class="box box-info">
-        <div class="box-label">Memory 的運作方式</div>
-        Claude Code 會把重要資訊寫進 CLAUDE.md 或專門的記憶檔案。下次你再開對話，它會先讀這些檔案，就像員工翻看自己上次的工作筆記。
+      <!-- Demo 2: Dropdown -->
+      <div class="demo-container" data-demo-title="互動示範：Dropdown">
+        <div class="demo-label">點擊按鈕展開下拉選單，選擇一個縣市。</div>
+        <div class="demo-dropdown-wrap" id="demoDropdownWrap">
+          <button type="button" class="demo-dropdown-btn" id="demoDropdownBtn" aria-expanded="false" aria-controls="demoDropdownList">
+            <span id="demoDropdownText">選擇縣市</span>
+            <span class="demo-arrow" aria-hidden="true">&#9660;</span>
+          </button>
+          <div class="demo-dropdown-list" id="demoDropdownList">
+            <div data-value="taipei">台北市</div>
+            <div data-value="taichung">台中市</div>
+            <div data-value="kaohsiung">高雄市</div>
+            <div data-value="tainan">台南市</div>
+          </div>
+        </div>
       </div>
 
-      <h3>Hook——自動化觸發器</h3>
-      <p>Hook 是一種「自動觸發的規則」。你可以設定：</p>
-      <ul>
-        <li>每次 Claude Code 要修改檔案之前，先做 XXX</li>
-        <li>每次 Git commit 之前，先跑測試</li>
-        <li>每次部署之前，先做安全檢查</li>
-      </ul>
-      <div class="analogy">
-        <strong>白話：</strong>Hook 就像你在工地門口貼的告示牌：「進門前先戴安全帽」。不管誰進來，都會先做那件事。
+      <!-- Demo 3: Toggle/Switch -->
+      <div class="demo-container" data-demo-title="互動示範：Toggle / Switch">
+        <div class="demo-label">點擊開關來切換開/關狀態。</div>
+        <div class="demo-toggle-row">
+          <button type="button" class="demo-toggle" id="demoToggle1" aria-label="示範開關：Dark Mode" aria-pressed="false"></button>
+          <span class="demo-toggle-label" id="demoToggleLabel1">Dark Mode：關</span>
+        </div>
+        <div class="demo-toggle-row" style="margin-top:12px;">
+          <button type="button" class="demo-toggle" id="demoToggle2" aria-label="示範開關：通知" aria-pressed="false"></button>
+          <span class="demo-toggle-label" id="demoToggleLabel2">通知：關</span>
+        </div>
       </div>
 
-      <h3>Plugin / Skill——可安裝的擴充包</h3>
-      <p>你可以幫 Claude Code 安裝各種「技能包」，讓它會做更多事情。例如：</p>
-      <ul>
-        <li><strong>Skill</strong>：一套預先寫好的指令和規範。例如「程式碼審查 Skill」會讓 Claude Code 用特定的標準幫你檢查程式碼品質</li>
-        <li><strong>Plugin</strong>：外掛模組，可以擴充 Claude Code 的能力。例如 Discord Plugin 讓它可以讀寫 Discord 訊息</li>
-      </ul>
-      <p>就像手機裝 App 一樣——手機出廠只有基本功能，裝了 App 才能做更多事。</p>
-
-      <!-- ========== E. MD 檔的重要性 ========== -->
-      <h2>MD 檔的重要性</h2>
-
-      <h3>Markdown 是什麼？</h3>
-      <p>Markdown（簡稱 MD）是一種用<strong>純文字寫格式</strong>的方法。你可以把它想成「簡化版的 Word」。</p>
-      <p>在 Word 裡面，你要粗體就用滑鼠選取文字然後點 B。在 Markdown 裡面，你只要打：</p>
-      <div class="code-block">
-**這段文字會變粗體**<br><br>
-# 這是大標題<br>
-## 這是次標題<br><br>
-- 這是項目符號<br>
-- 第二點<br><br>
-`這是程式碼`
+      <!-- Demo 4: Tab -->
+      <div class="demo-container" data-demo-title="互動示範：Tab 頁籤">
+        <div class="demo-label">點擊不同頁籤切換顯示的內容。</div>
+        <div class="demo-tabs">
+          <button type="button" class="demo-tab-btn demo-active" data-tab="spec">規格</button>
+          <button type="button" class="demo-tab-btn" data-tab="review">評價</button>
+          <button type="button" class="demo-tab-btn" data-tab="qa">問答</button>
+        </div>
+        <div class="demo-tab-content demo-active" data-tab-content="spec">
+          B 咖啡店招牌豆<br>
+          烘焙度：中焙／重量：半磅／保存：開封後兩週內喝完
+        </div>
+        <div class="demo-tab-content" data-tab-content="review">
+          ★★★★★ 「香氣很足，早上一杯剛好。」<br>
+          ★★★★☆ 「好喝，但希望有小包裝。」
+        </div>
+        <div class="demo-tab-content" data-tab-content="qa">
+          Q：可以幫我磨好嗎？<br>
+          A：可以，結帳時備註要用什麼器具沖。
+        </div>
       </div>
-      <p>就這麼簡單。不需要任何特殊軟體，用記事本就能寫。</p>
 
-      <h3>為什麼 Claude Code 生態都用 MD？</h3>
-      <p>有三個關鍵原因：</p>
-      <ol>
-        <li><strong>最省 Token</strong>——純文字檔案不含格式代碼，一個 MD 檔比同內容的 Word 檔小好幾倍。檔案越小，AI 讀得越快、花的 Token 越少</li>
-        <li><strong>最好讀</strong>——不管是人還是 AI，讀純文字都最直接。不像 Word 或 PDF，裡面一堆格式代碼會干擾 AI 的理解</li>
-        <li><strong>Git 友好</strong>——Git 版控系統是用「逐行比較」來追蹤變更。純文字的 MD 檔可以精準看出哪一行被改了；Word 檔是二進位格式，Git 根本無法比較</li>
-      </ol>
+      <!-- Demo 5: Accordion -->
+      <div class="demo-container" data-demo-title="互動示範：Accordion（手風琴）">
+        <div class="demo-label">點擊問題標題展開/收合答案。</div>
+        <div class="demo-accordion-item">
+          <button type="button" class="demo-accordion-header" data-accordion="a1" aria-expanded="false" aria-controls="demo-a1">
+            Claude Code 是什麼？
+            <span class="demo-accordion-icon" aria-hidden="true">&#9660;</span>
+          </button>
+          <div class="demo-accordion-body" id="demo-a1">
+            <div class="demo-accordion-body-inner">Anthropic 做的 AI 寫程式工具：會讀你的專案、改檔案、跑指令。終端機、程式編輯器、桌面 App、瀏覽器都能用。</div>
+          </div>
+        </div>
+        <div class="demo-accordion-item">
+          <button type="button" class="demo-accordion-header" data-accordion="a2" aria-expanded="false" aria-controls="demo-a2">
+            不會寫程式能用嗎？
+            <span class="demo-accordion-icon" aria-hidden="true">&#9660;</span>
+          </button>
+          <div class="demo-accordion-body" id="demo-a2">
+            <div class="demo-accordion-body-inner">能用。但做出來的東西要能改能修，得懂一點架構、知道哪裡不能亂動，這本指南講的就是這些。</div>
+          </div>
+        </div>
+        <div class="demo-accordion-item">
+          <button type="button" class="demo-accordion-header" data-accordion="a3" aria-expanded="false" aria-controls="demo-a3">
+            跟網頁上聊天的 Claude 差在哪？
+            <span class="demo-accordion-icon" aria-hidden="true">&#9660;</span>
+          </button>
+          <div class="demo-accordion-body" id="demo-a3">
+            <div class="demo-accordion-body-inner">Claude Code 直接進到你的專案裡做事，讀寫檔案、跑指令，不只是回你一段話。</div>
+          </div>
+        </div>
+      </div>
 
-      <h3>常見的 MD 檔案</h3>
+      <!-- Demo 6: Tooltip -->
+      <div class="demo-container" data-demo-title="互動示範：Tooltip（提示框）">
+        <div class="demo-label">把滑鼠移到下面的按鈕上（手機用點的），會出現提示文字。</div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap;">
+          <div class="demo-tooltip-wrap">
+            <button type="button" class="demo-tooltip-trigger">設定</button>
+            <div class="demo-tooltip-bubble" role="tooltip">開啟系統設定</div>
+          </div>
+          <div class="demo-tooltip-wrap">
+            <button type="button" class="demo-tooltip-trigger">通知</button>
+            <div class="demo-tooltip-bubble" role="tooltip">你有 3 則未讀通知</div>
+          </div>
+          <div class="demo-tooltip-wrap">
+            <button type="button" class="demo-tooltip-trigger">收藏</button>
+            <div class="demo-tooltip-bubble" role="tooltip">加入收藏清單</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo 7: Modal -->
+      <div class="demo-container" data-demo-title="互動示範：Modal（彈出視窗）">
+        <div class="demo-label">點擊按鈕會彈出一個對話框，背後變暗。</div>
+        <button type="button" class="demo-open-modal" id="demoOpenModal">開啟 Modal</button>
+      </div>
+      <div class="demo-modal-overlay" id="demoModalOverlay">
+        <div class="demo-modal-box" role="dialog" aria-modal="true" aria-labelledby="demoModalTitle">
+          <div class="demo-modal-title" id="demoModalTitle">確定要刪除嗎？</div>
+          <div class="demo-modal-body">這個操作無法復原。（這是示範，按哪一個都不會真的刪東西。）</div>
+          <div class="demo-modal-actions">
+            <button type="button" class="demo-modal-btn demo-modal-cancel" id="demoModalCancel">取消</button>
+            <button type="button" class="demo-modal-btn demo-modal-confirm" id="demoModalConfirm">確定刪除</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo 8: Spinner/Loading -->
+      <div class="demo-container" data-demo-title="互動示範：Spinner / Loading">
+        <div class="demo-label">轉圈圈動畫，用來表示「正在載入」。</div>
+        <div class="demo-spinner-row">
+          <div class="demo-spinner" aria-hidden="true"></div>
+          <span class="demo-spinner-text">載入中，請稍候...</span>
+        </div>
+      </div>
+
+      <!-- Demo 9: Toast -->
+      <div class="demo-container" data-demo-title="互動示範：Toast / Banner">
+        <div class="demo-label">點擊按鈕後出現通知條，3 秒後自動消失。</div>
+        <button type="button" class="demo-toast-btn" id="demoToastBtn">顯示 Toast 通知</button>
+        <div class="demo-toast-area" aria-live="polite">
+          <div class="demo-toast" id="demoToast">&#10003; 儲存成功！</div>
+        </div>
+      </div>
+
+      <!-- Demo 10: Carousel -->
+      <div class="demo-container" data-demo-title="互動示範：Carousel（輪播）">
+        <div class="demo-label">使用左右箭頭或圓點切換內容。</div>
+        <div class="demo-carousel">
+          <div class="demo-carousel-track" id="demoCarouselTrack">
+            <div class="demo-carousel-slide">第 1 張：歡迎光臨</div>
+            <div class="demo-carousel-slide">第 2 張：精選商品</div>
+            <div class="demo-carousel-slide">第 3 張：限時優惠</div>
+          </div>
+        </div>
+        <div class="demo-carousel-controls">
+          <button type="button" class="demo-carousel-btn" id="demoCarouselPrev" aria-label="示範：上一張">&#8249;</button>
+          <div class="demo-carousel-dots" id="demoCarouselDots">
+            <button type="button" class="demo-carousel-dot demo-active" data-slide="0" aria-label="示範：第 1 張"></button>
+            <button type="button" class="demo-carousel-dot" data-slide="1" aria-label="示範：第 2 張"></button>
+            <button type="button" class="demo-carousel-dot" data-slide="2" aria-label="示範：第 3 張"></button>
+          </div>
+          <button type="button" class="demo-carousel-btn" id="demoCarouselNext" aria-label="示範：下一張">&#8250;</button>
+        </div>
+      </div>
+
+      <!-- Demo 11: Checkbox / Radio -->
+      <div class="demo-container" data-demo-title="互動示範：Checkbox / Radio">
+        <div class="demo-label">Checkbox 可以多選（方框），Radio 只能選一個（圓形）。</div>
+        <div class="demo-check-group">
+          <div class="demo-section-label">興趣（Checkbox — 可多選）</div>
+          <div class="demo-check-row">
+            <label class="demo-check-label"><input type="checkbox"> 程式設計</label>
+            <label class="demo-check-label"><input type="checkbox"> 設計</label>
+            <label class="demo-check-label"><input type="checkbox"> 行銷</label>
+            <label class="demo-check-label"><input type="checkbox"> 財務</label>
+          </div>
+          <div class="demo-section-label" style="margin-top:16px;">性別（Radio — 單選）</div>
+          <div class="demo-check-row">
+            <label class="demo-check-label"><input type="radio" name="demoGender"> 男</label>
+            <label class="demo-check-label"><input type="radio" name="demoGender"> 女</label>
+            <label class="demo-check-label"><input type="radio" name="demoGender"> 其他</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Demo 12: Range Slider -->
+      <div class="demo-container" data-demo-title="互動示範：Range Slider">
+        <div class="demo-label">拖拉滑桿來調整數值。</div>
+        <div class="demo-range-row">
+          <span class="demo-range-label-text">價格：</span>
+          <input type="range" class="demo-range" id="demoRange1" min="0" max="10000" value="5000" step="100">
+          <span class="demo-range-value" id="demoRangeVal1">$5000</span>
+        </div>
+        <div class="demo-range-row" style="margin-top:12px;">
+          <span class="demo-range-label-text">音量：</span>
+          <input type="range" class="demo-range" id="demoRange2" min="0" max="100" value="60">
+          <span class="demo-range-value" id="demoRangeVal2">60%</span>
+        </div>
+      </div>
+
+      <!-- Demo JS -->
+      <script>
+      (function() {
+        /* 1. Hamburger */
+        var hb = document.getElementById('demoHamburger');
+        var hm = document.getElementById('demoHamburgerMenu');
+        hb.addEventListener('click', function() {
+          var open = hm.classList.toggle('demo-active');
+          hb.classList.toggle('demo-active', open);
+          hb.setAttribute('aria-expanded', String(open));
+          hm.querySelectorAll('a').forEach(function(a) { a.tabIndex = open ? 0 : -1; });
+        });
+        hm.querySelectorAll('a').forEach(function(a) {
+          a.addEventListener('click', function(e) { e.preventDefault(); });
+        });
+
+        /* 2. Dropdown */
+        var dbtn = document.getElementById('demoDropdownBtn');
+        var dlist = document.getElementById('demoDropdownList');
+        var dtxt = document.getElementById('demoDropdownText');
+        function setDropdown(open) {
+          dbtn.classList.toggle('demo-active', open);
+          dlist.classList.toggle('demo-active', open);
+          dbtn.setAttribute('aria-expanded', String(open));
+        }
+        dbtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          setDropdown(!dlist.classList.contains('demo-active'));
+        });
+        dlist.querySelectorAll('div').forEach(function(item) {
+          item.addEventListener('click', function() {
+            dtxt.textContent = item.textContent;
+            setDropdown(false);
+          });
+        });
+        document.addEventListener('click', function() { setDropdown(false); });
+
+        /* 3. Toggle */
+        function setupToggle(btnId, labelId, onText, offText) {
+          var btn = document.getElementById(btnId);
+          var lbl = document.getElementById(labelId);
+          btn.addEventListener('click', function() {
+            var on = btn.classList.toggle('demo-active');
+            btn.setAttribute('aria-pressed', String(on));
+            lbl.textContent = on ? onText : offText;
+          });
+        }
+        setupToggle('demoToggle1', 'demoToggleLabel1', 'Dark Mode：開', 'Dark Mode：關');
+        setupToggle('demoToggle2', 'demoToggleLabel2', '通知：開', '通知：關');
+
+        /* 4. Tabs */
+        var tabBtns = document.querySelectorAll('.demo-tab-btn');
+        var tabContents = document.querySelectorAll('.demo-tab-content');
+        tabBtns.forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            tabBtns.forEach(function(b) { b.classList.remove('demo-active'); });
+            tabContents.forEach(function(c) { c.classList.remove('demo-active'); });
+            btn.classList.add('demo-active');
+            document.querySelector('[data-tab-content="' + btn.dataset.tab + '"]').classList.add('demo-active');
+          });
+        });
+
+        /* 5. Accordion */
+        document.querySelectorAll('.demo-accordion-header').forEach(function(hdr) {
+          hdr.addEventListener('click', function() {
+            var body = document.getElementById('demo-' + hdr.dataset.accordion);
+            var isOpen = hdr.classList.contains('demo-active');
+            hdr.classList.toggle('demo-active');
+            hdr.setAttribute('aria-expanded', String(!isOpen));
+            body.style.maxHeight = isOpen ? '0' : body.scrollHeight + 'px';
+          });
+        });
+
+        /* 7. Modal：按取消、確定、背後暗處或 Esc 都會關 */
+        var overlay = document.getElementById('demoModalOverlay');
+        var opener = document.getElementById('demoOpenModal');
+        function closeModal() {
+          if (!overlay.classList.contains('demo-active')) return;
+          overlay.classList.remove('demo-active');
+          opener.focus();
+        }
+        opener.addEventListener('click', function() {
+          overlay.classList.add('demo-active');
+          document.getElementById('demoModalCancel').focus();
+        });
+        document.getElementById('demoModalCancel').addEventListener('click', closeModal);
+        document.getElementById('demoModalConfirm').addEventListener('click', closeModal);
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) closeModal();
+        });
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') closeModal();
+        });
+
+        /* 9. Toast */
+        var toastEl = document.getElementById('demoToast');
+        var toastTimer = null;
+        document.getElementById('demoToastBtn').addEventListener('click', function() {
+          clearTimeout(toastTimer);
+          toastEl.classList.remove('demo-toast-exit');
+          toastEl.classList.add('demo-active');
+          toastTimer = setTimeout(function() {
+            toastEl.classList.add('demo-toast-exit');
+            setTimeout(function() {
+              toastEl.classList.remove('demo-active', 'demo-toast-exit');
+            }, 300);
+          }, 3000);
+        });
+
+        /* 10. Carousel */
+        var track = document.getElementById('demoCarouselTrack');
+        var dots = document.querySelectorAll('.demo-carousel-dot');
+        var currentSlide = 0;
+        var totalSlides = 3;
+        function goToSlide(n) {
+          currentSlide = (n + totalSlides) % totalSlides;
+          track.style.transform = 'translateX(-' + (currentSlide * 100) + '%)';
+          dots.forEach(function(d, i) {
+            d.classList.toggle('demo-active', i === currentSlide);
+          });
+        }
+        document.getElementById('demoCarouselPrev').addEventListener('click', function() { goToSlide(currentSlide - 1); });
+        document.getElementById('demoCarouselNext').addEventListener('click', function() { goToSlide(currentSlide + 1); });
+        dots.forEach(function(dot) {
+          dot.addEventListener('click', function() { goToSlide(parseInt(dot.dataset.slide, 10)); });
+        });
+
+        /* 12. Range Slider */
+        var r1 = document.getElementById('demoRange1');
+        var v1 = document.getElementById('demoRangeVal1');
+        r1.addEventListener('input', function() { v1.textContent = '$' + r1.value; });
+        var r2 = document.getElementById('demoRange2');
+        var v2 = document.getElementById('demoRangeVal2');
+        r2.addEventListener('input', function() { v2.textContent = r2.value + '%'; });
+      })();
+</script>
+
+      <!-- ===== uidemo：補充示範（樣式共用；腳本在頁尾 main.js 之前） ===== -->
+      <style>
+        /* 外框：格線、卡片、舞台、說明 */
+        .uidemo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 16px; margin: 20px 0; }
+        .uidemo-card { min-width: 0; padding: 12px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius); }
+        .uidemo-stage { position: relative; height: 124px; padding: 10px; overflow: hidden; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 12px; line-height: 1.4; color: var(--text-muted); }
+        .uidemo-cap { display: block; margin-top: 10px; font-size: 13px; line-height: 1.6; color: var(--text-muted); }
+        .uidemo-name { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 2px; font-size: 14px; font-weight: 700; color: var(--text-heading); }
+        .uidemo-say { display: block; }
+        .uidemo-say::before { content: "跟 Claude 說："; color: var(--accent-light); }
+        .uidemo-tag { flex: none; min-height: 24px; padding: 0 8px; font: inherit; font-size: 11px; font-weight: 400; line-height: 22px; white-space: nowrap; color: var(--text-muted); background: none; border: 1px solid var(--border-light); border-radius: 12px; }
+        button.uidemo-tag { cursor: pointer; color: var(--accent-light); border-color: var(--accent); }
+        .uidemo-card button:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+        .uidemo-card [hidden] { display: none !important; }
+
+        /* 積木：灰條、方塊、小按鈕、排列 */
+        .uidemo-bar { display: block; height: 7px; margin-bottom: 8px; border-radius: 4px; background: var(--border-light); }
+        .uidemo-bar:nth-of-type(even) { width: 62%; }
+        .uidemo-tile { display: block; min-height: 20px; background: var(--bg-card-hover); border: 1px solid var(--border-light); border-radius: 6px; }
+        .uidemo-btn { min-height: 26px; padding: 3px 9px; font: inherit; color: var(--text); background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 6px; cursor: pointer; }
+        .uidemo-btn[aria-pressed="true"] { border-color: var(--accent); color: var(--accent-light); }
+        .uidemo-row { display: flex; align-items: center; gap: 4px; }
+        .uidemo-cols { display: flex; gap: 6px; }
+        .uidemo-cols > * { flex: 1; min-width: 0; }
+        .uidemo-note + .uidemo-cols .uidemo-tile { height: 72px; }
+        .uidemo-center { display: flex; align-items: center; justify-content: center; gap: 20px; }
+        .uidemo-media { display: flex; align-items: center; gap: 10px; height: 100%; }
+        .uidemo-lines { flex: 1; min-width: 0; color: var(--text); }
+        .uidemo-note { display: block; margin-bottom: 4px; font-size: 11px; }
+        .uidemo-stage svg { width: 26px; height: 26px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--text); }
+        .uidemo-screen { height: 100%; margin: 0 auto; padding: 6px; overflow: hidden; border: 1px solid var(--border-light); border-radius: 6px; }
+
+        /* 會開會關的三種：FAB 的對話泡泡、Drawer 的遮罩與面板 */
+        .uidemo-pop, .uidemo-shade, .uidemo-panel { position: absolute; visibility: hidden; transition: opacity 0.3s, transform 0.3s, visibility 0s 0.3s; }
+        .uidemo-card[data-state="on"] :is(.uidemo-pop, .uidemo-shade, .uidemo-panel) { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
+        .uidemo-fab { position: absolute; right: 10px; bottom: 10px; display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .uidemo-fab svg { width: 20px; height: 20px; color: #1a1a1a; }
+        .uidemo-pop { right: 10px; bottom: 56px; padding: 6px 10px; color: var(--text); background: var(--bg-card-hover); border: 1px solid var(--border-light); border-radius: 10px 10px 2px 10px; opacity: 0; transform: translateY(6px) scale(0.96); transform-origin: 100% 100%; }
+        .uidemo-shade { inset: 0; background: rgba(0,0,0,0.55); opacity: 0; }
+        .uidemo-panel { top: 0; right: 0; bottom: 0; width: 58%; padding: 6px 8px 8px 10px; color: var(--text); background: var(--bg-card-hover); border-left: 1px solid var(--border-light); transform: translateX(100%); }
+        .uidemo-x { width: 26px; height: 26px; margin-left: auto; font: inherit; font-size: 16px; line-height: 1; color: inherit; background: none; border: 0; cursor: pointer; }
+
+        /* Banner */
+        .uidemo-banner { display: flex; align-items: center; margin: -10px -10px 10px; padding: 1px 2px 1px 10px; color: #1a1a1a; background: var(--accent); transition: margin-top 0.3s; }
+        .uidemo-card[data-state="off"] .uidemo-banner { margin-top: -40px; visibility: hidden; transition: margin-top 0.3s, visibility 0s 0.3s; }
+
+        /* Infinite Scroll、Skeleton 共用「晚一點才出現」 */
+        .uidemo-inf { position: relative; transform: translateY(-58px); animation: uidemo-inf 8s ease-in-out infinite; }
+        .uidemo-inf .uidemo-tile { position: relative; margin-bottom: 8px; }
+        .uidemo-spin { position: absolute; top: 142px; left: calc(50% - 8px); width: 16px; height: 16px; border: 2px solid var(--border-light); border-top-color: var(--accent); border-radius: 50%; animation: uidemo-spin 0.8s linear infinite; }
+        .uidemo-late { opacity: 0; animation: uidemo-late 8s infinite; }
+        .uidemo-inf .uidemo-late { border-color: var(--accent); }
+        @keyframes uidemo-inf { 0%, 8% { transform: translateY(0); } 28%, 58% { transform: translateY(-58px); } 80%, 94% { transform: translateY(-112px); } 100% { transform: translateY(0); } }
+        @keyframes uidemo-spin { to { transform: rotate(360deg); } }
+        @keyframes uidemo-late { 0%, 52% { opacity: 0; } 60%, 94% { opacity: 1; } 100% { opacity: 0; } }
+        .uidemo-stage .uidemo-shim { background: linear-gradient(90deg, var(--border) 25%, #444 50%, var(--border) 75%) 0 0 / 200% 100%; animation: uidemo-shim 1.4s linear infinite; }
+        @keyframes uidemo-shim { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+        .uidemo-cover { position: absolute; inset: 0; height: auto; padding: 10px; background: var(--bg); }
+
+        /* Pagination、Grid、Flexbox */
+        .uidemo-pager .uidemo-btn { width: 24px; padding: 3px 0; }
+        .uidemo-gridbox { display: grid; grid-template-columns: repeat(var(--uidemo-n, 3), 1fr); gap: 6px; margin-top: 8px; }
+        .uidemo-gridbox .uidemo-tile { min-height: 18px; }
+        .uidemo-flexbox { display: flex; gap: 6px; margin-top: 10px; padding: 8px; border: 1px dashed var(--border-light); border-radius: 6px; }
+        .uidemo-flexbox .uidemo-tile { width: 34px; height: 34px; }
+        .uidemo-card[data-state="center"] .uidemo-flexbox { justify-content: center; }
+        .uidemo-card[data-state="between"] .uidemo-flexbox { justify-content: space-between; }
+
+        /* Container、Wrapper */
+        .uidemo-squeeze { width: 100%; animation: uidemo-squeeze 6s ease-in-out infinite alternate; }
+        @keyframes uidemo-squeeze { from { width: 100%; } to { width: 118px; } }
+        .uidemo-inner { max-width: 104px; height: 100%; margin: 0 auto; padding: 6px; color: var(--accent-light); border: 1px dashed var(--accent); border-radius: 4px; }
+        .uidemo-wrap { display: flex; gap: 6px; width: max-content; margin: 8px auto 0; padding: 8px; border: 1px dashed var(--accent); border-radius: 6px; animation: uidemo-nudge 5s ease-in-out infinite alternate; }
+        .uidemo-wrap .uidemo-tile { width: 36px; height: 44px; }
+        @keyframes uidemo-nudge { from { transform: translateX(-22px); } to { transform: translateX(22px); } }
+
+        /* Avatar、Badge、Breadcrumb、Divider */
+        .uidemo-avatar { flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; font-size: 16px; font-weight: 700; font-style: normal; color: #1a1a1a; background: var(--accent); }
+        .uidemo-badged { position: relative; display: block; line-height: 0; }
+        .uidemo-badged svg { width: 34px; height: 34px; }
+        .uidemo-badge { position: absolute; top: -8px; right: -10px; min-width: 18px; padding: 0 5px; border-radius: 9px; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; color: #fff; background: #dc2626; animation: uidemo-pop 4s infinite; }
+        @keyframes uidemo-pop { 0%, 10% { transform: scale(0); } 18% { transform: scale(1.3); } 26%, 100% { transform: scale(1); } }
+        .uidemo-crumbs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+        .uidemo-crumbs :last-child { color: var(--text-heading); font-weight: 700; }
+        .uidemo-hr { margin: 10px 0 18px; border: 0; border-top: 2px solid var(--accent); }
+
+        /* 依序進場：Breadcrumb、Scroll Animation 共用 */
+        .uidemo-s1 { animation: uidemo-s1 6s infinite; }
+        .uidemo-s2 { animation: uidemo-s2 6s infinite; }
+        .uidemo-s3 { animation: uidemo-s3 6s infinite; }
+        @keyframes uidemo-s1 { 0%, 12% { opacity: 0; transform: translateY(8px); } 22%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+        @keyframes uidemo-s2 { 0%, 32% { opacity: 0; transform: translateY(8px); } 42%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+        @keyframes uidemo-s3 { 0%, 52% { opacity: 0; transform: translateY(8px); } 62%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+
+        /* RWD */
+        .uidemo-rwd { display: flex; flex-wrap: wrap; align-content: flex-start; gap: 4px; width: 100%; height: 78px; margin-top: 8px; transition: width 0.5s; }
+        .uidemo-rwd .uidemo-bar { flex: 0 0 100%; margin: 0 0 2px; }
+        .uidemo-rwd .uidemo-tile { flex: 1 1 56px; min-height: 0; height: 46px; transition: height 0.5s; }
+        .uidemo-card[data-state="phone"] .uidemo-rwd { width: 84px; }
+        .uidemo-card[data-state="phone"] .uidemo-rwd .uidemo-tile { height: 14px; }
+
+        /* 滾動類：Sticky Header、Parallax 共用同一組「往下滾再滾回來」 */
+        .uidemo-scroll { transform: translateY(calc(var(--uidemo-d, -80px) / 2)); animation: uidemo-scroll 5s ease-in-out infinite alternate; }
+        @keyframes uidemo-scroll { from { transform: translateY(0); } to { transform: translateY(var(--uidemo-d, -80px)); } }
+        .uidemo-thumb { position: absolute; top: 35%; right: 3px; z-index: 3; width: 3px; height: 30%; border-radius: 2px; background: #555; animation: uidemo-thumb 5s ease-in-out infinite alternate; }
+        @keyframes uidemo-thumb { from { top: 4%; } to { top: 66%; } }
+        .uidemo-head { position: absolute; top: 0; left: 0; right: 0; z-index: 2; padding: 4px 10px; color: var(--text-heading); background: var(--bg-card-hover); border-bottom: 2px solid var(--accent); }
+        .uidemo-head + .uidemo-scroll { padding-top: 26px; }
+        .uidemo-head + .uidemo-scroll .uidemo-tile { height: 30px; margin-bottom: 8px; }
+        .uidemo-far { position: absolute; top: 0; left: 0; right: 0; height: 170px; padding: 36px 10px; --uidemo-d: -24px; background: radial-gradient(circle at 78% 28%, rgba(96,165,250,0.35) 0 26px, transparent 27px), radial-gradient(circle at 22% 72%, rgba(167,139,250,0.3) 0 34px, transparent 35px); }
+        .uidemo-near { position: relative; --uidemo-d: -110px; padding-top: 50px; }
+        .uidemo-near .uidemo-tile { width: 50%; margin: 0 0 44px auto; padding: 6px 8px; color: var(--text); }
+
+        /* Smooth Scroll */
+        .uidemo-view { height: 66px; margin-top: 8px; overflow: hidden; border-radius: 6px; }
+        .uidemo-strip { transform: translateY(calc((var(--uidemo-n, 1) - 1) * -66px)); transition: transform 0.7s ease; }
+        .uidemo-strip > div { display: grid; place-items: center; height: 66px; color: var(--text-heading); background: rgba(212,132,90,0.15); }
+        .uidemo-strip > div:nth-child(2) { background: rgba(96,165,250,0.15); }
+        .uidemo-strip > div:nth-child(3) { background: rgba(74,222,128,0.15); }
+
+        /* Dark Mode */
+        .uidemo-dark { color: #333; background: #f4f1ec; transition: background 0.3s, color 0.3s; }
+        .uidemo-dark .uidemo-bar { margin-top: 10px; background: #cfc8bd; transition: background 0.3s; }
+        .uidemo-card[data-state="on"] .uidemo-dark { color: #eee; background: #141414; }
+        .uidemo-card[data-state="on"] .uidemo-dark .uidemo-bar { background: #3a3a3a; }
+        .uidemo-switch { position: relative; width: 40px; height: 24px; margin-right: 6px; border: 0; border-radius: 12px; background: #a49b8e; cursor: pointer; transition: background 0.3s; }
+        .uidemo-switch::after { content: ""; position: absolute; top: 4px; left: 4px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: transform 0.3s; }
+        .uidemo-switch[aria-pressed="true"] { background: var(--accent); }
+        .uidemo-switch[aria-pressed="true"]::after { transform: translateX(16px); }
+
+        /* Onboarding */
+        .uidemo-tour .uidemo-tile { line-height: 26px; text-align: center; color: var(--text); }
+        .uidemo-spot { position: absolute; top: 6px; left: calc(6px + (var(--uidemo-n, 1) - 1) * ((100% - 32px) / 3 + 6px)); width: calc((100% - 32px) / 3 + 8px); height: 36px; border: 2px solid var(--accent); border-radius: 8px; box-shadow: 0 0 0 400px rgba(0,0,0,0.6); pointer-events: none; transition: left 0.4s; }
+        .uidemo-tip { position: absolute; left: 10px; right: 10px; bottom: 10px; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 8px; color: #1a1a1a; background: var(--text); border-radius: 8px; }
+        .uidemo-tip .uidemo-btn { flex: none; }
+
+        /* Drag & Drop */
+        .uidemo-dnd .uidemo-tile { height: 28px; margin-bottom: 8px; padding: 0 10px; line-height: 26px; color: var(--text); animation: uidemo-dnd-b 7s ease-in-out infinite; }
+        .uidemo-dnd .uidemo-tile::before { content: "≡"; margin-right: 8px; color: var(--text-muted); }
+        .uidemo-dnd .uidemo-tile:first-child { position: relative; z-index: 1; transform: translateY(36px) rotate(-1.5deg); border-color: var(--accent); box-shadow: 0 8px 18px rgba(0,0,0,0.6); animation-name: uidemo-dnd-a; }
+        @keyframes uidemo-dnd-a { 0%, 10% { transform: none; border-color: var(--border-light); box-shadow: none; } 18% { transform: rotate(-1.5deg); border-color: var(--accent); box-shadow: 0 8px 18px rgba(0,0,0,0.6); } 50% { transform: translateY(72px) rotate(-1.5deg); border-color: var(--accent); box-shadow: 0 8px 18px rgba(0,0,0,0.6); } 58%, 90% { transform: translateY(72px); border-color: var(--border-light); box-shadow: none; } 100% { transform: none; border-color: var(--border-light); box-shadow: none; } }
+        @keyframes uidemo-dnd-b { 0%, 26% { transform: none; } 46%, 90% { transform: translateY(-36px); } 100% { transform: none; } }
+
+        /* hover、transition */
+        .uidemo-hover { padding: 14px 20px; font: inherit; color: var(--text); background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 10px; cursor: pointer; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; }
+        /* 觸控螢幕的 :hover 不可靠，所以手機改成「點一下浮起、再點放下」 */
+        .uidemo-hover:focus-visible { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 10px 22px rgba(0,0,0,0.6); }
+        @media (hover: hover) { .uidemo-hover:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 10px 22px rgba(0,0,0,0.6); } }
+        @media (hover: none) { .uidemo-card[data-state="on"] .uidemo-hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 10px 22px rgba(0,0,0,0.6); } }
+        .uidemo-track { display: block; width: 64px; height: 24px; margin-bottom: 10px; padding: 3px; border-radius: 12px; background: var(--border-light); animation: uidemo-track 3s infinite; }
+        .uidemo-track b { display: block; width: 18px; height: 18px; border-radius: 50%; background: #fff; animation: uidemo-knob 3s infinite; }
+        .uidemo-jump, .uidemo-jump b { animation-timing-function: step-end; }
+        @keyframes uidemo-track { 0%, 40% { background: var(--border-light); } 50%, 90% { background: var(--accent); } 100% { background: var(--border-light); } }
+        @keyframes uidemo-knob { 0%, 40% { transform: none; } 50%, 90% { transform: translateX(40px); } 100% { transform: none; } }
+
+        /* 只有滑進畫面中間（.uidemo-on）才播；按了暫停（.uidemo-hold）就停 */
+        .uidemo-js .uidemo-card:not(.uidemo-on) *, .uidemo-hold * { animation-play-state: paused !important; }
+        @media (prefers-reduced-motion: reduce) {
+          .uidemo-card *, .uidemo-card *::after { animation: none !important; transition: none !important; }
+          .uidemo-dnd .uidemo-tile:first-child { transform: rotate(-1.5deg); }
+          .demo-spinner { animation: none; }
+        }
+      </style>
+
+      <p>表格裡還有五個上面沒示範到，補在這裡。名字旁邊有「暫停」鈕的會自己播，滑到畫面中間才開始動；標「可以點」的請直接動手試。</p>
+
+      <div class="uidemo-grid">
+        <figure class="uidemo-card" data-state="off" data-uidemo-peek>
+          <div class="uidemo-stage">
+            <span class="uidemo-bar"></span><span class="uidemo-bar"></span><span class="uidemo-bar"></span>
+            <div class="uidemo-pop">您好，需要幫忙嗎？</div>
+            <button type="button" class="uidemo-fab" data-uidemo-go="toggle" aria-expanded="false" aria-label="示範：打開或關閉客服聊天室"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v9h-8l-4 3v-3H5z"/></svg></button>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">FAB / Chat Widget（浮動按鈕）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「右下角加一個 FAB，點了打開客服聊天室」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-state="on">
+          <div class="uidemo-stage">
+            <div class="uidemo-banner">全館免運到週日<button type="button" class="uidemo-x" data-uidemo-go="off" aria-label="示範：關閉 Banner">&times;</button></div>
+            <span class="uidemo-bar"></span><span class="uidemo-bar"></span><span class="uidemo-bar"></span>
+            <button type="button" class="uidemo-btn" data-uidemo-go="on" data-uidemo-when="off" hidden>再顯示 Banner</button>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Banner（通知條）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「頁面最上面加一條 Banner 公告，要有關閉按鈕」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage" aria-hidden="true">
+            <div class="uidemo-inf">
+              <i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i>
+              <b class="uidemo-spin"></b>
+              <i class="uidemo-tile uidemo-late"></i><i class="uidemo-tile uidemo-late"></i><i class="uidemo-tile uidemo-late"></i>
+            </div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Infinite Scroll（無限滾動）</span>
+            <span class="uidemo-say">「文章列表用 Infinite Scroll 取代分頁」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-state="1" data-uidemo-max="5">
+          <div class="uidemo-stage">
+            <span class="uidemo-bar"></span><span class="uidemo-bar"></span>
+            <div class="uidemo-note" aria-live="polite">現在在第 <span data-uidemo-out>1</span> 頁，共 5 頁</div>
+            <div class="uidemo-row uidemo-pager">
+              <button type="button" class="uidemo-btn" data-uidemo-go="prev" aria-label="示範：上一頁">&lsaquo;</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="1" aria-pressed="true" aria-label="示範：第 1 頁">1</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="2" aria-pressed="false" aria-label="示範：第 2 頁">2</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="3" aria-pressed="false" aria-label="示範：第 3 頁">3</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="4" aria-pressed="false" aria-label="示範：第 4 頁">4</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="5" aria-pressed="false" aria-label="示範：第 5 頁">5</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="next" aria-label="示範：下一頁">&rsaquo;</button>
+            </div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Pagination（分頁）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「搜尋結果用 Pagination，每頁 20 筆」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-state="off" data-uidemo-peek>
+          <div class="uidemo-stage">
+            <span class="uidemo-bar"></span><span class="uidemo-bar"></span>
+            <button type="button" class="uidemo-btn" data-uidemo-go="toggle" aria-expanded="false">打開購物車</button>
+            <div class="uidemo-shade" data-uidemo-go="off"></div>
+            <div class="uidemo-panel">
+              <div class="uidemo-row">購物車<button type="button" class="uidemo-x" data-uidemo-go="off" aria-label="示範：關閉購物車 Drawer">&times;</button></div>
+              <i class="uidemo-tile"></i>
+            </div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Drawer（抽屜）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「購物車用 Drawer，從右邊滑出」</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <h3>容器與佈局元件</h3>
+
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
-              <th>檔名</th>
-              <th>功能</th>
+              <th>術語</th>
               <th>白話</th>
+              <th>用在哪</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td><code>CLAUDE.md</code></td>
-              <td>Claude Code 的設定檔，定義它的行為規範</td>
-              <td>員工的 SOP 手冊，每天上班先讀一次</td>
+              <td><strong>Container</strong></td>
+              <td>容器，限制內容寬度的外框</td>
+              <td>頁面中間那個有邊界的區塊</td>
             </tr>
             <tr>
-              <td><code>README.md</code></td>
-              <td>專案的說明書。打開 GitHub 倉庫時，首頁顯示的就是這個檔案</td>
-              <td>產品外包裝上的使用說明</td>
+              <td><strong>Wrapper</strong></td>
+              <td>包裹器，把一組東西包在一起</td>
+              <td>把好幾張卡片包成一組</td>
             </tr>
             <tr>
-              <td><code>CHANGELOG.md</code></td>
-              <td>紀錄每次更新改了什麼。方便追溯歷史</td>
-              <td>產品的「更新日誌」，像手機系統更新說明</td>
+              <td><strong>Grid</strong></td>
+              <td>網格排版</td>
+              <td>商品列表的棋盤式排列</td>
+            </tr>
+            <tr>
+              <td><strong>Flexbox</strong></td>
+              <td>彈性排版</td>
+              <td>一排按鈕自動均分空間</td>
+            </tr>
+            <tr>
+              <td><strong>Icon</strong></td>
+              <td>小圖示</td>
+              <td>選單旁邊的小符號（齒輪、放大鏡、鈴鐺）</td>
+            </tr>
+            <tr>
+              <td><strong>Avatar</strong></td>
+              <td>頭像</td>
+              <td>使用者大頭照的圓形小圖</td>
+            </tr>
+            <tr>
+              <td><strong>Badge</strong></td>
+              <td>徽章/數字標記</td>
+              <td>購物車上面的紅色數字「3」</td>
+            </tr>
+            <tr>
+              <td><strong>Breadcrumb</strong></td>
+              <td>麵包屑導航</td>
+              <td>首頁 &gt; 商品 &gt; 咖啡豆 &gt; 招牌豆</td>
+            </tr>
+            <tr>
+              <td><strong>Skeleton</strong></td>
+              <td>骨架屏</td>
+              <td>載入中時的灰色佔位區塊</td>
+            </tr>
+            <tr>
+              <td><strong>Divider</strong></td>
+              <td>分隔線</td>
+              <td>段落之間的一條橫線</td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div class="box box-warning">
-        <div class="box-label">常見誤解</div>
-        很多人以為用 Word 寫文件比較「正式」。但在程式開發的世界裡，MD 才是標準格式。用 Word 寫 CLAUDE.md？那就像穿西裝去工地——不是不行，但真的沒必要，而且會礙手礙腳。
+      <p>這十個名字，各看一眼長相就記得住：</p>
+
+      <div class="uidemo-grid">
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage" aria-hidden="true">
+            <div class="uidemo-screen uidemo-squeeze">
+              <div class="uidemo-inner">Container<span class="uidemo-bar"></span><span class="uidemo-bar"></span><span class="uidemo-bar"></span></div>
+            </div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Container（容器）</span>
+            <span class="uidemo-say">「內容包在一個 Container 裡，最寬 1200px，置中」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage" aria-hidden="true">
+            <span class="uidemo-note">虛線框就是 Wrapper，裡面三張一起動</span>
+            <div class="uidemo-wrap"><i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i></div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Wrapper（包裹器）</span>
+            <span class="uidemo-say">「把這三張卡片用一個 Wrapper 包起來，整組置中」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-state="3">
+          <div class="uidemo-stage">
+            <div class="uidemo-row">
+              <button type="button" class="uidemo-btn" data-uidemo-go="2" aria-pressed="false" aria-label="示範：Grid 改成 2 欄">2 欄</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="3" aria-pressed="true" aria-label="示範：Grid 改成 3 欄">3 欄</button>
+            </div>
+            <div class="uidemo-gridbox"><i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i></div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Grid（網格排版）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「商品列表用 Grid 排，桌機一排三個」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-state="start">
+          <div class="uidemo-stage">
+            <div class="uidemo-row">
+              <button type="button" class="uidemo-btn" data-uidemo-go="start" aria-pressed="true" aria-label="示範：Flexbox 靠左">靠左</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="center" aria-pressed="false" aria-label="示範：Flexbox 置中">置中</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="between" aria-pressed="false" aria-label="示範：Flexbox 分散對齊">分散</button>
+            </div>
+            <div class="uidemo-flexbox"><i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i></div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Flexbox（彈性排版）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「這排按鈕用 Flexbox，分散對齊」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card">
+          <div class="uidemo-stage uidemo-center" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="8.6" stroke-width="2.6" stroke-dasharray="3.2 3.555" stroke-linecap="butt"/></svg>
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M16 16l5 5"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M6 17v-6a6 6 0 0 1 12 0v6l2 2H4z"/><path d="M10 22h4"/></svg>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Icon（小圖示）</span>
+            <span class="uidemo-say">「搜尋框左邊加一個放大鏡 Icon」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card">
+          <div class="uidemo-stage" aria-hidden="true">
+            <div class="uidemo-media">
+              <i class="uidemo-avatar">A</i>
+              <span class="uidemo-lines">A 設計工作室<br><span class="uidemo-note">這家的服務很好，推薦！</span></span>
+            </div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Avatar（頭像）</span>
+            <span class="uidemo-say">「留言旁邊放圓形 Avatar，沒照片就顯示第一個字」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage uidemo-center" aria-hidden="true">
+            <span class="uidemo-badged">
+              <svg viewBox="0 0 24 24"><path d="M3 4h2l2.5 11h10l2-8H6.5"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></svg>
+              <b class="uidemo-badge">3</b>
+            </span>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Badge（徽章）</span>
+            <span class="uidemo-say">「購物車 Icon 右上角加紅色 Badge 顯示數量」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage" aria-hidden="true">
+            <div class="uidemo-crumbs"><span>首頁</span><span class="uidemo-s1">&rsaquo; 商品</span><span class="uidemo-s2">&rsaquo; 咖啡豆</span><span class="uidemo-s3">&rsaquo; 招牌豆</span></div>
+            <span class="uidemo-bar"></span><span class="uidemo-bar"></span><span class="uidemo-bar"></span>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Breadcrumb（麵包屑）</span>
+            <span class="uidemo-say">「商品頁上方加 Breadcrumb，顯示現在在哪一層」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage" aria-hidden="true">
+            <div class="uidemo-media">
+              <i class="uidemo-avatar uidemo-shim"></i>
+              <span class="uidemo-lines"><span class="uidemo-bar uidemo-shim"></span><span class="uidemo-bar uidemo-shim"></span></span>
+            </div>
+            <div class="uidemo-media uidemo-cover uidemo-late">
+              <i class="uidemo-avatar">B</i>
+              <span class="uidemo-lines">B 咖啡店<br><span class="uidemo-note">訂單已出貨</span></span>
+            </div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Skeleton（骨架屏）</span>
+            <span class="uidemo-say">「資料載入前先顯示 Skeleton，不要整片空白」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card">
+          <div class="uidemo-stage" aria-hidden="true">
+            <span class="uidemo-bar"></span><span class="uidemo-bar"></span><span class="uidemo-bar"></span>
+            <hr class="uidemo-hr">
+            <span class="uidemo-bar"></span><span class="uidemo-bar"></span>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Divider（分隔線）</span>
+            <span class="uidemo-say">「這兩段之間加一條 Divider」</span>
+          </figcaption>
+        </figure>
       </div>
-
-      <!-- ========== F. Chrome DevTools + Claude ========== -->
-      <h2>實戰組合：Chrome DevTools + Claude Code</h2>
-
-      <p>Chrome DevTools 可以解析 DOM（網頁結構）和 JS（JavaScript）程式邏輯，直接把這些資料提供給 Claude。這比你手動複製開發者模式的訊息給 AI 快很多。</p>
 
       <div class="box box-info">
-        <div class="box-label">什麼是 JS？</div>
-        JS（JavaScript）是讓網頁「會動」的程式語言。按鈕點了會跑出東西、表單可以送出、動畫會播放——這些都是 JS 在背後做的事。
+        <div class="box-label">Modal vs Drawer vs Toast 的差別</div>
+        <strong>Modal</strong> = 畫面正中間彈出，背後變暗，你必須處理它。<br>
+        <strong>Drawer</strong> = 從旁邊滑出來，可以半覆蓋畫面。<br>
+        <strong>Toast</strong> = 角落短暫出現幾秒就自己消失，不需要你做任何動作。<br><br>
+        干擾程度：Modal > Drawer > Toast
       </div>
 
-      <p>Claude 搭配 DevTools MCP 可以直接讀取：</p>
-      <ul>
-        <li><strong>Console 錯誤訊息</strong>——不用你複製貼上，Claude 自己去看</li>
-        <li><strong>Network 請求</strong>——API 有沒有回應、回了什麼資料</li>
-        <li><strong>DOM 結構</strong>——元素的 class、id、屬性，全部一覽無遺</li>
-      </ul>
+      <!-- ===== C. 網頁行為 ===== -->
+      <h2 id="behavior">C. 網頁行為（動態表現）</h2>
+
+      <p>這些不是「東西」，而是網頁的「行為」。它們描述的是「頁面會怎麼動」。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>現象（你看到的）</th>
+              <th>術語</th>
+              <th>白話</th>
+              <th>你可以這樣跟 Claude 說</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>手機和電腦看到的排版不同</td>
+              <td><strong>RWD</strong>（Responsive Web Design）</td>
+              <td>響應式設計——同一個網頁在不同螢幕大小自動調整排版</td>
+              <td>「這個頁面要做 RWD，手機版一欄、桌機版三欄」</td>
+            </tr>
+            <tr>
+              <td>選單一直釘在最上面不動</td>
+              <td><strong>Sticky Header</strong></td>
+              <td>網頁往下滾，Header 固定不動一直在最上面</td>
+              <td>「Header 做成 Sticky，滾動時固定在頂部」</td>
+            </tr>
+            <tr>
+              <td>往下滾時，東西慢慢飛進來</td>
+              <td><strong>Scroll Animation</strong></td>
+              <td>滾動到某個位置時，元件播放進場動畫</td>
+              <td>「Card 區塊加 Scroll Animation，滾到時淡入」</td>
+            </tr>
+            <tr>
+              <td>點連結後滑順地滾到那個位置</td>
+              <td><strong>Smooth Scroll</strong></td>
+              <td>點了錨點連結後，頁面順滑地滾動（不是瞬移）</td>
+              <td>「目錄的連結用 Smooth Scroll 跳到對應段落」</td>
+            </tr>
+            <tr>
+              <td>背景和前景滾動速度不一樣</td>
+              <td><strong>Parallax（視差效果）</strong></td>
+              <td>前景滾快、背景滾慢，產生立體感</td>
+              <td>「Hero 區域加 Parallax，背景圖滾動速度減半」</td>
+            </tr>
+            <tr>
+              <td>整個網站變黑底白字</td>
+              <td><strong>Dark Mode</strong></td>
+              <td>深色模式，深色底、淺色字，晚上看比較不刺眼</td>
+              <td>「加一個 Dark Mode Toggle，切換深色/淺色」</td>
+            </tr>
+            <tr>
+              <td>第一次用時一步一步的教學引導</td>
+              <td><strong>Onboarding</strong></td>
+              <td>新手引導——用彈窗或高亮一步步教你怎麼用</td>
+              <td>「新使用者第一次登入時跑一個 Onboarding 流程」</td>
+            </tr>
+            <tr>
+              <td>可以用滑鼠拖拉移動東西</td>
+              <td><strong>Drag &amp; Drop</strong></td>
+              <td>拖放操作——用滑鼠抓起一個東西拖到另一個位置</td>
+              <td>「任務清單支援 Drag &amp; Drop 重新排序」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>「行為」光看字很難想像，直接看它怎麼動：</p>
+
+      <div class="uidemo-grid">
+        <figure class="uidemo-card" data-state="desk">
+          <div class="uidemo-stage">
+            <div class="uidemo-row">
+              <button type="button" class="uidemo-btn" data-uidemo-go="phone" aria-pressed="false" aria-label="示範：RWD 切成手機寬度">手機</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="desk" aria-pressed="true" aria-label="示範：RWD 切成桌機寬度">桌機</button>
+            </div>
+            <div class="uidemo-screen uidemo-rwd"><span class="uidemo-bar"></span><i class="uidemo-tile"></i><i class="uidemo-tile"></i><i class="uidemo-tile"></i></div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">RWD（響應式設計）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「這個頁面要做 RWD，手機版一欄、桌機版三欄」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage" aria-hidden="true">
+            <div class="uidemo-head">Header（一直在最上面）</div>
+            <div class="uidemo-scroll">
+              <span class="uidemo-bar"></span><span class="uidemo-bar"></span><i class="uidemo-tile"></i>
+              <span class="uidemo-bar"></span><span class="uidemo-bar"></span><i class="uidemo-tile"></i>
+              <span class="uidemo-bar"></span><span class="uidemo-bar"></span>
+            </div>
+            <i class="uidemo-thumb"></i>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Sticky Header（固定頁首）</span>
+            <span class="uidemo-say">「Header 做成 Sticky，滾動時固定在頂部」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage" aria-hidden="true">
+            <span class="uidemo-note">滾到這裡，卡片才一張張淡入</span>
+            <div class="uidemo-cols"><i class="uidemo-tile uidemo-s1"></i><i class="uidemo-tile uidemo-s2"></i><i class="uidemo-tile uidemo-s3"></i></div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Scroll Animation（滾動進場）</span>
+            <span class="uidemo-say">「Card 區塊加 Scroll Animation，滾到時淡入」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-state="1">
+          <div class="uidemo-stage">
+            <div class="uidemo-row">
+              <button type="button" class="uidemo-btn" data-uidemo-go="1" aria-pressed="true" aria-label="示範：平滑滾動到「關於」">關於</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="2" aria-pressed="false" aria-label="示範：平滑滾動到「服務」">服務</button>
+              <button type="button" class="uidemo-btn" data-uidemo-go="3" aria-pressed="false" aria-label="示範：平滑滾動到「聯絡」">聯絡</button>
+            </div>
+            <div class="uidemo-view"><div class="uidemo-strip"><div>關於我們</div><div>服務項目</div><div>聯絡方式</div></div></div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Smooth Scroll（平滑滾動）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「目錄的連結用 Smooth Scroll 跳到對應段落」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage" aria-hidden="true">
+            <div class="uidemo-far uidemo-scroll">背景：滾得慢</div>
+            <div class="uidemo-near uidemo-scroll"><span class="uidemo-tile">前景：滾得快</span><span class="uidemo-tile">前景：滾得快</span></div>
+            <i class="uidemo-thumb"></i>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Parallax（視差效果）</span>
+            <span class="uidemo-say">「Hero 區域加 Parallax，背景圖滾動速度減半」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-state="off">
+          <div class="uidemo-stage uidemo-dark">
+            <div class="uidemo-row">
+              <button type="button" class="uidemo-switch" data-uidemo-go="toggle" aria-pressed="false" aria-label="示範：切換 Dark Mode"></button>
+              <span data-uidemo-when="off">現在是淺色</span><span data-uidemo-when="on" hidden>現在是深色</span>
+            </div>
+            <span class="uidemo-bar"></span><span class="uidemo-bar"></span><span class="uidemo-bar"></span><span class="uidemo-bar"></span>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Dark Mode（深色模式）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「加一個 Dark Mode Toggle，切換深色和淺色」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-state="1" data-uidemo-max="3">
+          <div class="uidemo-stage uidemo-tour">
+            <div class="uidemo-cols"><span class="uidemo-tile">搜尋</span><span class="uidemo-tile">新增</span><span class="uidemo-tile">設定</span></div>
+            <i class="uidemo-spot"></i>
+            <div class="uidemo-tip">
+              <span aria-live="polite"><b>步驟 <span data-uidemo-out>1</span>/3</b><br><span data-uidemo-when="1">在這裡找資料</span><span data-uidemo-when="2" hidden>按這裡新增一筆</span><span data-uidemo-when="3" hidden>這裡改個人設定</span></span>
+              <button type="button" class="uidemo-btn" data-uidemo-go="loop" aria-label="示範：Onboarding 下一步">下一步</button>
+            </div>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Onboarding（新手引導）<span class="uidemo-tag">可以點</span></span>
+            <span class="uidemo-say">「新使用者第一次登入時跑一個 Onboarding 流程」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage uidemo-dnd" aria-hidden="true">
+            <span class="uidemo-tile">買菜</span><span class="uidemo-tile">回信</span><span class="uidemo-tile">報帳</span>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">Drag &amp; Drop（拖放）</span>
+            <span class="uidemo-say">「任務清單支援 Drag &amp; Drop 重新排序」</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <!-- ===== D. CSS 最低限度知識 ===== -->
+      <h2 id="css">D. CSS 最低限度知識</h2>
+
+      <div class="analogy">
+        <strong>你不需要會寫 CSS，但你要能精準描述。</strong><br><br>
+        這就像你不需要會裁縫，但你去量身訂做西裝時，你要能說「袖子短一公分」而不是「那邊改一下」。<br><br>
+        CSS 負責的事：顏色、大小、間距、排版、動畫、響應式。<br>
+        你只要學會「怎麼用中文精準描述這些東西」。
+      </div>
+
+      <h3>不要這樣說 vs 要這樣說</h3>
 
       <div class="compare">
         <div class="compare-bad">
-          <div class="compare-label">手動方式（慢又容易漏）</div>
+          <div class="compare-label">不要這樣說</div>
           <div class="code-block">
-1. 你打開 F12 開發者工具<br>
-2. 看到紅色錯誤訊息<br>
-3. 截圖或複製錯誤訊息<br>
-4. 貼給 Claude<br>
-5. Claude 問你更多問題<br>
-6. 你再去 F12 查更多資料<br>
-7. 來回好幾次才找到問題<br><br>
-<span style="color: var(--red);">你變成 AI 和瀏覽器之間的「傳話人」</span>
+「那個按鈕太醜了」
           </div>
         </div>
         <div class="compare-good">
-          <div class="compare-label">DevTools MCP（快又完整）</div>
+          <div class="compare-label">要這樣說</div>
           <div class="code-block">
-1. Claude 直接讀 Console 錯誤<br>
-2. Claude 直接看 Network 請求<br>
-3. Claude 直接分析 DOM 結構<br>
-4. 一次找到問題根源<br>
-5. 直接修改程式碼<br><br>
-<span style="color: var(--green);">Claude 自己去看、自己去查、自己修</span>
+「『送出』按鈕的圓角太大，<br>
+改成 8px；背景色太亮，<br>
+改成 #2563eb；hover 時<br>
+加 0.1 秒的過渡效果」
           </div>
         </div>
       </div>
 
-      <p>補充一點：有時候 Headless Browser（無頭瀏覽器，就是沒有畫面的自動化瀏覽器，像 Playwright）會遇到問題，通常是因為取得的資訊不夠完整，或是 DOM 沒有全部渲染完。在做 E2E 測試（End-to-End，從頭到尾的完整流程測試）的問題排除時，DevTools + Claude 是最快的組合。</p>
-
-      <div class="box box-info">
-        <div class="box-label">補充術語</div>
-        <ul style="margin-bottom: 0;">
-          <li><strong>TDD（Test-Driven Development，測試驅動開發）</strong>：先寫測試，再寫功能。確保每個功能都有測試保護。</li>
-          <li><strong>E2E（End-to-End Testing，端對端測試）</strong>：模擬真實使用者操作整個流程（打開網頁 → 點按鈕 → 填表單 → 送出），確認一切正常。</li>
-          <li>這些概念在你的專案變大的時候會越來越重要。現在先知道名字就好。</li>
-        </ul>
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「字跟旁邊的東西太近了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「Card 的 padding 太小，<br>
+內容跟邊框太擠，<br>
+改成 padding: 24px」
+          </div>
+        </div>
       </div>
 
-      <!-- Chapter Navigation -->
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「手機上看起來怪怪的」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「手機版（< 768px）的<br>
+grid 從三欄改成一欄，<br>
+字體從 16px 改成 14px」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「顏色不好看」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「主色改成 #d4845a（暖橘），<br>
+背景用 #0f0f0f（深黑），<br>
+文字用 #e0e0e0（淺灰）」
+          </div>
+        </div>
+      </div>
+
+      <h3>常用 CSS 描述詞彙</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>你想表達的</th>
+              <th>CSS 術語</th>
+              <th>白話</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>東西跟邊框的距離</td>
+              <td><code>padding</code></td>
+              <td>「內距」——內容跟自己邊框的距離</td>
+            </tr>
+            <tr>
+              <td>這個東西跟隔壁的距離</td>
+              <td><code>margin</code></td>
+              <td>「外距」——這個元件跟旁邊東西的距離</td>
+            </tr>
+            <tr>
+              <td>圓角</td>
+              <td><code>border-radius</code></td>
+              <td>角落圓不圓——0px 是直角，50% 是圓形</td>
+            </tr>
+            <tr>
+              <td>陰影</td>
+              <td><code>box-shadow</code></td>
+              <td>讓元件看起來浮起來的陰影效果</td>
+            </tr>
+            <tr>
+              <td>滑鼠移上去</td>
+              <td><code>hover</code></td>
+              <td>滑鼠游標移到上面時的變化</td>
+            </tr>
+            <tr>
+              <td>透明度</td>
+              <td><code>opacity</code></td>
+              <td>0 = 完全透明，1 = 完全不透明</td>
+            </tr>
+            <tr>
+              <td>排版方式</td>
+              <td><code>flexbox</code> / <code>grid</code></td>
+              <td>Flex = 一條線排列；Grid = 像表格一樣排</td>
+            </tr>
+            <tr>
+              <td>固定不動</td>
+              <td><code>position: fixed</code> / <code>sticky</code></td>
+              <td>Fixed = 永遠釘在螢幕某處；Sticky = 滾到它時才釘住</td>
+            </tr>
+            <tr>
+              <td>動畫過渡</td>
+              <td><code>transition</code></td>
+              <td>「從 A 狀態變到 B 狀態要花多久」——讓變化不要太突兀</td>
+            </tr>
+            <tr>
+              <td>超出範圍怎麼辦</td>
+              <td><code>overflow</code></td>
+              <td>內容太多塞不下時——hidden 裁掉 / scroll 加捲軸 / auto 自動判斷</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p><code>hover</code> 和 <code>transition</code> 常常一起出現，看一眼就懂差別：</p>
+
+      <div class="uidemo-grid">
+        <figure class="uidemo-card" data-state="off">
+          <div class="uidemo-stage uidemo-center">
+            <button type="button" class="uidemo-hover" data-uidemo-go="toggle" aria-label="示範：滑鼠移上來，卡片會浮起來（手機用點的）">滑鼠移上來<span class="uidemo-note">手機用點的</span></button>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">hover（滑鼠移上去）<span class="uidemo-tag">動手試</span></span>
+            <span class="uidemo-say">「卡片 hover 時往上浮一點，邊框變橘色」</span>
+          </figcaption>
+        </figure>
+
+        <figure class="uidemo-card" data-uidemo-auto>
+          <div class="uidemo-stage" aria-hidden="true">
+            <span class="uidemo-note">沒有 transition：瞬間跳過去</span>
+            <i class="uidemo-track uidemo-jump"><b></b></i>
+            <span class="uidemo-note">transition 0.3 秒：滑過去</span>
+            <i class="uidemo-track"><b></b></i>
+          </div>
+          <figcaption class="uidemo-cap">
+            <span class="uidemo-name">transition（動畫過渡）</span>
+            <span class="uidemo-say">「開關切換加 0.3 秒的 transition，不要瞬間跳」</span>
+          </figcaption>
+        </figure>
+      </div>
+
+      <h3>Global CSS vs !important</h3>
+
+      <div class="analogy">
+        <strong>Global CSS = 社區公約</strong><br>
+        「全社區的房子統一用白色外牆」——這是全域的 CSS 規則，所有元件都遵守。<br><br>
+        <strong>!important = 法院強制執行令</strong><br>
+        「不管社區公約說什麼，這面牆必須是紅色」——<code>!important</code> 會覆蓋所有其他規則，強制套用。<br><br>
+        <strong>濫用 !important 就像什麼事都告上法院——系統會亂掉。</strong>正常情況下，靠更精確的選擇器（selector）就能解決。
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">跟 Claude 說的時候</div>
+        如果你改了樣式但沒有效果，可以跟 Claude 說：<br>
+        「這個按鈕的顏色改不動，可能是被 global CSS 或 <code>!important</code> 覆蓋了，幫我查一下 CSS 優先級，查出是哪一條規則蓋掉的；不要再用 <code>!important</code> 硬壓。」
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">跨瀏覽器相容性</div>
+        不同瀏覽器（Chrome / Safari / Firefox）對 CSS 的渲染可能有微小差異。如果你發現「在我電腦上好好的，別人的卻跑版」，通常是瀏覽器相容性問題。這時候跟 Claude 說「請加上 <code>-webkit-</code> 前綴」或「請確認跨瀏覽器相容性」就好。
+      </div>
+
+      <!-- ===== E. 瀏覽器三劍客 ===== -->
+      <h2 id="browser">E. 瀏覽器三劍客</h2>
+
+      <p>在 AI 工具生態裡，有三種不同的「看網頁」方式，搞清楚它們的差別很重要。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>工具</th>
+              <th>比喻</th>
+              <th>你在哪</th>
+              <th>適合做什麼</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Chrome DevTools</strong></td>
+              <td>自己拿放大鏡檢查</td>
+              <td>你親手操作你自己的瀏覽器</td>
+              <td>看 CSS、查元素、看 Network 請求、Debug</td>
+            </tr>
+            <tr>
+              <td><strong>Playwright</strong></td>
+              <td>請機器人開一台新車去跑</td>
+              <td>一個全新的瀏覽器（不是你的），自動化操作</td>
+              <td>自動測試、截圖、批量操作、E2E 測試</td>
+            </tr>
+            <tr>
+              <td><strong>Claude in Chrome</strong></td>
+              <td>你坐副駕，Claude 幫你開你的車</td>
+              <td>你的瀏覽器，Claude 用 MCP 控制它</td>
+              <td>看到你看到的畫面、幫你操作你的瀏覽器</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">常見搞混</div>
+          <div class="code-block">
+「幫我用 Playwright 打開我的 Gmail」<br><br>
+不行。Playwright 開的是全新瀏覽器，<br>
+你沒有登入，看不到你的 Gmail。<br>
+它適合「測試公開網頁」，<br>
+不適合「操作你已登入的東西」。
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">正確用法</div>
+          <div class="code-block">
+要操作你已登入的網站<br>
+→ 用 <strong>Claude in Chrome</strong><br><br>
+要自動測試公開頁面<br>
+→ 用 <strong>Playwright</strong><br><br>
+要自己手動查問題<br>
+→ 用 <strong>Chrome DevTools</strong>
+          </div>
+        </div>
+      </div>
+
+      <p>這三樣怎麼排先後：有官方 CLI 的事先用 CLI；沒有 CLI 才裝 MCP；要操作網頁才交給瀏覽器工具（Claude in Chrome、Playwright）；都不行才用 Computer Use（讓 Claude 看螢幕、點滑鼠）。完整的順序見<a href="/chapter10/#cli-mcp">第十章 Claude Code 怎麼用</a>。</p>
+
+      <h3 id="inspect">「右鍵 → 檢查」——非技術人員最該學的一招</h3>
+
+      <div class="analogy">
+        <strong>這一招的價值超過你想像。</strong><br><br>
+        在任何網頁上按「右鍵 → 檢查」（或按 F12），你會看到 Chrome DevTools。<br>
+        不用害怕，你不需要看懂所有東西。你只需要會做一件事：<br><br>
+        <strong>用「選取元素」工具（左上角的游標圖示），點一下畫面上的任何東西，</strong><br>
+        就能看到它的 HTML 標籤名稱和 CSS 樣式。
+      </div>
+
+      <p>為什麼這很重要？因為你可以這樣跟 Claude 說：</p>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不會用 DevTools 的人</div>
+          <div class="code-block">
+「那個按鈕的顏色不對」<br>
+「第三排的圖片跑掉了」<br>
+「有一塊不知道為什麼空白」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">會用 DevTools 的人</div>
+          <div class="code-block">
+「class 叫 .btn-primary 的按鈕<br>
+背景色是 #ccc，應該改成 #2563eb」<br><br>
+「#product-grid 的第三個 .card<br>
+圖片 width 超出容器了」<br><br>
+「.hero 下面有個 margin-bottom: 80px<br>
+造成太大的空白」
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">實作練習</div>
+        現在就試試看：<br>
+        1. 在這個頁面按「右鍵 → 檢查」<br>
+        2. 點左上角的游標圖示（Select Element）<br>
+        3. 把滑鼠移到這個綠色框框上<br>
+        4. 你會看到它的 class 是 <code>box box-tip</code><br><br>
+        恭喜你，你學會了非技術人員最強大的偵查技能。<br><br>
+        同一個工具裡有一頁叫 <strong>Console</strong>，網頁出錯時常會在那裡冒紅字。整段複製貼給 Claude，比你描述「好像壞了」有用得多。錯誤訊息怎麼讀，見<a href="/appendix/">附錄 常見問題</a>。
+      </div>
+
+      <h3>F12 開發者模式：你最該學的一招</h3>
+
+      <div class="analogy">
+        <strong>步驟超簡單，照做就好：</strong><br><br>
+        1. 在任何網頁上按 <strong>F12</strong> 或 <strong>Ctrl + Shift + I</strong>（Mac 用 <strong>Cmd + Option + I</strong>）<br>
+        2. 點左上角的「箭頭圖示」（Select Element）。想一步到位：Windows 按 <strong>Ctrl + Shift + C</strong>，Mac 按 <strong>Cmd + Shift + C</strong>，直接進入選取模式<br>
+        3. 滑鼠移到你想改的東西上面，點一下<br>
+        4. 開發者工具裡會顯示這個元素的 HTML 和 CSS<br>
+        5. 你就知道它叫什麼 class、用了什麼樣式
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">學會這招的威力</div>
+        學會這招之後，你再也不用跟 LLM 說「那個藍色的上面的東西」。你可以直接說「class 叫 <code>.hero-title</code> 的 h1，font-size 改成 36px」。講一次就對的機會高很多。
+      </div>
+
+      <p>如果你在 DevTools 裡看不懂那些 CSS，沒關係。把你在 DevTools 看到的 HTML 結構直接複製，貼給 Claude，說「幫我改這個元素的樣式」。Claude 看到 HTML 就知道要改什麼了。</p>
+
+      <!-- ===== F. 怎麼跟 LLM 精準描述 ===== -->
+      <h2 id="describe">F. 怎麼跟 LLM 精準描述</h2>
+
+      <p>以上學的所有術語，最終目的只有一個：<strong>讓你用一句話就講清楚，省掉三輪來回。</strong></p>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「那個圖片太大了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「Hero 區塊的背景圖在手機版<br>
+超出容器（overflow），<br>
+請加 object-fit: cover<br>
+並設 max-height: 300px」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「按鈕按了沒反應」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「.submit-btn 的 click event listener<br>
+沒有綁定，或是被 z-index 較高的<br>
+overlay 擋住了，請檢查 DOM 層級」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「手機版跑版了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「在 viewport width 375px 時，<br>
+Navbar 的 flex-wrap 沒設定，<br>
+導致選單項目溢出。請加<br>
+@media (max-width: 768px) 的 RWD 樣式」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「字跟字太擠了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">要這樣說</div>
+          <div class="code-block">
+「.card-body 裡的 p 標籤<br>
+line-height 只有 1.2，請改成 1.6，<br>
+然後段落之間加 margin-bottom: 16px」
+          </div>
+        </div>
+      </div>
+
+      <p>上面這幾組，是你已經從 DevTools 看出問題在哪的講法。<strong>不知道原因的時候，不要自己猜技術原因</strong>，猜錯了 Claude 會照你猜的方向去改。改成講三件事：<strong>在哪裡、看到什麼、應該是什麼</strong>。</p>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「那個圖片太大了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">不知道原因時這樣說</div>
+          <div class="code-block">
+「首頁 Hero 的背景圖在手機上<br>
+超出畫面右邊。要裁切填滿，<br>
+不要變形，高度最多 300px」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不要這樣說</div>
+          <div class="code-block">
+「手機版跑版了」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">不知道原因時這樣說</div>
+          <div class="code-block">
+「手機寬 375px 時，Navbar<br>
+最後兩個連結擠到畫面外。<br>
+手機版改成漢堡選單」
+          </div>
+        </div>
+      </div>
+
+      <h3>描述公式</h3>
+
+      <div class="analogy">
+        <strong>哪個元件 + 什麼屬性 + 改成什麼 + 什麼時候</strong><br><br>
+        範例：「<code>.btn-primary</code> 按鈕的 <code>background-color</code> 改成 <code>#2563eb</code>，<code>hover</code> 時改成 <code>#1d4ed8</code>」<br><br>
+        四個資訊一次到位，AI 一輪就能做。
+      </div>
+
+      <h3>各場景描述範例</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>你想做的事</th>
+              <th>精準的說法</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>改按鈕顏色</td>
+              <td>「把 <code>.btn-primary</code> 的 background-color 從 #ccc 改成 #2563eb」</td>
+            </tr>
+            <tr>
+              <td>加一個彈窗確認</td>
+              <td>「按『刪除』時彈一個 Modal，有『確定』和『取消』兩個按鈕」</td>
+            </tr>
+            <tr>
+              <td>改手機版排版</td>
+              <td>「螢幕寬度 < 768px 時，Card Grid 從三欄改成一欄」</td>
+            </tr>
+            <tr>
+              <td>選單固定在上面</td>
+              <td>「Navbar 做成 Sticky Header，background 加 blur 效果」</td>
+            </tr>
+            <tr>
+              <td>加一個聊天按鈕</td>
+              <td>「右下角加一個 FAB（圓形按鈕），點了打開一個 Drawer 顯示聊天室」</td>
+            </tr>
+            <tr>
+              <td>通知使用者操作成功</td>
+              <td>「表單送出成功後，右上角顯示一個綠色 Toast，3 秒後自動消失」</td>
+            </tr>
+            <tr>
+              <td>FAQ 區塊</td>
+              <td>「FAQ 用 Accordion 排列，預設全部收合，點標題展開答案」</td>
+            </tr>
+            <tr>
+              <td>圖片輪播</td>
+              <td>「Banner 區域做一個 Carousel，自動播放，底部加圓點指示器」</td>
+            </tr>
+            <tr>
+              <td>表格太多資料</td>
+              <td>「資料列表加 Pagination，每頁 20 筆，底部顯示頁碼」</td>
+            </tr>
+            <tr>
+              <td>篩選用拖拉桿</td>
+              <td>「價格篩選改成 Range Slider，最小值 0 最大值 50000」</td>
+            </tr>
+            <tr>
+              <td>新手引導</td>
+              <td>「新使用者首次登入時跑 Onboarding Tour，用 Tooltip 高亮每個功能區」</td>
+            </tr>
+            <tr>
+              <td>暗色模式</td>
+              <td>「Header 右上加 Dark Mode Toggle，用 CSS Variables 切換色彩主題」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>進階技巧：截圖 + 標註</h3>
+
+      <div class="box box-info">
+        <div class="box-label">最強描述法</div>
+        當文字描述不夠的時候，<strong>截圖 + 用紅框圈起來 + 文字標註</strong>是最快的。<br><br>
+        你可以這樣跟 Claude 說：<br>
+        「看這張截圖，紅框圈起來的 Card 區塊，padding 太小，文字跟邊框太擠。幫我改成 padding: 24px，然後加 border-radius: 12px 和 box-shadow。」<br><br>
+        一張圖 + 一句話，抵過十輪對話。
+      </div>
+
+      <p>Claude Code 收得到圖片，三種給法：</p>
+      <ul>
+        <li>把圖檔直接拖進 Claude Code 的視窗。</li>
+        <li>複製圖片，在 Claude Code 裡按 <code>Ctrl+V</code> 貼上（Windows 按 <code>Alt+V</code>）。Mac 也是按 <code>Ctrl+V</code>，不是平常的 <code>Cmd+V</code>。</li>
+        <li>直接給圖片的路徑，例如「看這張圖：/Users/你的名字/Desktop/畫面.png」。</li>
+      </ul>
+
+      <h2 id="terms">本章術語總表</h2>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>類別</th>
+              <th>術語</th>
+              <th>一句話解釋</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="10">網頁結構</td>
+              <td>Header</td>
+              <td>頁面最上面那一條</td>
+            </tr>
+            <tr><td>Footer</td><td>頁面最下面那一條</td></tr>
+            <tr><td>Hero</td><td>首頁最大最醒目的那塊</td></tr>
+            <tr><td>Section</td><td>頁面中的一個主題區塊</td></tr>
+            <tr><td>Sidebar</td><td>側邊窄欄</td></tr>
+            <tr><td>Modal</td><td>正中間彈出的對話框</td></tr>
+            <tr><td>Navbar</td><td>導覽列（選單連結那一排）</td></tr>
+            <tr><td>Card</td><td>卡片式的小區塊</td></tr>
+            <tr><td>Button</td><td>可以按的按鈕</td></tr>
+            <tr><td>Form</td><td>填資料的表單</td></tr>
+            <tr>
+              <td rowspan="16">UI 元件</td>
+              <td>Hamburger Menu</td>
+              <td>三條線的手機版選單按鈕</td>
+            </tr>
+            <tr><td>Dropdown</td><td>往下展開的選單</td></tr>
+            <tr><td>Toggle / Switch</td><td>開/關切換器</td></tr>
+            <tr><td>Tab</td><td>頁籤，同區域切換內容</td></tr>
+            <tr><td>Accordion</td><td>展開/收合的區塊</td></tr>
+            <tr><td>Carousel / Slider</td><td>輪播（自動左右滑）</td></tr>
+            <tr><td>Tooltip</td><td>滑鼠移上去的小提示</td></tr>
+            <tr><td>FAB / Chat Widget</td><td>右下角浮動圓形按鈕</td></tr>
+            <tr><td>Banner / Toast</td><td>通知條 / 短暫提示</td></tr>
+            <tr><td>Spinner / Loading</td><td>轉圈圈載入動畫</td></tr>
+            <tr><td>Infinite Scroll</td><td>滑到底自動載入更多</td></tr>
+            <tr><td>Pagination</td><td>分頁（1, 2, 3... 下一頁）</td></tr>
+            <tr><td>Checkbox / Radio</td><td>多選框 / 單選框</td></tr>
+            <tr><td>Range Slider</td><td>拖拉橫桿選數值</td></tr>
+            <tr><td>Dialog</td><td>確認對話框</td></tr>
+            <tr><td>Drawer</td><td>從側邊滑出的面板</td></tr>
+            <tr>
+              <td rowspan="8">網頁行為</td>
+              <td>RWD</td>
+              <td>響應式設計，不同螢幕自動排版</td>
+            </tr>
+            <tr><td>Sticky Header</td><td>滾動時固定在頂部的 Header</td></tr>
+            <tr><td>Scroll Animation</td><td>滾到時播放進場動畫</td></tr>
+            <tr><td>Smooth Scroll</td><td>點連結後平滑滾動</td></tr>
+            <tr><td>Parallax</td><td>背景和前景滾動速度不同的視差效果</td></tr>
+            <tr><td>Dark Mode</td><td>深色模式</td></tr>
+            <tr><td>Onboarding</td><td>新手引導教學</td></tr>
+            <tr><td>Drag &amp; Drop</td><td>拖拉放置操作</td></tr>
+            <tr>
+              <td rowspan="3">瀏覽器工具</td>
+              <td>Chrome DevTools</td>
+              <td>自己拿放大鏡看（右鍵 → 檢查）</td>
+            </tr>
+            <tr><td>Playwright</td><td>機器人開新瀏覽器自動測試</td></tr>
+            <tr><td>Claude in Chrome</td><td>Claude 幫你操作你的瀏覽器</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">本章重點</div>
+        <strong>看到 → 認出名字 → 精準描述 → AI 一次到位。</strong><br><br>
+        你不需要會做這些東西，但你需要會「指」。<br>
+        就像你去餐廳不需要會做菜，但你要會看菜單——<br>
+        「松露奶油燉飯」跟「那個白白的飯」，出來的東西完全不同。
+      </div>
+
+      <h2 id="takeaway">這章帶走什麼</h2>
+
+      <ol>
+        <li><strong>畫面上每一塊都有名字。</strong>Header、Hero、Card、Modal、Drawer、Toast……叫得出來，Claude 就不用猜。</li>
+        <li><strong>「東西」和「行為」分開講。</strong>RWD、Sticky、Scroll Animation 這些講的是「怎麼動」，不是「長什麼樣」。</li>
+        <li><strong>CSS 不用會寫，要能講。</strong>padding、margin、圓角、陰影、hover、transition，加上一個數字，比「怪怪的」有用得多。</li>
+        <li><strong>不知道叫什麼，右鍵 → 檢查自己看。</strong>看 class 名字，或整段 HTML 複製給 Claude。</li>
+        <li><strong>描述公式：哪個元件 + 什麼屬性 + 改成什麼 + 什麼時候。</strong>不知道原因就講在哪裡、看到什麼、應該是什麼，不要自己猜技術原因。</li>
+        <li><strong>講不清楚就截圖圈起來。</strong>一張圖配一句話。</li>
+      </ol>
+
+      <p>到這裡，你已經能把想要的畫面講清楚了。做出來的東西要讓別人打開網址就看得到，下一章講怎麼放上網路：<a href="/chapter7/">第七章 部署</a>。</p>
+
+      <h2 id="say">跟 Claude 怎麼說</h2>
+
+      <div class="box box-tip">
+        <div class="box-label">可以直接抄</div>
+        「首頁 Hero 的標題改成『歡迎光臨』，Header 的背景改成深藍色，其他地方不要動。」<br><br>
+        「商品列表用 Card 排，桌機一排三張，手機（寬度小於 768px）一排一張。」<br><br>
+        「按『刪除』時跳一個 Modal，有『確定』和『取消』兩個按鈕；存檔成功後右上角跳綠色 Toast，3 秒後自己消失。」<br><br>
+        「這個按鈕的顏色改不動，幫我查是被哪一條規則蓋掉的，不要用 !important 硬壓。」<br><br>
+        「手機寬 375px 時，Navbar 最後兩個連結擠到畫面外。先找原因講給我聽，先不要改。」<br><br>
+        「看這張截圖，紅框圈起來的 Card，文字跟邊框太擠。padding 加大，角改圓一點，加一點陰影。」
+      </div>
+
+      <!-- Chapter Nav -->
       <div class="chapter-nav">
         <a href="/chapter5/" class="prev">
           <span class="nav-label">上一章</span>
-          <span class="nav-title">學會描述你看到的東西</span>
+          <span class="nav-title">基本知識</span>
         </a>
         <a href="/chapter7/" class="next">
           <span class="nav-label">下一章</span>
-          <span class="nav-title">用什麼材料蓋房子（技術棧）</span>
+          <span class="nav-title">部署</span>
         </a>
       </div>
 
     </div>
   </section>
+
+<!-- uidemo：補充示範的腳本（切換狀態、進畫面才播、暫停鈕） -->
+<script>
+(function () {
+  var cards = [].slice.call(document.querySelectorAll('.uidemo-card'));
+  if (!cards.length) return;
+  /* 有 JS 才啟用「進畫面才播」；沒 JS 時動畫照常播，不會停在第 0 格 */
+  document.documentElement.classList.add('uidemo-js');
+  var reduce = !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* 可以點的示範：按鈕的 data-uidemo-go 決定卡片的 data-state，畫面交給 CSS */
+  function setState(card, go) {
+    var cur = card.getAttribute('data-state');
+    var max = +card.getAttribute('data-uidemo-max') || 1;
+    var s = go === 'toggle' ? (cur === 'on' ? 'off' : 'on')
+          : go === 'next' ? String(Math.min(max, +cur + 1))
+          : go === 'prev' ? String(Math.max(1, +cur - 1))
+          : go === 'loop' ? String(+cur % max + 1)
+          : go;
+    card.setAttribute('data-state', s);
+    if (+s) card.style.setProperty('--uidemo-n', s);
+    [].forEach.call(card.querySelectorAll('[data-uidemo-go]'), function (b) {
+      var g = b.getAttribute('data-uidemo-go');
+      var active = String(g === 'toggle' ? s === 'on' : g === s);
+      if (b.hasAttribute('aria-pressed')) b.setAttribute('aria-pressed', active);
+      if (b.hasAttribute('aria-expanded')) b.setAttribute('aria-expanded', active);
+    });
+    [].forEach.call(card.querySelectorAll('[data-uidemo-when]'), function (el) {
+      el.hidden = el.getAttribute('data-uidemo-when') !== s;
+    });
+    [].forEach.call(card.querySelectorAll('[data-uidemo-out]'), function (el) { el.textContent = s; });
+  }
+
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest && ev.target.closest('[data-uidemo-go]');
+    var card = t && t.closest('.uidemo-card');
+    if (!card) return;
+    card.uidemoPeek = 2;
+    setState(card, t.getAttribute('data-uidemo-go'));
+  });
+
+  cards.forEach(function (card) {
+    /* 自動播放的示範：補一顆暫停鈕；關閉動畫的人只看到說明 */
+    if (card.hasAttribute('data-uidemo-auto')) {
+      var name = card.querySelector('.uidemo-name');
+      var title = name.textContent.trim();
+      var tag = document.createElement(reduce ? 'span' : 'button');
+      tag.className = 'uidemo-tag';
+      tag.textContent = reduce ? '動畫已關閉' : '暫停';
+      if (!reduce) {
+        tag.type = 'button';
+        tag.setAttribute('aria-label', '暫停示範：' + title);
+        tag.addEventListener('click', function () {
+          var hold = card.classList.toggle('uidemo-hold');
+          tag.textContent = hold ? '播放' : '暫停';
+          tag.setAttribute('aria-label', (hold ? '播放示範：' : '暫停示範：') + title);
+        });
+      }
+      name.appendChild(tag);
+    }
+    /* 關閉動畫時，Drawer、FAB 直接停在打開的樣子 */
+    if (reduce && card.hasAttribute('data-uidemo-peek')) setState(card, 'on');
+  });
+
+  /* 滑進畫面中間才播，離開就停；Drawer、FAB 第一次進畫面自己開一下再關 */
+  function show(card, on) {
+    card.classList.toggle('uidemo-on', on);
+    if (on && !reduce && card.hasAttribute('data-uidemo-peek') && !card.uidemoPeek) {
+      card.uidemoPeek = 1;
+      setState(card, 'on');
+      setTimeout(function () { if (card.uidemoPeek === 1) setState(card, 'off'); }, 2200);
+    }
+  }
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { show(e.target, e.isIntersecting); });
+    }, { rootMargin: '-12% 0px -12% 0px', threshold: 0.5 });
+    cards.forEach(function (card) { io.observe(card); });
+  } else {
+    cards.forEach(function (card) { show(card, true); });
+  }
+})();
+</script>
 </main>
 
 <footer class="site-footer">

@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十六章：前後端邊界 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ===== 第十六章專用樣式（示範與例子卡沿用舊頁的 edge- 前綴）===== */
+    #edge-boundary { scroll-margin-top: 72px; }
+    .edge-link { color: var(--accent-light); }
+    .content .compare > div { min-width: 0; }
+
+    /* 八個例子：一例一張卡 */
+    .edge-cases { display: grid; gap: 14px; margin: 24px 0; }
+    .edge-case {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      min-width: 0;
+    }
+    .edge-case-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-heading);
+      margin-bottom: 12px;
+    }
+    .edge-case-num {
+      color: var(--accent);
+      margin-right: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    .edge-rows {
+      display: grid;
+      grid-template-columns: 7em minmax(0, 1fr);
+      gap: 8px 16px;
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .edge-rows dt { font-size: 13px; font-weight: 700; padding-top: 2px; }
+    .edge-rows dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+    .edge-front { color: var(--green); }
+    .edge-back { color: var(--yellow); }
+    .edge-why { color: var(--text-muted); }
+    dd.edge-why { color: var(--text-muted); }
+
+    /* 互動示範：竄改折扣 */
+    .edge-demo {
+      position: relative;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      padding: 24px;
+      margin: 28px 0 20px;
+    }
+    .edge-demo::before {
+      content: attr(data-demo-title);
+      position: absolute;
+      top: -11px;
+      left: 16px;
+      background: var(--bg-card);
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .edge-demo-label { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .edge-screen {
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+    }
+    .edge-screen-title { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+    .edge-order {
+      display: grid;
+      grid-template-columns: 4em minmax(0, 1fr);
+      gap: 6px 16px;
+      margin: 0;
+      font-size: 16px;
+    }
+    .edge-order dt { color: var(--text-muted); font-size: 14px; padding-top: 2px; }
+    .edge-order dd { margin: 0; font-variant-numeric: tabular-nums; }
+    .edge-order dd strong { color: var(--text-heading); font-size: 18px; }
+    .edge-flag {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 0 8px;
+      border-radius: 999px;
+      border: 1px solid var(--red);
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.7;
+      vertical-align: 1px;
+    }
+    .edge-flag[hidden] { display: none; }
+    .edge-tampered #edge-rate,
+    .edge-tampered #edge-total { color: var(--red); }
+
+    .edge-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+    .edge-btn {
+      min-height: 44px;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .edge-btn:hover { border-color: var(--accent); }
+    .edge-btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+    .edge-btn-main { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .edge-btn-main:hover { background: var(--accent-light); border-color: var(--accent-light); }
+    .edge-btn-warn[aria-pressed="true"] { border-color: var(--red); color: var(--red); }
+
+    .edge-payload { margin: 0 0 16px; font-size: 14px; }
+    .edge-payload-label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+    .edge-payload code {
+      display: block;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.7;
+    }
+
+    .edge-results { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+    .edge-panel {
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      font-size: 14px;
+      min-width: 0;
+    }
+    .edge-panel-bad { background: rgba(248, 113, 113, 0.06); border: 1px solid rgba(248, 113, 113, 0.2); }
+    .edge-panel-good { background: rgba(74, 222, 128, 0.06); border: 1px solid rgba(74, 222, 128, 0.2); }
+    .edge-panel-title { font-size: 13px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+    .edge-panel-bad .edge-panel-title { color: var(--red); }
+    .edge-panel-good .edge-panel-title { color: var(--green); }
+    .content .edge-panel ol { margin: 0 0 12px; padding-left: 20px; color: var(--text-muted); }
+    .edge-panel li { margin: 4px 0; }
+    .edge-verdict {
+      margin: 0;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-light);
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .edge-verdict.edge-is-bad { color: var(--red); }
+    .edge-verdict.edge-is-ok { color: var(--green); }
+    .edge-verdict.edge-is-luck { color: var(--yellow); }
+    .edge-verdict.edge-pop { animation: edge-pop 0.35s ease-out; }
+    @keyframes edge-pop {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .edge-static > p { font-size: 14px; color: var(--text-muted); }
+    .edge-static .compare { margin-bottom: 0; }
+    .edge-static .code-block { margin-bottom: 0; }
+
+    @media (max-width: 600px) {
+      .edge-rows { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+      .edge-rows dd { margin-bottom: 10px; }
+      .edge-rows dd:last-child { margin-bottom: 0; }
+      .edge-demo { padding: 20px 16px 16px; }
+      .edge-results { grid-template-columns: minmax(0, 1fr); }
+      .edge-btn { flex: 1 1 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .edge-btn { transition: none; }
+      .edge-verdict.edge-pop { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="/">首頁</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="/">首頁</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/" class="active">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第十六章</div>
+      <h1>前後端邊界：什麼放前面，什麼一定要放後面</h1>
+      <p class="lead">上一章把資料的家蓋好了。接著的問題是：誰可以碰這些資料？畫面上的 JS 能做到哪裡，什麼一定要交給後端？這是第一章說的邊界裡最難守的一條。它畫不到百分之百乾淨，所以你要會的是判斷，不是背規則。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <p><a class="edge-link" href="/chapter5/">第五章 基本知識</a>把前端比成餐廳的用餐區，後端比成廚房：客人看得到用餐區、進不去廚房。那一章先記了一句：跟錢和權限有關的，最後都要後端說了算。這一章就把這一句展開：哪些事可以留在用餐區做，哪些事一定要送進廚房。</p>
+
+    <p>前端和後端之間怎麼講話（也就是 API），<a class="edge-link" href="/chapter12/">第十二章</a>講過了。這一章不管怎麼講，只管一件事：<strong>這件事該交給哪一邊做。</strong></p>
+
+    <!-- ===== 前後端邏輯歸屬 ===== -->
+    <h2 id="edge-boundary">前端 vs 後端：什麼計算該放哪裡</h2>
+
+    <p><a class="edge-link" href="/chapter14/">第十四章</a>講功能和功能之間要有邊界。整個系統裡最粗的一條邊界，就是前端和後端中間那一條。</p>
+
+    <p>這是很多新手搞不清楚的問題：某段邏輯到底該寫在前端還是後端？</p>
+
+    <div class="analogy">
+      <strong>比喻：用餐區的菜單 vs 收銀台。</strong><br><br>
+      菜單上可以印「參考價格」，讓客人大概知道要花多少錢。但<strong>結帳金額一定要收銀台算</strong>。<br><br>
+      為什麼？因為菜單在客人手上，客人可以塗改。收銀台在店裡面、跟廚房同一邊，客人碰不到。<br><br>
+      前端 = 菜單（在使用者的電腦上，使用者看得到、改得到）<br>
+      後端 = 收銀台（在雲端，使用者碰不到）
+    </div>
+
+    <p>這本書推薦的組合裡，後端多半不是一台你要顧的機器，而是 Cloudflare Workers、Supabase Edge Functions 這類小函式（<a class="edge-link" href="/chapter11/">第十一章 技術棧</a>說的門鈴：平常沒人顧，有人按鈴才醒來辦事），或是資料庫服務本身的存取規則。機器看不到，但它一樣是客人碰不到的那一邊。</p>
+
+    <h3>判斷原則：誰能被竄改？</h3>
+
+    <p>前端的程式碼跑在使用者的瀏覽器裡。任何懂一點技術的人，都可以打開瀏覽器的開發者工具，修改前端的 JavaScript。所以：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>類型</th>
+            <th>放前端</th>
+            <th>放後端</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>日期格式化</td>
+            <td style="color: var(--green);">可以。純展示，沒安全問題</td>
+            <td>不需要</td>
+          </tr>
+          <tr>
+            <td>表單欄位檢查</td>
+            <td style="color: var(--yellow);">可以做，讓人當場改</td>
+            <td style="color: var(--green);">一定要。前端的檢查可以被繞過</td>
+          </tr>
+          <tr>
+            <td>訂單金額計算</td>
+            <td style="color: var(--yellow);">可以顯示「預估金額」</td>
+            <td style="color: var(--green);">一定要。最終金額只能後端算</td>
+          </tr>
+          <tr>
+            <td>使用者權限判斷</td>
+            <td style="color: var(--red);">不行。使用者改得到前端</td>
+            <td style="color: var(--green);">一定要。權限只能後端決定</td>
+          </tr>
+          <tr>
+            <td>登入密碼</td>
+            <td style="color: var(--yellow);">只負責讓人輸入、送出。不在前端判斷對不對，也不存</td>
+            <td style="color: var(--green);">一定要。對不對由後端比對；存的是雜湊過的結果，不存原本的密碼</td>
+          </tr>
+          <tr>
+            <td>搜尋結果排序</td>
+            <td style="color: var(--green);">資料少時前端自己排</td>
+            <td style="color: var(--green);">資料多時後端排好再送</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>密碼那一列多講一句。密碼當然是在前端輸入的，重點是輸入完就送給後端，對不對由後端說了算。後端存的也不是密碼本身，是<strong>雜湊（hash）</strong>過的結果：一串還原不回原文的亂碼。就算資料外流，別人拿到的也不是密碼。Supabase 的登入服務官方寫明只存雜湊過的密碼，這一段它已經做好，不要叫 Claude 自己重寫一套。</p>
+
+    <div class="box box-danger">
+      <div class="box-label">關鍵原則</div>
+      <strong>跟「錢」「權限」「安全」有關的邏輯，最後都要後端說了算。</strong><br><br>
+      前端可以做「預覽」，可以讓操作順手，但最終的計算和判斷，要在客人碰不到的地方完成。<br><br>
+      記住：<strong>前端是給使用者看的，後端是給你自己用的。</strong>使用者看得到的東西，都有可能被竄改。
+    </div>
+
+    <h3>一個常見的災難情境</h3>
+
+    <p>假設你的購物網站把折扣計算寫在前端的 JS 裡。有人打開瀏覽器的開發者工具，把「打九折」改成「打一折」，再送出訂單。後端沒有重新驗算，直接照前端傳來的金額扣款。</p>
+
+    <p>一台原價三萬的筆電，三千塊就被買走。不用駭進誰的主機，只要後端照單全收就做得到。</p>
+
+    <h3>動手玩：把九折改成一折</h3>
+
+    <p>下面是同一張訂單，同時送給兩種後端。先照正常流程按一次「送出訂單」，再按「竄改前端的折扣」送一次，看兩邊差在哪。</p>
+
+    <div class="demo-container edge-demo" id="edge-demo" data-demo-title="互動示範：竄改折扣">
+      <div class="demo-label edge-demo-label">這裡的「竄改」只會改你眼前這個示範，不會送出任何資料。</div>
+
+      <div id="edge-live" hidden>
+        <div class="edge-screen">
+          <div class="edge-screen-title">客人瀏覽器裡的結帳畫面（前端）</div>
+          <dl class="edge-order">
+            <dt>商品</dt>
+            <dd>筆電 × 1</dd>
+            <dt>原價</dt>
+            <dd>30,000 元</dd>
+            <dt>折扣</dt>
+            <dd><span id="edge-rate">九折</span><span class="edge-flag" id="edge-flag" hidden>被改過</span></dd>
+            <dt>應付</dt>
+            <dd><strong id="edge-total">27,000 元</strong></dd>
+          </dl>
+        </div>
+
+        <div class="edge-actions">
+          <button type="button" class="edge-btn edge-btn-warn" id="edge-tamper" aria-pressed="false">竄改前端的折扣</button>
+          <button type="button" class="edge-btn edge-btn-main" id="edge-send">送出訂單</button>
+        </div>
+
+        <div class="edge-payload">
+          <span class="edge-payload-label">前端送給後端的內容</span>
+          <code id="edge-payload">商品：筆電，數量：1，折扣：九折，應付：27,000 元</code>
+        </div>
+
+        <div class="edge-results" aria-live="polite">
+          <div class="edge-panel edge-panel-bad">
+            <div class="edge-panel-title">後端 A：只信前端</div>
+            <ol>
+              <li>收到前端說「應付 <span class="edge-claim">27,000</span> 元」。</li>
+              <li>不查價目表，也不重算。</li>
+              <li>照這個數字扣款。</li>
+            </ol>
+            <p class="edge-verdict" id="edge-verdict-a">還沒送出。</p>
+          </div>
+          <div class="edge-panel edge-panel-good">
+            <div class="edge-panel-title">後端 B：自己重算</div>
+            <ol>
+              <li>只認「筆電 × 1」。前端送來的折扣和金額不拿來算，只拿來比對。</li>
+              <li>自己查價目表：30,000 元。自己查這位客人的折扣：九折。</li>
+              <li>算出應付 27,000 元，再跟前端說的 <span class="edge-claim">27,000</span> 元比對。</li>
+            </ol>
+            <p class="edge-verdict" id="edge-verdict-b">還沒送出。</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="edge-static" id="edge-static">
+        <p>這個示範要開 JavaScript 才能按。看不到按鈕的話，下面是同一件事的文字版：客人把前端的折扣從九折改成一折，再送出訂單。</p>
+        <div class="compare">
+          <div class="compare-bad">
+            <div class="compare-label">後端 A：只信前端</div>
+            <div class="code-block">
+前端送來：折扣一折、應付 3,000 元<br>
+後端不查價目表，也不重算<br>
+照這個數字扣款 3,000 元<br>
+<br>
+<span style="color: var(--red);">三萬的筆電被一折買走，<br>少收 24,000 元</span>
+            </div>
+          </div>
+          <div class="compare-good">
+            <div class="compare-label">後端 B：自己重算</div>
+            <div class="code-block">
+只認「筆電 × 1」，折扣和金額不拿來算，只拿來比對<br>
+自己查價目表 30,000 元、折扣九折<br>
+算出應付 27,000 元，跟前端說的 3,000 元對不上<br>
+<br>
+<span style="color: var(--green);">訂單擋下來，<br>一塊錢都沒少收</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>兩個後端收到的是同一份被改過的資料，差別只有一件事：<strong>後端有沒有自己再算一次</strong>。前端寫得多漂亮、多嚴謹，都不影響這個結果。</p>
+
+    <p>金流服務也是這樣要求的。Stripe 的串接文件就寫：要收多少錢，一律在伺服器那一邊決定，不要交給客戶端，免得有人替自己挑價格。</p>
+
+    <h3>八個你每天會遇到的例子</h3>
+
+    <p>原則一句話就講完，難的是套到手上的功能。下面八個都是小公司的系統裡常見的，每個拆成三格：前面可以做什麼、後面一定要做什麼、為什麼。</p>
+
+    <div class="edge-cases">
+
+      <div class="edge-case">
+        <div class="edge-case-title"><span class="edge-case-num">01</span>報價單即時試算</div>
+        <dl class="edge-rows">
+          <dt class="edge-front">前面可以</dt>
+          <dd>客人改數量、換方案，小計和稅金馬上跟著跳。這是給人看的草稿。</dd>
+          <dt class="edge-back">後面一定要</dt>
+          <dd>正式報價單存檔或寄出之前，用後端的價目表整張重算一次。</dd>
+          <dt class="edge-why">為什麼</dt>
+          <dd class="edge-why">前端只該告訴後端「選了什麼、幾個」，不該告訴後端「多少錢」。金額讓前端說了算，等於讓客人自己開價。</dd>
+        </dl>
+      </div>
+
+      <div class="edge-case">
+        <div class="edge-case-title"><span class="edge-case-num">02</span>優惠碼</div>
+        <dl class="edge-rows">
+          <dt class="edge-front">前面可以</dt>
+          <dd>輸入框、沒填的提示，以及把後端回覆的「已套用，折 200 元」顯示出來。</dd>
+          <dt class="edge-back">後面一定要</dt>
+          <dd>這組碼存不存在、有沒有過期、用過幾次、這位客人能不能用、折多少。</dd>
+          <dt class="edge-why">為什麼</dt>
+          <dd class="edge-why">有效的優惠碼清單一旦寫在前端程式裡，會看網頁原始碼的人就全部看得到。</dd>
+        </dl>
+      </div>
+
+      <div class="edge-case">
+        <div class="edge-case-title"><span class="edge-case-num">03</span>會員等級顯示</div>
+        <dl class="edge-rows">
+          <dt class="edge-front">前面可以</dt>
+          <dd>顯示「金卡會員」的徽章、顏色、權益說明。</dd>
+          <dt class="edge-back">後面一定要</dt>
+          <dd>他是哪一級（照消費紀錄算），以及這一級可以用什麼價格、看到什麼內容。</dd>
+          <dt class="edge-why">為什麼</dt>
+          <dd class="edge-why">有人把自己畫面上的徽章改成金卡，只有他自己看得到，沒關係。後端要是相信前端送來的「我是金卡」，就是讓客人自己升等。</dd>
+        </dl>
+      </div>
+
+      <div class="edge-case">
+        <div class="edge-case-title"><span class="edge-case-num">04</span>庫存數量</div>
+        <dl class="edge-rows">
+          <dt class="edge-front">前面可以</dt>
+          <dd>顯示「剩 3 件」，數量選超過的時候提醒。</dd>
+          <dt class="edge-back">後面一定要</dt>
+          <dd>下單那一刻再查一次庫存，有貨就立刻扣掉。查和扣要綁在一起，中間不能讓別人插隊。</dd>
+          <dt class="edge-why">為什麼</dt>
+          <dd class="edge-why">畫面上的「剩 3 件」是打開頁面那一刻的數字，這段時間別人可能已經買走。兩個人搶最後一件會怎樣（工程師叫它 Race Condition），<a class="edge-link" href="/chapter17/">第十七章 會出事的地方</a>有細講。</dd>
+        </dl>
+      </div>
+
+      <div class="edge-case">
+        <div class="edge-case-title"><span class="edge-case-num">05</span>表單必填檢查</div>
+        <dl class="edge-rows">
+          <dt class="edge-front">前面可以</dt>
+          <dd>沒填就標紅、Email 格式不對馬上提示，讓人當場改。</dd>
+          <dt class="edge-back">後面一定要</dt>
+          <dd>同樣的檢查再做一次，通過才寫進資料庫。</dd>
+          <dt class="edge-why">為什麼</dt>
+          <dd class="edge-why">前面的檢查是替正常客人省時間。有心人可以跳過你的表單，直接把資料送給後端。</dd>
+        </dl>
+      </div>
+
+      <div class="edge-case">
+        <div class="edge-case-title"><span class="edge-case-num">06</span>檔案上傳的大小與類型</div>
+        <dl class="edge-rows">
+          <dt class="edge-front">前面可以</dt>
+          <dd>選檔視窗只列出圖片；檔案太大先提醒，省得白傳一趟。</dd>
+          <dt class="edge-back">後面一定要</dt>
+          <dd>收到檔案之後，再檢查一次實際的大小和類型，通過才存起來。</dd>
+          <dt class="edge-why">為什麼</dt>
+          <dd class="edge-why">選檔視窗的限制只是提示，使用者多半可以切換成選任何檔案；副檔名也能自己改。</dd>
+        </dl>
+      </div>
+
+      <div class="edge-case">
+        <div class="edge-case-title"><span class="edge-case-num">07</span>金鑰（API key）放哪裡</div>
+        <dl class="edge-rows">
+          <dt class="edge-front">前面可以</dt>
+          <dd>只放服務商明講「可以公開」的那一種（下面的灰色地帶會講）。其他一律不放。</dd>
+          <dt class="edge-back">後面一定要</dt>
+          <dd>金鑰存在後端的環境變數。要呼叫外部服務的時候由後端去呼叫，前端只跟你自己的後端講話。</dd>
+          <dt class="edge-why">為什麼</dt>
+          <dd class="edge-why">寫進前端的東西，任何人都能從網頁的程式碼裡撈出來。撈到金鑰的人，花的是你的額度。</dd>
+        </dl>
+      </div>
+
+      <div class="edge-case">
+        <div class="edge-case-title"><span class="edge-case-num">08</span>匯出報表</div>
+        <dl class="edge-rows">
+          <dt class="edge-front">前面可以</dt>
+          <dd>把畫面上已經看得到的那幾列，轉成 CSV 讓人下載。</dd>
+          <dt class="edge-back">後面一定要</dt>
+          <dd>決定這個人能匯出哪些資料。筆數多的大報表也由後端產生。</dd>
+          <dt class="edge-why">為什麼</dt>
+          <dd class="edge-why">把「匯出」按鈕藏起來不算權限控管。後端的匯出窗口沒檢查身分的話，知道網址的人照樣拿得到全部資料。</dd>
+        </dl>
+      </div>
+
+    </div>
+
+    <h3>灰色地帶：分不到百分之百乾淨</h3>
+
+    <p>看完八個例子，你可能想整理成一條鐵律：「重要的放後端，不重要的放前端。」實際做起來沒這麼乾淨。下面幾種情況，前後兩邊都會沾到：</p>
+
+    <ul>
+      <li><strong>同一條檢查，前後各做一次。</strong>必填、Email 格式、檔案大小都是。看起來重複，其實分工不同：前面那次是服務，後面那次是把關。代價是規則一改要改兩處，所以要先講好：以後端那份為準，前面那份只是影本。同一件事只認一個正本，這叫單一資料來源（SSOT），<a class="edge-link" href="/chapter17/">第十七章</a>會講抄成兩份會怎麼出事。</li>
+      <li><strong>先顯示，再確認。</strong>按下「加入購物車」，數字馬上加一，不等後端回覆，等了會覺得卡。後端如果回「沒貨了」，畫面再改回來。前端先做了一件它沒資格決定的事，這是故意的，為了快。</li>
+      <li><strong>預估金額和正式金額。</strong>前面算給人看，後面算的才算數。麻煩在兩邊的算法要一樣。假設一張訂單打完折是 1,049.5 元：前面四捨五入，顯示 1,050 元；後面無條件捨去，收 1,049 元。沒有人竄改，照樣有人來問。</li>
+      <li><strong>頁面直接連資料庫。</strong>Supabase 就是設計成可以這樣用：它會替資料表產生存取的窗口，再靠設在資料表上的存取規則（RLS，Row Level Security，逐列權限，<a class="edge-link" href="/chapter9/#step4">第九章「步驟四：開門，再上鎖」</a>動手開過）把關，規定每個人只能讀寫自己的那幾筆。現在新建的表還要先明確授權（grant）才會開窗口，時程和做法見<a class="edge-link" href="/chapter9/#step4">第九章</a>。<a class="edge-link" href="/chapter11/">第十一章</a>推薦的組合、<a class="edge-link" href="/chapter13/">第十三章</a>的第三種形狀都是這樣接。這條線可以畫，但規則沒開就等於倉庫沒鎖；而且金額、訂單狀態這類不能讓客人自己說了算的，還是交給後端的小函式或資料庫裡的函式去寫。</li>
+      <li><strong>可以公開的金鑰。</strong>「金鑰一律放後端」這句話，字面上也不是百分之百。Supabase 有兩種金鑰：publishable key（舊專案裡叫 anon key）官方說可以放在網頁上，資料靠 RLS 把關；secret key（舊的叫 service_role）會略過所有存取規則，官方寫明只能放在後端，不可以放進瀏覽器。同一家服務的兩把金鑰，一把可以放前面，一把絕對不行。</li>
+      <li><strong>排序和篩選。</strong>五十筆資料，前面自己排就夠快；五萬筆就得由後端排好再送過來。同一個功能，資料長大了就要搬家。</li>
+    </ul>
+
+    <p>頁面直接連 Supabase 的時候，有兩種「拿不到」長得不一樣，看到時分得出來就好：被 RLS 規則擋掉的那幾筆通常不會報錯，而是像沒有這筆一樣查不到；整張表還沒授權的話，會直接收到「permission denied for table」（代碼 42501），意思是門還沒開，不是資料不見。</p>
+
+    <div class="box box-info">
+      <div class="box-label">分不清楚的時候，問這一句</div>
+      <strong>「這個放前面，被人改掉會出什麼事？」</strong><br><br>
+      只有他自己的畫面變奇怪：放前面沒關係。<br>
+      你會少收錢、他會看到不該看的、別人的資料會被動到：後面一定要再做一次。<br><br>
+      這一句問的是後果，不是技術。你不會寫程式也答得出來。
+    </div>
+
+    <h3>邊界沒人守，就會越改越纏</h3>
+
+    <p>這條線沒人守會怎樣，<a class="edge-link" href="/chapter1/">第一章</a>那條五步的時間軸已經走過一遍：每一次都修好了，最後同一個「價格」有四套算法，散在前端、後端、資料表和報表裡。</p>
+
+    <p>這不是 Claude 哪一次做錯。Claude 會改，也會修，但它每次只處理你眼前講的那一件事。從頭到尾沒有人說過「價格只有後端能算」，它不知道線在哪，就哪裡近改哪裡。加上這條線本來就畫不到百分之百乾淨，沒辦法丟一條死規則給它就不管，得有人每次看一眼。</p>
+
+    <div class="box box-warning">
+      <div class="box-label">所以你要會的是什麼</div>
+      <strong>不是自己寫，是知道邊界在哪。</strong><br><br>
+      程式可以交給 Claude 寫。但「金額、折扣、庫存、權限、金鑰，只有後端說了算」這張清單要你來定，而且要在它動手之前講。<br><br>
+      只講一次不夠，換一個新對話它不一定還記得。把這張清單寫進專案的 <code>CLAUDE.md</code>（<a class="edge-link" href="/chapter10/">第十章</a>講過），它每次開工都會先讀到。讀到不代表每次都照做，所以改完再問一句，範例在下面。
+    </div>
+
+    <!-- ===== 收尾 ===== -->
+    <h2>這章帶走什麼</h2>
+
+    <ul>
+      <li>前端在客人手上，看得到、改得到；後端客人碰不到。</li>
+      <li>錢、權限、安全，最後都要後端說了算。前端只送「選了什麼、幾個」，不送金額。</li>
+      <li>這條線分不到百分之百乾淨：有些檢查前後各做一次，有些金鑰本來就放前面，有些頁面本來就直接連資料庫。分不清時問「被人改掉會出什麼事」。</li>
+      <li>線在哪裡，要你在 Claude 動手之前講，並寫進 CLAUDE.md。後端開出去的每一扇門（API）怎麼守，回頭看<a class="edge-link" href="/chapter12/">第十二章</a>。</li>
+    </ul>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      <strong>動手之前</strong><br>
+      「這個功能先列給我看：哪些放前端、哪些放後端、要不要動資料表。我確認了你再寫」<br>
+      「金額、折扣、庫存、權限只能後端算。前端只送『選了什麼、幾個』，不送金額」<br>
+      「這個折扣計算要放在後端做，前端只顯示結果」<br>
+      「前端的權限檢查只是方便（UX），藏按鈕不算擋人，真正擋人的要在後端」<br><br>
+      <strong>改完之後</strong><br>
+      「這次動了哪些檔案？有沒有把價格或權限的判斷寫到前端？」<br>
+      「同一個計算有沒有出現在兩個地方？有的話留後端那份，前端改成去問後端」<br>
+      「幫我確認所有跟金額有關的邏輯都在後端（server side）」<br>
+      「新表要開放給頁面用的話，列出你下了哪些 grant、RLS 規則是什麼」<br><br>
+      <strong>偶爾巡一次</strong><br>
+      「檢查前端的程式碼，有沒有金鑰、優惠碼清單，或任何不該讓客人看到的東西」<br>
+      「列出 Supabase 裡每一張表開放給誰（grant）、有沒有開 RLS、規則是什麼」<br><br>
+      <strong>要它下次還記得</strong><br>
+      「把『金額、折扣、庫存、權限只能後端決定』寫進這個專案的 CLAUDE.md」
+    </div>
+
+    <p>前後端這條線，只是整個系統裡的其中一條。整體怎麼連看<a class="edge-link" href="/chapter13/">第十三章 架構拓樸</a>，怎麼切功能看<a class="edge-link" href="/chapter14/">第十四章 功能怎麼切</a>，資料怎麼放看<a class="edge-link" href="/chapter15/">第十五章 資料表與欄位</a>。邊界守住了，系統還是會出事，下一章講最常見的三種：順序亂掉、同一份資料存好幾處、改一個壞三個。</p>
+
+    <div class="chapter-nav">
+      <a href="/chapter15/" class="prev">
+        <span class="nav-label">上一章</span>
+        <span class="nav-title">資料表與欄位</span>
+      </a>
+      <a href="/chapter17/" class="next">
+        <span class="nav-label">下一章</span>
+        <span class="nav-title">會出事的地方</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/main.js"></script>
+<script>
+// 第十六章互動示範：竄改前端折扣（只在本頁運作，不送出任何資料）
+(function () {
+  var live = document.getElementById('edge-live');
+  var fallback = document.getElementById('edge-static');
+  var demo = document.getElementById('edge-demo');
+  if (!live || !fallback || !demo) return;
+
+  var PRICE = 30000;          // 後端價目表上的原價
+  var REAL = { rate: 0.9, label: '九折' };
+  var FAKE = { rate: 0.1, label: '一折' };
+  var tampered = false;
+
+  var rateEl = document.getElementById('edge-rate');
+  var flagEl = document.getElementById('edge-flag');
+  var totalEl = document.getElementById('edge-total');
+  var payloadEl = document.getElementById('edge-payload');
+  var tamperBtn = document.getElementById('edge-tamper');
+  var sendBtn = document.getElementById('edge-send');
+  var verdictA = document.getElementById('edge-verdict-a');
+  var verdictB = document.getElementById('edge-verdict-b');
+  var claims = demo.querySelectorAll('.edge-claim');
+
+  function money(n) { return Math.round(n).toLocaleString('en-US'); }
+  function current() { return tampered ? FAKE : REAL; }
+  function claimed() { return PRICE * current().rate; }   // 前端自己算、自己說的金額
+  function correct() { return PRICE * REAL.rate; }        // 後端自己查、自己算的金額
+
+  function setVerdict(el, text, kind) {
+    el.textContent = text;
+    el.className = 'edge-verdict' + (kind ? ' edge-is-' + kind : '');
+    if (kind) {
+      void el.offsetWidth;            // 讓進場動畫可以重播
+      el.classList.add('edge-pop');
+    }
+  }
+
+  function renderScreen() {
+    var c = current();
+    rateEl.textContent = c.label;
+    flagEl.hidden = !tampered;
+    totalEl.textContent = money(claimed()) + ' 元';
+    payloadEl.textContent = '商品：筆電，數量：1，折扣：' + c.label + '，應付：' + money(claimed()) + ' 元';
+    for (var i = 0; i < claims.length; i++) claims[i].textContent = money(claimed());
+    demo.classList.toggle('edge-tampered', tampered);
+    tamperBtn.setAttribute('aria-pressed', tampered ? 'true' : 'false');
+    tamperBtn.textContent = tampered ? '改回九折' : '竄改前端的折扣';
+  }
+
+  function resetVerdicts() {
+    var hint = tampered ? '折扣已經被改成一折。按「送出訂單」看看。' : '還沒送出。';
+    setVerdict(verdictA, hint, '');
+    setVerdict(verdictB, hint, '');
+  }
+
+  tamperBtn.addEventListener('click', function () {
+    tampered = !tampered;
+    renderScreen();
+    resetVerdicts();
+  });
+
+  sendBtn.addEventListener('click', function () {
+    var paid = claimed();
+    var should = correct();
+    if (tampered) {
+      setVerdict(verdictA, '扣款 ' + money(paid) + ' 元。三萬的筆電被一折買走，少收 ' + money(should - paid) + ' 元。', 'bad');
+      setVerdict(verdictB, '前端說 ' + money(paid) + ' 元，後端算出 ' + money(should) + ' 元，對不上。訂單擋下來，一塊錢都沒少收。', 'ok');
+    } else {
+      setVerdict(verdictA, '扣款 ' + money(paid) + ' 元。這次沒事，只是因為沒人動手腳。', 'luck');
+      setVerdict(verdictB, '跟前端顯示的一致，扣款 ' + money(should) + ' 元。', 'ok');
+    }
+  });
+
+  renderScreen();
+  resetVerdicts();
+  fallback.hidden = true;
+  live.hidden = false;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十八章：其他工具 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* 第十八章專用：Remotion 流程示意。class 一律用 tool- 前綴 */
+    .tool-demo {
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 28px 20px 20px;
+      margin: 28px 0 20px;
+      background: var(--bg-card);
+      position: relative;
+    }
+    .tool-demo-title {
+      position: absolute;
+      top: -11px;
+      left: 16px;
+      background: var(--bg-card);
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .tool-demo-label {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .tool-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .tool-step {
+      flex: 1 1 0;
+      min-width: 0;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      padding: 14px 12px;
+      text-align: center;
+      animation: tool-step-on 9s infinite;
+    }
+    /* 用負的延遲錯開，三格輪流亮，一開始就只有第一格亮 */
+    .tool-step-2 { animation-delay: -6s; }
+    .tool-step-3 { animation-delay: -3s; }
+    .tool-arrow {
+      flex: 0 0 auto;
+      align-self: center;
+      color: var(--text-muted);
+      font-size: 20px;
+      line-height: 1;
+    }
+    .tool-visual {
+      height: 92px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+    .tool-code {
+      width: 100%;
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-muted);
+      text-align: left;
+      word-break: break-all;
+    }
+    .tool-code b { color: var(--accent-light); font-weight: 400; }
+    .tool-screen {
+      width: 100%;
+      max-width: 150px;
+      aspect-ratio: 16 / 9;
+      background: #1f1a17;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 6px 10px;
+    }
+    .tool-screen-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-heading);
+      line-height: 1.2;
+    }
+    .tool-screen-num {
+      font-size: 12px;
+      color: var(--accent-light);
+      line-height: 1.2;
+    }
+    .tool-bar {
+      width: 100%;
+      height: 4px;
+      background: var(--border-light);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .tool-bar-fill {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--accent);
+      transform-origin: left center;
+      animation: tool-bar-grow 9s infinite;
+    }
+    .tool-file {
+      width: 92px;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--bg-code);
+    }
+    .tool-file-thumb {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #1f1a17;
+    }
+    /* 播放三角形：純 CSS 畫，不用圖片 */
+    .tool-file-play {
+      width: 0;
+      height: 0;
+      border-top: 9px solid transparent;
+      border-bottom: 9px solid transparent;
+      border-left: 15px solid var(--accent-light);
+      margin-left: 4px;
+    }
+    .tool-file-name {
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 5px 4px;
+      border-top: 1px solid var(--border);
+    }
+    .tool-step-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+    .tool-step-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+    /* 指令表：指令只在空白處換行，不在參數中間斷開；寬螢幕整行不換 */
+    .tool-cmd span { white-space: nowrap; }
+    @media (min-width: 769px) {
+      .tool-cmd { white-space: nowrap; }
+    }
+    /* 其他工具表：工具名不斷行 */
+    .tool-name { white-space: nowrap; }
+    @keyframes tool-step-on {
+      0%, 30% { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+      38%, 94% { opacity: 0.62; border-color: var(--border-light); box-shadow: 0 0 0 0 transparent; }
+      100% { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    }
+    @keyframes tool-bar-grow {
+      0%, 36% { transform: scaleX(0.08); }
+      62%, 100% { transform: scaleX(1); }
+    }
+    @media (max-width: 600px) {
+      .tool-demo { padding: 26px 14px 14px; }
+      .tool-flow { flex-direction: column; }
+      .tool-arrow { transform: rotate(90deg); }
+      .tool-visual { height: auto; min-height: 76px; }
+    }
+    /* 關閉動畫時：三格都維持完整顯示，內容不會少 */
+    @media (prefers-reduced-motion: reduce) {
+      .tool-step, .tool-bar-fill { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="/">首頁</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="/">首頁</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/" class="active">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第十八章</div>
+      <h1>其他工具：做影片、管筆記</h1>
+      <p class="lead">第十七章看的是邊界沒守住時，東西會怎麼壞。正文最後這一章換到兩件你自己每天會碰到的事：做影片、管筆記。知道有哪些現成的工具可以用，常常比自己從零開始省事得多；這一章分享我實際在用的工具，以及為什麼選它們。挑工具也是在畫邊界：這件事能不能整件交給 Claude Code，做出來的東西以後要不要一直維護。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <h2>挑工具，先看兩件事</h2>
+
+    <p>這一章的兩個工具，是用同一把尺挑的：</p>
+
+    <ul>
+      <li><strong>Claude Code 能不能從頭做到尾。</strong>有指令可以打、檔案是純文字，它就能自己開、自己改、自己存。要你用滑鼠一格一格點的軟體，它幫不上多少。</li>
+      <li><strong>做出來的東西，以後要不要一直維護。</strong>網站上線後要一直改，所以<a href="/chapter11/">第十一章 技術棧</a>選不打包的做法。一支影片交出去就結束了，標準就不一樣。</li>
+    </ul>
+
+    <p>這兩條就是工具的邊界：哪些整件丟給它，哪些留在你手上。</p>
+
+    <div class="box box-info">
+      <div class="box-label">在找 MCP、懶人包、部署工具？</div>
+      這些前面講過了：MCP（讓 Claude Code 接上外部服務的連接器）和 Quickstart 懶人包在<a href="/chapter10/#cli-mcp">第十章 Claude Code 怎麼用</a>；Cloudflare、Supabase、Vercel、Render 這些部署工具怎麼選，在<a href="/chapter7/">第七章 部署</a>。這一章只講前面還沒講過的。
+    </div>
+
+    <!-- ===== Remotion ===== -->
+    <h2>Remotion：用指令做影片</h2>
+
+    <h3>它是什麼</h3>
+
+    <p>Remotion 是一個<strong>用程式做影片</strong>的工具。一般做影片，是打開剪輯軟體，用滑鼠把素材一段一段拖到時間軸上。Remotion 反過來：畫面是用 React（做網頁常用的一套寫法）寫出來的，寫好之後下一行指令，它就把畫面一格一格算出來，存成 mp4。</p>
+
+    <p>聽起來是工程師的東西。重點在這裡：<strong>寫程式的是 Claude，不是你。</strong>你負責講這支片要給誰看、要講什麼，剩下的它用指令做完，你不用開剪輯軟體。</p>
+
+    <div class="analogy">
+      <strong>比喻：親手彈琴 vs 寫樂譜給自動鋼琴。</strong><br><br>
+      剪輯軟體像親手彈琴，每一個音都要你自己按。<br><br>
+      Remotion 像寫樂譜交給自動鋼琴。譜（程式）寫好，它照著彈一遍、錄下來，就是影片。想改，就改譜上那一個音，再彈一遍。同一份譜換一段歌詞，還能錄出很多個版本。
+    </div>
+
+    <div class="tool-demo">
+      <div class="tool-demo-title">示意</div>
+      <div class="tool-demo-label">一支影片是這樣做出來的：</div>
+      <div class="tool-flow">
+        <div class="tool-step tool-step-1">
+          <div class="tool-visual" aria-hidden="true">
+            <div class="tool-code">&lt;標題 文字=<b>"新品上市"</b> /&gt;<br>&lt;數字 從=<b>0</b> 到=<b>128</b> /&gt;</div>
+          </div>
+          <div class="tool-step-name">1　程式</div>
+          <div class="tool-step-desc">Claude 把畫面寫成文字檔</div>
+        </div>
+        <div class="tool-arrow" aria-hidden="true">→</div>
+        <div class="tool-step tool-step-2">
+          <div class="tool-visual" aria-hidden="true">
+            <div class="tool-screen">
+              <span class="tool-screen-title">新品上市</span>
+              <span class="tool-screen-num">128 萬</span>
+              <span class="tool-bar"><span class="tool-bar-fill"></span></span>
+            </div>
+          </div>
+          <div class="tool-step-name">2　畫面</div>
+          <div class="tool-step-desc">Remotion 一格一格算出來</div>
+        </div>
+        <div class="tool-arrow" aria-hidden="true">→</div>
+        <div class="tool-step tool-step-3">
+          <div class="tool-visual" aria-hidden="true">
+            <div class="tool-file">
+              <div class="tool-file-thumb"><span class="tool-file-play"></span></div>
+              <div class="tool-file-name">影片.mp4</div>
+            </div>
+          </div>
+          <div class="tool-step-name">3　影片檔</div>
+          <div class="tool-step-desc">存成 mp4，直接拿去用</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>為什麼選它</h3>
+
+    <p>關鍵在這裡：<strong>整支影片就是一堆文字檔，所以 Claude Code 可以從頭做到尾。</strong></p>
+
+    <ul>
+      <li><strong>全程用指令</strong>：開專案、預覽、輸出都是終端機指令，Claude Code 自己會打。<a href="/chapter10/">第十章</a>講過，有 CLI 的事它做起來順手，做影片也一樣</li>
+      <li><strong>用講的就能改</strong>：「標題再大一點」「整支改成直式」「第二幕縮短成三秒」，改完重新輸出一次就好</li>
+      <li><strong>同一支片可以換資料重做</strong>：版型做一次，換品名、價格、照片，就能一次輸出很多支</li>
+      <li><strong>有給 AI 看的說明書</strong>：Remotion 自己出了一組 Agent Skills，給 Claude Code 這類工具照著官方建議的寫法做</li>
+    </ul>
+
+    <div class="box box-info">
+      <div class="box-label">前面不是說不打包？</div>
+      對。Remotion 的畫面是用 React 寫的，輸出前也要先打包，看起來跟<a href="/chapter11/">第十一章</a>打架。<br><br>
+      差在做出來的東西。網站上線後還要一直改，每改一次就要再打包一次，用到的套件也得跟著升級，所以做網站我不推薦。影片打包完輸出的是一個 mp4 檔，交出去就結束了，不是要長期維護的網站。<br><br>
+      而且做影片這件事，它是能全程用指令完成的選擇。所以線畫在這裡：<strong>網站不打包，影片可以。</strong>
+    </div>
+
+    <h3>適合什麼、不適合什麼</h3>
+
+    <div class="compare">
+      <div class="compare-good">
+        <div class="compare-label">適合</div>
+        - 產品介紹短片（用產品照、畫面截圖、文字組成）<br>
+        - 數字動畫（營業額、成長率跑起來）<br>
+        - 字卡、片頭片尾<br>
+        - 同一支片換資料批次產出（每個產品一支、每位客戶一支）
+      </div>
+      <div class="compare-bad">
+        <div class="compare-label">不適合</div>
+        - 實拍素材要精剪（訪談、活動紀錄）<br>
+        - 複雜的調色<br><br>
+        這些還是交給剪輯軟體。可以分工：實拍的部分在剪輯軟體剪，字卡和數字動畫用 Remotion 做好，再放進去。
+      </div>
+    </div>
+
+    <h3>做一支片的流程</h3>
+
+    <div class="code-block">
+<strong style="color: var(--accent-light);">Remotion + Claude Code 協作流程</strong><br>
+<br>
+你想好這支片給誰看、要講哪幾件事<br>
+　　↓<br>
+Claude 寫腳本和分鏡，你確認<br>
+　　↓<br>
+Claude 開專案，把每一幕寫成程式<br>
+　　↓<br>
+你在瀏覽器預覽，用講的請它改<br>
+　　↓<br>
+Claude 輸出成 mp4<br>
+<br>
+<span style="color: var(--green);">你是「導演」，只管要什麼</span><br>
+<span style="color: var(--green);">Claude Code 是「製作團隊」，負責做出來</span>
+    </div>
+
+    <p>過程中 Claude 會打下面這幾個指令。你不用背，看得懂它在做什麼就好：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>指令</th>
+            <th>在做什麼</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code class="tool-cmd">npx <span>create-video@latest</span> <span>--yes</span> <span>--blank</span> <span>my-video</span></code></td>
+            <td>開一個空白的影片專案，放在 <code>my-video</code> 資料夾</td>
+          </tr>
+          <tr>
+            <td><code class="tool-cmd">npx remotion skills add</code></td>
+            <td>在專案裡裝上 Remotion 給 AI 用的那組 Skills</td>
+          </tr>
+          <tr>
+            <td><code class="tool-cmd">npm run dev</code></td>
+            <td>打開預覽畫面（叫 Remotion Studio），在瀏覽器裡看影片現在長怎樣</td>
+          </tr>
+          <tr>
+            <td><code class="tool-cmd">npx remotion render HelloWorld</code></td>
+            <td>輸出影片。<code>HelloWorld</code> 換成那支影片在專案裡的名字；沒特別指定的話輸出 mp4，檔案放在專案的 <code>out</code> 資料夾</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="box box-info">
+      <div class="box-label">開始之前</div>
+      電腦要先裝好 Node.js。用 Mac 的話，系統要 macOS 15 以上。<br><br>
+      影片是在你自己的電腦上算出來的，Remotion 不幫你代算。想丟到雲端算，要另外接你自己的雲端帳號（例如 AWS），剛開始用不到。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">兩個省時間的習慣</div>
+      <strong>先定腳本，再做畫面。</strong>先講清楚這支片要解決觀眾的什麼問題，腳本確認了再讓 Claude 動手。畫面做到一半才改方向，前面等於白做。<br><br>
+      <strong>用真的素材。</strong>產品照、畫面截圖、logo 先放進專案資料夾給它用。讓它憑空「畫」一個你的產品，通常不像。
+    </div>
+
+    <h3>影片專案也有邊界</h3>
+
+    <p>影片專案要打包、要裝一堆套件，跟你那個不打包的網站是兩回事。兩邊分開放：</p>
+
+    <ul>
+      <li><strong>影片專案自己一個資料夾。</strong>不要讓 Claude 為了做一支宣傳片，把 Remotion 裝進網站的資料夾。網站一旦多了打包步驟，以後每次改字都要先打包。</li>
+      <li><strong>網站要放影片，放的是輸出好的 mp4。</strong>網站那邊只拿成品，不拿程式。</li>
+      <li><strong>素材共用，就複製一份過去。</strong>logo、產品照從網站資料夾複製到影片專案，不要讓兩個專案互相讀對方的檔案。</li>
+    </ul>
+
+    <h3>授權：先看公司有幾個人</h3>
+
+    <div class="box box-warning">
+      <div class="box-label">不是所有人都免費</div>
+      Remotion 收不收錢，看公司人數。以下是 2026 年 11 月官網的說法：<br><br>
+      <strong>免費：</strong>個人，或是總人數 3 人以下的公司、團隊。可以商用，功能跟付費的一樣，不用註冊帳號。還在評估適不適合、還沒正式商用的階段也免費，決定正式用才買。非營利組織原則上免費；政府機關、學校要先取得 Remotion 的書面同意。<br><br>
+      <strong>要付費：</strong>4 人以上的公司要買 Company License。算的是公司總人數，不是「有幾個人在用」。20 人的公司只有 1 個人用，一樣要買。找外面的工作室或接案者一起操作同一個專案，他們的人數也要合起來算。<br>
+      - 像這一節這樣，自己用 Claude Code 做少量影片（Remotion for Creators）：每位使用者每月 25 美元<br>
+      - 寫程式讓它自動連續出片，包含換資料批次輸出（Remotion for Automators）：每輸出一次 0.01 美元，每月最低 100 美元<br><br>
+      <strong>幫客戶做片：</strong>只交成品 mp4 給客戶，只算你自己公司的人數。連專案程式一起交給客戶、由客戶自己操作的話，兩家公司的人數要合起來算。<br><br>
+      價格和條款會調整，動手前看一次官網：<a href="https://www.remotion.dev/docs/license/pricing" target="_blank" rel="noopener">remotion.dev/docs/license/pricing</a>
+    </div>
+
+    <!-- ===== Obsidian ===== -->
+    <h2>Obsidian：筆記放在自己的電腦裡</h2>
+
+    <h3>它是什麼</h3>
+
+    <p>Obsidian 是一個寫筆記的軟體，筆記存成 <strong>Markdown（.md）</strong>純文字檔。Markdown 是一種「用純文字寫格式」的方法，像是用 <code>#</code> 代表標題、用 <code>-</code> 代表清單項目。你現在看的這個網站，每一頁的內容其實也都可以用 Markdown 來寫。</p>
+
+    <p>Obsidian 個人用、公司用都免費，不用註冊。跨裝置同步（Sync）、把筆記發佈成網頁（Publish）是另外付費的加購，不買也能用。</p>
+
+    <h3>為什麼選它</h3>
+
+    <div class="analogy">
+      <strong>第一個理由：你的筆記永遠是你的。</strong><br><br>
+      很多筆記軟體（像 Notion、Evernote 這類）把資料放在它們的伺服器上。哪天改方案、漲價，或是你想換一套，要搬家得先匯出，格式也不一定能完整帶走。<br><br>
+      Obsidian 的筆記就是你電腦裡一個資料夾（它叫 vault，保險庫）裡的 <code>.md</code> 檔。就算哪天不用 Obsidian 了，用任何文字編輯器都打得開。<br><br>
+      <strong>你的資料不被任何一套軟體綁住。</strong>
+    </div>
+
+    <p>第二個理由：<strong>Claude Code 可以直接讀寫你的筆記。</strong>筆記就是電腦裡的檔案，Claude Code 本來就有讀檔、寫檔的工具（Read、Write），不用另外裝東西。它改了檔案，Obsidian 那邊會自動更新。這代表：</p>
+
+    <ul>
+      <li>你跟 Claude 討論出來的想法、結論，可以直接請它存成一篇筆記</li>
+      <li>開新對話時，它可以先讀之前的筆記，接上專案的來龍去脈</li>
+      <li>任務、專案規劃、參考資料，都放在同一個地方</li>
+    </ul>
+
+    <p>怎麼讓它讀得到：在筆記資料夾裡打開 Claude Code；或是在別的專案裡打 <code>/add-dir</code>，把筆記資料夾加進來。</p>
+
+    <h3>跟 Claude Code 怎麼搭</h3>
+
+    <div class="code-block">
+<strong style="color: var(--accent-light);">Obsidian + Claude Code 協作流程</strong><br>
+<br>
+你的想法 / 需求<br>
+　　↓<br>
+寫進 Obsidian（Inbox/ 資料夾）<br>
+　　↓<br>
+Claude Code 讀取筆記<br>
+　　↓<br>
+拆解成具體任務<br>
+　　↓<br>
+執行（寫程式 / 研究 / 設定）<br>
+　　↓<br>
+完成後更新 Obsidian 裡的狀態<br>
+<br>
+<span style="color: var(--green);">Obsidian 是你的「大腦外掛」，也是記事本</span><br>
+<span style="color: var(--green);">Claude Code 是你的「手腳」</span>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">建議的資料夾結構</div>
+      <code>Inbox/</code>：還沒分類的想法、靈感<br>
+      <code>專案/</code>：有開始、有結束的事<br>
+      <code>知識庫/</code>：查過的事實、參考資料（不太會過期的）<br>
+      <code>學習/</code>：正在學的東西<br>
+      <code>SOP/</code>：反覆執行的流程
+    </div>
+
+    <p>筆記資料夾的最上層，也可以放一份 <code>CLAUDE.md</code>，寫這個資料夾的規矩：每個資料夾放什麼、新筆記放哪裡、哪些不准動。Claude 每次在這裡開工都會先讀它，跟<a href="/chapter3/">第三章</a>講的邊界文件是同一件事。</p>
+
+    <h3>筆記也有邊界</h3>
+
+    <p>筆記一多，也會出現<a href="/chapter17/">第十七章 會出事的地方</a>講的問題。三條規矩先講好：</p>
+
+    <ul>
+      <li><strong>一件事只寫在一篇。</strong>同一個報價寫在三篇筆記，改了一篇，另外兩篇就是錯的。其他地方要提到，用 <code>[[篇名]]</code> 連過去就好。這就是<a href="/glossary/#t-ssot">單一資料來源</a>，筆記也適用。</li>
+      <li><strong>金鑰、密碼、客戶個資不寫進筆記。</strong>Claude 讀得到的東西，就可能被它引用到對話或別的檔案裡。</li>
+      <li><strong>讓它改筆記之前，先說好範圍。</strong>例如「只能動 Inbox 和這個專案的資料夾」。不講，它整理起來可能順手把別的筆記也改了。</li>
+    </ul>
+
+    <p>怕它改壞？筆記資料夾也可以用 Git 存檔，改壞了回到上一個存檔點，做法見<a href="/appendix/#faq-git">附錄 Git 基礎</a>。要備份到 GitHub 的話，用私人的 repo。</p>
+
+    <!-- ===== 其他常用工具 ===== -->
+    <h2>其他常用工具</h2>
+
+    <p>下面這幾個，是前面幾章那套組合（純靜態頁面放 Cloudflare、資料放 Supabase 或 D1、版控用 GitHub）會一起用到的。大部分是 CLI，Claude 自己會打，你知道它是做什麼的就好：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>工具</th>
+            <th>一句話</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tool-name"><strong>Git</strong></td>
+            <td>替檔案留下每一次修改的紀錄，改壞了能回到前一版。基本概念見<a href="/appendix/#faq-git">附錄 常見問題</a></td>
+          </tr>
+          <tr>
+            <td class="tool-name"><code>gh</code></td>
+            <td>GitHub 的官方 CLI。開 repo、開 PR、用 <code>gh search repos</code> 找有沒有現成的，都不用你去點網頁</td>
+          </tr>
+          <tr>
+            <td class="tool-name"><code>wrangler</code></td>
+            <td>Cloudflare 的官方 CLI。部署網站、建 D1 資料庫、存金鑰都靠它</td>
+          </tr>
+          <tr>
+            <td class="tool-name"><code>supabase</code></td>
+            <td>Supabase 的官方 CLI。記下資料表的每一次變更（migration），部署後端小程式（Edge Functions）</td>
+          </tr>
+          <tr>
+            <td class="tool-name"><strong>Node.js</strong></td>
+            <td>很多工具要它才跑得動，Remotion 也是。Claude 常打的 <code>npx</code> 就是它附的，意思是「抓這個工具來跑一次」</td>
+          </tr>
+          <tr>
+            <td class="tool-name"><strong>Claude in Chrome</strong></td>
+            <td>讓 Claude 在你的 Chrome 裡開網頁、點按鈕、填表單、看主控台的錯誤。沒有 CLI 的網頁工作交給它</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>用哪個工具，順序跟<a href="/chapter10/#cli-mcp">第十章 Claude Code 怎麼用</a>一樣：有官方 CLI 的先用 CLI；沒有才裝 MCP（連接器）；操作網頁交給瀏覽器工具；都不行才用 Computer Use。就算一個 MCP 都沒裝，Claude Code 本來就能讀寫檔案、跑指令、上網查資料。</p>
+
+    <!-- ===== 收尾 ===== -->
+    <h2>這章帶走什麼</h2>
+
+    <ul>
+      <li>挑工具看兩件事：Claude Code 能不能從頭做到尾，做出來的東西要不要長期維護。</li>
+      <li>Remotion 要打包，但輸出的是影片檔，交出去就結束。網站不打包，影片可以；影片專案跟網站分開放。</li>
+      <li>Remotion 4 人以上的公司要付費，算的是公司總人數。動手前看一次官網。</li>
+      <li>Obsidian 的筆記是你電腦裡的純文字檔，Claude Code 直接讀寫，不用另外接。</li>
+      <li>筆記也守單一資料來源：一件事只寫一篇，其他地方用連結。改之前先說好範圍。</li>
+    </ul>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      <strong>做影片</strong><br>
+      「我要做一支 30 秒的產品介紹短片，直式 1080×1920。先不要寫程式，先幫我寫腳本和分鏡，我確認後再用 Remotion 做。素材放在『素材』資料夾，有三張產品照和一張 logo。」<br>
+      「第二幕的營業額，數字從 0 跑到 128 萬，跑 2 秒，停一下再進下一幕。改好後開預覽給我看。」<br>
+      「同一支片，照『產品清單』這個檔案，每一列換品名、價格、照片，各輸出一支 mp4，檔名用品名。」<br>
+      「影片專案開在另一個資料夾，不要裝進網站的資料夾。做好只把 mp4 複製到網站的 videos 資料夾。」<br><br>
+      <strong>管筆記</strong><br>
+      「把今天討論的結論整理成一篇筆記，放進專案資料夾。已經有寫過的事，用連結指過去，不要再抄一份。」<br>
+      「這次只能動 Inbox 和『B 咖啡店官網』這個資料夾，其他筆記不要改。」<br><br>
+      <strong>選工具</strong><br>
+      「這件事有官方 CLI 的話用 CLI 做，沒有再用 MCP。」
+    </div>
+
+    <div class="chapter-nav">
+      <a href="/chapter17/" class="prev">
+        <span class="nav-label">上一章</span>
+        <span class="nav-title">會出事的地方</span>
+      </a>
+      <a href="/appendix/" class="next">
+        <span class="nav-label">下一頁</span>
+        <span class="nav-title">常見問題</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/main.js"></script>
+</body>
+</html>

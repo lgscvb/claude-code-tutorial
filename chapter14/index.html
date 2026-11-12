@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十四章：功能怎麼切 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ===== 第十四章專用樣式（一律 fn- 前綴）===== */
+
+    /* 工作站圖：進來 → 工作站 → 交出去 */
+    .fn-stations { display: grid; gap: 14px; margin: 24px 0; }
+    .fn-station {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      min-width: 0;
+    }
+    .fn-station-where {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+    .fn-io {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+      gap: 10px;
+      align-items: stretch;
+    }
+    .fn-io-cell {
+      border: 1px dashed var(--border-light);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      min-width: 0;
+      overflow-wrap: anywhere;
+    }
+    .fn-io-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+    .fn-io-core {
+      border: 2px solid var(--accent);
+      background: var(--accent-glow);
+      color: var(--text-heading);
+      font-weight: 700;
+      font-size: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      text-align: center;
+    }
+    .fn-io-core .fn-io-label { color: var(--accent-light); font-weight: 400; }
+    .fn-io-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .fn-io-arrow::before { content: "→"; }
+    .fn-not {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-light);
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .fn-not strong { color: var(--red); margin-right: 6px; }
+
+    /* 內文裡連到別章的連結 */
+    .fn-link { color: var(--accent-light); text-decoration: underline; text-underline-offset: 3px; }
+    .fn-link:hover { color: var(--accent); }
+
+    /* 徵兆 */
+    .fn-sign {
+      margin: 16px 0;
+      padding: 12px 16px;
+      border: 1px solid rgba(251, 191, 36, 0.3);
+      border-radius: var(--radius-sm);
+      background: rgba(251, 191, 36, 0.06);
+      font-size: 15px;
+    }
+    .content p.fn-sign { margin: 16px 0; }
+    .fn-sign-label {
+      display: inline-block;
+      margin-right: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--yellow);
+    }
+
+    /* 一塊功能越長越大 */
+    .fn-grow {
+      list-style: none;
+      margin: 20px 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-code);
+      font-size: 14px;
+    }
+    .content .fn-grow { padding-left: 0; }
+    .fn-grow li {
+      display: grid;
+      grid-template-columns: minmax(0, 15em) minmax(0, 1fr);
+      gap: 6px 16px;
+      align-items: center;
+      margin: 0;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .fn-grow li:last-child { border-bottom: none; }
+    .fn-grow-say { color: var(--text-muted); min-width: 0; overflow-wrap: anywhere; }
+    .fn-grow-has { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+    .fn-chip {
+      display: inline-block;
+      padding: 2px 10px;
+      border: 1px solid var(--border-light);
+      border-radius: 999px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .fn-chip-new { border-color: var(--red); color: var(--red); }
+
+    /* 檢查清單裡的名字對照 */
+    .fn-ok { color: var(--green); }
+    .fn-warn { color: var(--red); }
+
+    /* 互動示範 */
+    .fn-demo {
+      position: relative;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      padding: 24px;
+      margin: 28px 0 20px;
+    }
+    .fn-demo [hidden] { display: none; }
+    .fn-demo::before {
+      content: attr(data-demo-title);
+      position: absolute;
+      top: -11px;
+      left: 16px;
+      background: var(--bg-card);
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .fn-demo-label { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .fn-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 12px; }
+    .fn-btn {
+      min-height: 44px;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .fn-btn:hover { border-color: var(--accent); }
+    .fn-btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+    .fn-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .fn-btn-reset { color: var(--text-muted); font-weight: 400; }
+    .fn-case-desc {
+      min-height: 1.75em;
+      font-size: 15px;
+      color: var(--text-heading);
+    }
+    .content p.fn-case-desc { margin: 0 0 14px; }
+
+    .fn-panels {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .fn-panel {
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      min-width: 0;
+    }
+    .fn-panel-bad { background: rgba(248, 113, 113, 0.06); border: 1px solid rgba(248, 113, 113, 0.2); }
+    .fn-panel-good { background: rgba(74, 222, 128, 0.06); border: 1px solid rgba(74, 222, 128, 0.2); }
+    .fn-panel-title { font-size: 13px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+    .fn-panel-bad .fn-panel-title { color: var(--red); }
+    .fn-panel-good .fn-panel-title { color: var(--green); }
+
+    .fn-blob {
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .fn-blob-name {
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-heading);
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .fn-segs, .fn-blocks { list-style: none; margin: 0; }
+    .content .fn-segs, .content .fn-blocks { padding-left: 0; margin: 0; }
+    .fn-seg {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0;
+      padding: 9px 12px;
+      font-size: 14px;
+      line-height: 1.5;
+      min-width: 0;
+      transition: background 0.25s, border-color 0.25s, opacity 0.25s;
+    }
+    .content .fn-seg { margin: 0; }
+    .fn-seg small { display: block; font-size: 12px; color: var(--text-muted); }
+    .fn-segs .fn-seg { border-bottom: 1px dashed var(--border-light); border-left: 3px solid transparent; }
+    .fn-segs .fn-seg:last-child { border-bottom: none; }
+
+    .fn-flow {
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      border: 1px dashed var(--border-light);
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .fn-flow strong { color: var(--text-heading); }
+    .fn-blocks { display: grid; gap: 8px; }
+    .content .fn-blocks { margin-bottom: 10px; }
+    .fn-blocks .fn-seg {
+      border: 2px solid var(--border-light);
+      border-radius: 6px;
+      background: var(--bg);
+    }
+    .fn-blocks-readers .fn-seg { border-style: dashed; border-width: 1px; }
+
+    .fn-seg::after {
+      flex: none;
+      padding: 0 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.7;
+    }
+    .fn-seg[data-fn-state="hit"] { background: var(--accent-glow); border-color: var(--accent); color: var(--text-heading); }
+    .fn-segs .fn-seg[data-fn-state="hit"] { border-bottom-color: var(--border-light); border-left-color: var(--accent); }
+    .fn-seg[data-fn-state="hit"]::after { content: "要改"; background: var(--accent); color: #fff; }
+    .fn-seg[data-fn-state="check"] { background: rgba(251, 191, 36, 0.07); }
+    .fn-segs .fn-seg[data-fn-state="check"] { border-left-color: var(--yellow); }
+    .fn-seg[data-fn-state="check"]::after { content: "要檢查"; border: 1px solid var(--yellow); color: var(--yellow); }
+    .fn-seg[data-fn-state="idle"] { opacity: 0.5; }
+
+    .fn-score {
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-light);
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .content p.fn-score { margin: 12px 0 0; }
+    .fn-score strong {
+      display: inline-block;
+      min-width: 1.2em;
+      text-align: center;
+      font-size: 22px;
+      color: var(--text-heading);
+      font-variant-numeric: tabular-nums;
+    }
+    .fn-score.fn-pop strong { animation: fn-pop 0.35s ease-out; }
+    @keyframes fn-pop {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: none; }
+    }
+    .fn-note { font-size: 14px; }
+    .content p.fn-note { margin: 6px 0 0; }
+    .fn-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 18px;
+      margin-top: 14px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .fn-legend span::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 6px;
+      border-radius: 2px;
+      border: 1px solid var(--border-light);
+    }
+    .fn-legend .fn-legend-hit::before { background: var(--accent); border-color: var(--accent); }
+    .fn-legend .fn-legend-check::before { border-color: var(--yellow); background: rgba(251, 191, 36, 0.25); }
+    .fn-static { margin-top: 16px; }
+    .fn-static > p { font-size: 14px; color: var(--text-muted); }
+    .fn-static .table-wrapper { margin-bottom: 0; }
+
+    @media (max-width: 700px) {
+      .fn-panels { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 600px) {
+      .fn-io { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+      .fn-io-arrow::before { content: "↓"; }
+      .fn-grow li { grid-template-columns: minmax(0, 1fr); padding: 12px 14px; }
+      .fn-demo { padding: 20px 16px 16px; }
+      .fn-btn { flex: 1 1 calc(50% - 5px); padding: 8px 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .fn-btn, .fn-seg { transition: none; }
+      .fn-score.fn-pop strong { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="/">首頁</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="/">首頁</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/" class="active">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第十四章</div>
+      <h1>功能怎麼切：一塊只做一件事</h1>
+      <p class="lead">上一章把系統畫成幾大塊和幾條線。這一章鑽進其中一塊，看裡面的功能怎麼切。報價單系統做出來了，也會動；三個月後你想把九折改成八五折，Claude 卻說要動好幾個檔案。這一章講它為什麼會變成這樣，以及你不用看懂程式，要怎麼把它擋住。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <div class="analogy">
+      <strong>第一章、第十三章提過的耦合（coupling），這一章放到功能這一層看：功能和功能黏在一起的程度。</strong><br><br>
+      用積木蓋的城堡，每一塊各自獨立，拔掉一座塔樓，城牆還在；想換一座新的，拔掉舊的插上去就好。用膠水黏的城堡，零件全黏死在一起，想拆一座塔樓，旁邊的城牆、吊橋跟著碎掉。<br><br>
+      上一章看的是系統裡大塊和大塊黏住；這一章看的是一塊裡面，功能和功能黏住。道理一樣：黏在一起，改一個會壞三個。
+    </div>
+
+    <p>這一章講的是怎麼不黏：一開始要怎麼切，切好之後怎麼看出 AI 又把它黏回去了。黏起來之後完整的出事情境，在<a class="fn-link" href="/chapter17/">第十七章 會出事的地方</a>。第一章說的「知道邊界」，放到功能這一層，就是知道每一塊管到哪裡為止。</p>
+
+    <div class="box box-info">
+      <div class="box-label">這一章要回答的兩件事</div>
+      <strong>不懂這個，讓 AI 一直改下去會怎樣？</strong><br>
+      每一次「順便加一下」，都加在現成的那一塊裡。半年後，改一條折扣規則要動好幾個地方，漏掉一個數字就對不起來，而且沒有人說得出這個系統到底有幾個功能。<br><br>
+      <strong>懂了以後，你能說出哪一句話？</strong><br>
+      「這次改動屬於哪一個功能？只動那一塊。需要動到別的地方，先停下來問我。」
+    </div>
+
+    <!-- ===== 1. function 是什麼 ===== -->
+    <h2>Function 是什麼：店裡的一個工作站</h2>
+
+    <div class="analogy">
+      <strong>比喻：巷口的早餐店。</strong><br><br>
+      早上七點最忙的時候，三個人各站一個位置：<br><br>
+      <strong>點餐台</strong>：聽客人說要什麼，寫成一張單子。<br>
+      <strong>煎台</strong>：照單子把餐做出來。<br>
+      <strong>收銀台</strong>：照單子算錢、收錢、找零。<br><br>
+      煎台的阿姨不需要知道蛋餅賣多少錢，收銀的人不需要會煎蛋。<strong>那張單子，是他們之間唯一的溝通方式。</strong>
+    </div>
+
+    <p>程式裡的 <strong>function</strong>（中文叫「函式」，這一章直接說「功能」）就是一個工作站。每一個功能有三件事要講清楚：</p>
+
+    <ul>
+      <li><strong>輸入</strong>：進來的東西。收銀台收到的是一張點單。</li>
+      <li><strong>輸出</strong>：交出去的東西。收銀台交出應收金額和找零。</li>
+      <li><strong>它不該順手做的事</strong>：收銀台不改單子上的品項，也不幫忙煎蛋。</li>
+    </ul>
+
+    <p>上一章和<a class="fn-link" href="/chapter11/">第十一章 技術棧</a>說的「小函式」，指的是放在雲端、有人按鈴才醒來的一小段後端。這一章講的是程式裡面的一個步驟，為了不搞混，一律叫「功能」。</p>
+
+    <p>早餐店的工作站，和報價單系統裡的一個功能，畫出來是同一個形狀：</p>
+
+    <div class="fn-stations">
+      <div class="fn-station">
+        <div class="fn-station-where">早餐店裡</div>
+        <div class="fn-io">
+          <div class="fn-io-cell"><span class="fn-io-label">進來</span>一張點單</div>
+          <div class="fn-io-arrow" aria-hidden="true"></div>
+          <div class="fn-io-cell fn-io-core"><span class="fn-io-label">工作站</span>收銀台</div>
+          <div class="fn-io-arrow" aria-hidden="true"></div>
+          <div class="fn-io-cell"><span class="fn-io-label">交出去</span>應收金額、找零</div>
+        </div>
+        <div class="fn-not"><strong>不順手做</strong>改單子上的品項、幫忙煎蛋</div>
+      </div>
+      <div class="fn-station">
+        <div class="fn-station-where">報價單系統裡</div>
+        <div class="fn-io">
+          <div class="fn-io-cell"><span class="fn-io-label">進來（輸入）</span>小計、客戶等級</div>
+          <div class="fn-io-arrow" aria-hidden="true"></div>
+          <div class="fn-io-cell fn-io-core"><span class="fn-io-label">功能</span>套折扣</div>
+          <div class="fn-io-arrow" aria-hidden="true"></div>
+          <div class="fn-io-cell"><span class="fn-io-label">交出去（輸出）</span>折扣後金額</div>
+        </div>
+        <div class="fn-not"><strong>不順手做</strong>存資料、寄信、改報價單的其他內容</div>
+      </div>
+    </div>
+
+    <h3>第三件事容易被忽略</h3>
+
+    <div class="analogy">
+      煎台的阿姨看到熟客，順手把紅茶換成大杯，沒寫在單子上。心意是好的。<br><br>
+      但收銀台照單子收了中杯的錢。月底盤點，大杯的杯子少了一批，沒有人知道為什麼。
+    </div>
+
+    <p>程式裡這叫<strong>副作用（side effect）</strong>：一個功能除了交出該交的東西，還另外動到外面的東西：存資料、寄信、改別人的紀錄。</p>
+
+    <p>副作用不一定是壞事。「寄給客人」這個功能，它的工作就是寄信。壞的是<strong>名字上沒寫、也沒有人知道</strong>的那一種。</p>
+
+    <p>你不用會寫 function，但要問得出這三件事。Claude 寫完任何一個功能，都可以叫它用三行回報。答不清楚，或者第三行特別長，就是有東西要再問。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這個功能，用三行告訴我：輸入是什麼、輸出是什麼、它另外還動了哪些東西（存資料、寄信、改別的紀錄）」<br>
+      「這一塊只負責算，不要在裡面存資料或寄信」<br>
+      「把這個專案的每個功能列成表：名字、輸入、輸出、副作用」
+    </div>
+
+    <!-- ===== 2. 一塊只做一件事 ===== -->
+    <h2>一個功能只做一件事：把報價單切成五塊</h2>
+
+    <p>換成你的生意。你請 Claude 做了一個報價單系統，按下「送出」之後，其實發生了五件事：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>功能</th>
+            <th>進來</th>
+            <th>交出去</th>
+            <th>不該順手做</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>算金額</strong></td>
+            <td>品項、單價、數量</td>
+            <td>小計</td>
+            <td>套折扣、存檔</td>
+          </tr>
+          <tr>
+            <td><strong>套折扣</strong></td>
+            <td>小計、客戶等級</td>
+            <td>折扣後金額、折扣說明</td>
+            <td>存檔、寄信</td>
+          </tr>
+          <tr>
+            <td><strong>產生 PDF</strong></td>
+            <td>整張報價單（金額已算好）</td>
+            <td>一個 PDF 檔</td>
+            <td>重算金額。它只印，不算</td>
+          </tr>
+          <tr>
+            <td><strong>寄給客人</strong></td>
+            <td>PDF、收件人</td>
+            <td>寄成功或失敗</td>
+            <td>改報價單的內容</td>
+          </tr>
+          <tr>
+            <td><strong>記到客戶紀錄</strong></td>
+            <td>哪位客戶、發生了什麼事</td>
+            <td>一筆紀錄</td>
+            <td>碰報價單、碰金額</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>這個原則有名字，叫<strong>單一職責（Single Responsibility）</strong>：一塊只做一件事，而且這件事只有它在做。</p>
+
+    <h3>那誰把五塊串起來？</h3>
+
+    <div class="analogy">
+      <strong>店長。</strong><br><br>
+      人多的時候，店長站在中間喊：「三號單做好了沒？好了交給收銀。」他不煎蛋、不收錢，只管順序。
+    </div>
+
+    <p>程式裡也有這一塊，可以叫它「送出報價單」：照順序叫五個功能，把上一塊交出來的東西遞給下一塊。它可以很短，但有一條規矩：<strong>它自己不算錢、不排版</strong>。規則一旦寫進店長的腦袋，五塊就又纏回去了。</p>
+
+    <h3>全部塞在一起，改折扣的時候差在哪</h3>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：一大塊「處理報價單」</div>
+        <div class="code-block">
+裡面從頭寫到尾：<br>
+算小計 → 滿萬打九折 → 排 PDF 版面 → 寄 Email → 寫客戶紀錄<br>
+<br>
+把九折改成八五折：<br>
+- 打開這一大塊，在中間找到那一行<br>
+- 改完，五件事都要重測，因為寫在一起<br>
+- 列表頁、月報表各抄了一份折扣，也要改<br>
+<br>
+<span style="color: var(--red);">動三個地方，檢查全部</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：切成五塊，加一個店長</div>
+        <div class="code-block">
+算金額｜套折扣｜產生 PDF｜寄給客人｜記到客戶紀錄<br>
+「送出報價單」照順序叫它們<br>
+<br>
+把九折改成八五折：<br>
+- 改「套折扣」這一塊<br>
+- 其他四塊沒有碰，只是收到的數字不一樣<br>
+- 列表頁、月報表讀的是報價單上算好的金額，自己不算<br>
+<br>
+<span style="color: var(--green);">動一個地方</span>
+        </div>
+      </div>
+    </div>
+
+    <p>兩個版本今天跑出來的結果一模一樣。客人看不出差別，你也看不出差別。差別在三個月後你要改東西的那一天。</p>
+
+    <p>這也是它難防的原因：<strong>纏起來的時候，畫面上什麼都看不出來。</strong></p>
+
+    <h3>切開的另一個好處：可以整塊換掉</h3>
+
+    <p>產生 PDF、寄信這種每一家公司都需要的功能，多半已經有人做好了，放在 GitHub 上，或做成現成的服務。功能有切開，才換得進去：只要它收的東西和交出來的東西對得上，裡面是誰寫的都沒關係。所以動手之前先找現成的。怎麼找、怎麼判斷能不能用，照<a class="fn-link" href="/chapter11/">第十一章 技術棧</a>的「先上 GitHub 找」。</p>
+
+    <p>切好的每一塊，還有幾個問題要回答，各有一章在講：整個系統有哪幾個大塊、怎麼連，是上一章<a class="fn-link" href="/chapter13/">第十三章 架構拓樸</a>；「記到客戶紀錄」要寫進哪張表、哪些欄位，看下一章<a class="fn-link" href="/chapter15/">第十五章 資料表與欄位</a>；這一塊該放前端還是後端，看<a class="fn-link" href="/chapter16/">第十六章 前後端邊界</a>。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「按下『送出報價單』之後，總共做了幾件事？一件一件列出來」<br>
+      「把這幾件事拆成各自獨立的功能，另外用一個『送出報價單』照順序叫它們。它自己不要有任何計算」<br>
+      「產生 PDF 和寄信，先上 GitHub 找有沒有現成的，列兩三個給我選，不要自己從頭寫」
+    </div>
+
+    <!-- ===== 3. AI 怎麼寫纏的 ===== -->
+    <h2>AI 是怎麼把功能寫纏的：三種纏法</h2>
+
+    <p>沒有人一開始就想寫成一大塊。纏，是一次一次「加一下」加出來的。常見的有三種，每一種都有一個不用看程式就看得到的徵兆。</p>
+
+    <h3>纏法一：「順便加個⋯⋯」</h3>
+
+    <p>你說：「寄出報價單的時候，順便記到客戶紀錄。」對 Claude 來說，最短的路是打開「寄給客人」那一塊，在最後面多寫幾行。能動，你也滿意。然後你又說了幾次「順便」：</p>
+
+    <ol class="fn-grow">
+      <li>
+        <div class="fn-grow-say">一開始</div>
+        <div class="fn-grow-has"><span class="fn-chip">寄 PDF 給客人</span></div>
+      </li>
+      <li>
+        <div class="fn-grow-say">「順便記到客戶紀錄」</div>
+        <div class="fn-grow-has"><span class="fn-chip">寄 PDF 給客人</span><span class="fn-chip fn-chip-new">＋寫一筆紀錄</span></div>
+      </li>
+      <li>
+        <div class="fn-grow-say">「順便把狀態改成已送出」</div>
+        <div class="fn-grow-has"><span class="fn-chip">寄 PDF 給客人</span><span class="fn-chip">寫一筆紀錄</span><span class="fn-chip fn-chip-new">＋改報價單狀態</span></div>
+      </li>
+      <li>
+        <div class="fn-grow-say">「順便用 LINE 通知業務」</div>
+        <div class="fn-grow-has"><span class="fn-chip">寄 PDF 給客人</span><span class="fn-chip">寫一筆紀錄</span><span class="fn-chip">改報價單狀態</span><span class="fn-chip fn-chip-new">＋通知業務</span></div>
+      </li>
+      <li>
+        <div class="fn-grow-say">「寄之前順便重算一次，確保金額是最新的」</div>
+        <div class="fn-grow-has"><span class="fn-chip">寄 PDF 給客人</span><span class="fn-chip">寫一筆紀錄</span><span class="fn-chip">改報價單狀態</span><span class="fn-chip">通知業務</span><span class="fn-chip fn-chip-new">＋重算金額</span></div>
+      </li>
+    </ol>
+
+    <p>名字還叫「寄給客人」，裡面已經是五件事。</p>
+
+    <p>有一天客人說信沒收到，你按了「重寄」。客戶紀錄多了一筆，業務的 LINE 又響一次，金額被重算了。中間你剛好調過價，客人這次收到的數字和上次不一樣。你只是想重寄一封信。</p>
+
+    <p class="fn-sign"><span class="fn-sign-label">徵兆</span>按鈕的名字，和它實際做的事對不上。你想只做其中一件，做不到。</p>
+
+    <h3>纏法二：同一段計算，抄了三份</h3>
+
+    <p>你說：「列表頁也要顯示折扣後的金額。」Claude 每次開工不會把整個專案讀完，只讀它判斷跟這次有關的檔案。這次它讀了列表頁附近的東西，沒看到別的地方已經算過折扣，就在列表頁再寫一次。做月報表的時候，又一次。</p>
+
+    <p>三份今天算出來一樣。等你改了其中一份，另外兩份還是舊的。</p>
+
+    <p class="fn-sign"><span class="fn-sign-label">徵兆</span>改一個地方，三個頁面的數字不一樣。或者同一個毛病修好了，過幾天在別的頁面又出現一次。</p>
+
+    <p>上一章的「資料的家」講的是同一筆資料只存一份。這裡是同一個道理用在規則上：<strong>同一條規則只寫一份</strong>，其他地方都來問它。</p>
+
+    <h3>纏法三：偷偷去改別人的資料</h3>
+
+    <p>你說：「PDF 產生之後，報價單要顯示已送出。」Claude 就在「產生 PDF」裡，直接把報價單的狀態改掉。從此你只是想預覽一下 PDF，報價單就變成「已送出」。</p>
+
+    <p>這就是煎台阿姨順手換的那杯大杯紅茶。事情做了，但做的人不該是它，也沒有人知道是它做的。</p>
+
+    <p class="fn-sign"><span class="fn-sign-label">徵兆</span>你沒動的資料自己變了。只是打開來看一下、預覽一下、匯出一下，某個狀態或日期就跟著變。</p>
+
+    <h3>三種纏法，同一個原因</h3>
+
+    <p>Claude 每次只解決你眼前講的那一句，而且挑最近的地方下手。它沒有做錯事，是沒有人告訴它這一塊管到哪裡為止。所以同一個需求，換一種講法，結果就不一樣：</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事</div>
+        <div class="code-block">
+你：「寄出的時候順便記到客戶紀錄」<br>
+<br>
+Claude：在「寄給客人」最後面加了幾行<br>
+<br>
+<span style="color: var(--red);">「寄給客人」從此做兩件事。<br>重寄一次，紀錄就多一筆</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對</div>
+        <div class="code-block">
+你：「寄出之後要記到客戶紀錄。這是另一個功能，不要寫在『寄給客人』裡面。放到『送出報價單』的流程，排在寄信後面」<br>
+<br>
+Claude：新開一塊，流程多一步<br>
+<br>
+<span style="color: var(--green);">「寄給客人」沒有變。<br>重寄只會寄信</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這是一件新的事，不要加在現有的功能裡。另外開一塊，再告訴我要從哪裡叫它」<br>
+      「動手前先找一下，專案裡是不是已經有算折扣的地方。有的話用那一個，不要再寫一份」<br>
+      「這個功能除了它該交出來的東西，還改了哪些資料？全部列出來」
+    </div>
+
+    <!-- ===== 4. 四個檢查 ===== -->
+    <h2>切得好不好：四個不用看程式的檢查</h2>
+
+    <p>你不需要打開程式碼。下面四件事，用問的就知道。</p>
+
+    <h3>檢查一：能不能用一句話說完</h3>
+
+    <p>「套折扣：照客戶等級和小計，算出折扣後的金額。」說得完。</p>
+
+    <p>「處理報價單：算金額，然後套折扣，還要產生 PDF，順便寄出去⋯⋯」每出現一次「然後」「還要」「順便」，就多一件事。</p>
+
+    <p>例外只有店長那一塊。它的一件事就是「照順序叫人」，所以它的說明裡會有「然後」，但不該出現任何規則。</p>
+
+    <h3>檢查二：名字是不是「動詞＋受詞」</h3>
+
+    <p>功能的名字通常是英文。你不用背，叫 Claude 把每個名字翻成中文念給你聽就好。</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>名字</th>
+            <th>念成中文</th>
+            <th>聽起來</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>calculateSubtotal</code></td>
+            <td>算小計</td>
+            <td class="fn-ok">一件事，知道交出什麼</td>
+          </tr>
+          <tr>
+            <td><code>applyDiscount</code></td>
+            <td>套折扣</td>
+            <td class="fn-ok">一件事</td>
+          </tr>
+          <tr>
+            <td><code>sendQuoteEmail</code></td>
+            <td>寄報價單的信</td>
+            <td class="fn-ok">一件事</td>
+          </tr>
+          <tr>
+            <td><code>handleQuote</code></td>
+            <td>處理報價單</td>
+            <td class="fn-warn">處理什麼？裡面多半不只一件</td>
+          </tr>
+          <tr>
+            <td><code>processData</code></td>
+            <td>處理資料</td>
+            <td class="fn-warn">哪些資料、處理成什麼，都沒說</td>
+          </tr>
+          <tr>
+            <td><code>quoteManager</code>、<code>utils</code></td>
+            <td>報價單管理、工具</td>
+            <td class="fn-warn">雜物抽屜，什麼都往裡面放</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>念出來是「處理某某」「管理某某」的，不一定有問題，但值得多問一句：「這裡面到底做了幾件事？」</p>
+
+    <h3>檢查三：改它的時候，Claude 說要動幾個檔案</h3>
+
+    <p>改一條既有的規則，理想是動一個地方。Claude 說要動四、五個檔案的時候，先別讓它動，問它：「為什麼一條規則住在這麼多地方？」</p>
+
+    <p>這個檢查只適用「改既有的規則」。新增一整個功能，本來就會動到好幾個檔案，那是正常的。</p>
+
+    <h3>檢查四：同一條規則，是不是只出現一次</h3>
+
+    <p>請 Claude 在整個專案裡找「九折」這條規則出現在幾個地方。答案是一，沒事。答案是三，你就找到了纏法二。</p>
+
+    <h3>切太細也不對</h3>
+
+    <p>「一塊只做一件事」不是越碎越好。把套折扣再切成「判斷有沒有滿萬」「乘以零點九」「四捨五入」三塊，想搞懂一個折扣要翻三個地方，一樣難維護。</p>
+
+    <div class="box box-info">
+      <div class="box-label">要不要分開，問這一句</div>
+      <strong>「這兩件事，會不會因為不同的理由被改？」</strong><br><br>
+      折扣怎麼算，是你跟業務決定的。PDF 長什麼樣，是看美觀。信怎麼寄，是看客人習慣用 Email 還是 LINE。三個理由、三個時間點，所以分三塊。<br><br>
+      反過來，「打九折」和「折完四捨五入」總是一起改，放在同一塊就好。
+    </div>
+
+    <p>還是會有分不乾淨的。報價單上那一句「VIP 已折 200 元」的說明文字，該由「套折扣」產生，還是由「產生 PDF」自己寫？兩邊都說得通。遇到這種情況，選一邊、寫下來，比爭論哪一邊才正確重要。寫在哪裡，下面「功能清單當合約」那一節會講。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「把每個功能用一句中文說明它做什麼。說不完，或要用到『然後』的，標出來」<br>
+      「如果我要把九折改成八五折，你需要動哪些檔案？先列給我看，不要動手」<br>
+      「折扣的計算規則，在整個專案裡出現在幾個地方？列出檔案和位置」
+    </div>
+
+    <!-- ===== 5. 開規格 ===== -->
+    <h2>對 AI 開規格：四行講完</h2>
+
+    <p>前一節是事後檢查。更省事的做法，是一開始就講清楚。要加一個功能的時候，給 Claude 四行：</p>
+
+    <ol>
+      <li><strong>輸入什麼</strong></li>
+      <li><strong>得到什麼</strong></li>
+      <li><strong>遇到怪情況怎麼辦</strong></li>
+      <li><strong>不准動哪裡</strong></li>
+    </ol>
+
+    <p>前兩行就是開頭講的「進來」和「交出去」。後兩行多數人不會講，也正好是 AI 常常自己決定的地方。</p>
+
+    <h3>怪情況：你不講，它就自己挑一個</h3>
+
+    <p>早餐店的怪情況是「蛋餅不要蛋」。報價單的怪情況長這樣：滿萬打九折，VIP 再折 200 元，兩個優惠可以一起用。一張小計 12,000 元的 VIP 報價單，應付多少？</p>
+
+    <div class="code-block">
+先打折、再減 200：12,000 × 0.9 − 200 = <strong style="color: var(--text-heading);">10,600 元</strong><br>
+先減 200、再打折：（12,000 − 200）× 0.9 = <strong style="color: var(--text-heading);">10,620 元</strong>
+    </div>
+
+    <p>差 20 元。兩種算法都說得通，Claude 會挑一種，而且不一定告訴你。這不是程式問題，是你的生意規則，只有你能決定。</p>
+
+    <p>其他常見的怪情況：數量填 0 或負數；小計剛好 10,000 元算不算「滿萬」；折完有小數怎麼進位；客人沒留 Email。</p>
+
+    <p>你不需要自己想到全部。Claude 很會列怪情況，你負責選。</p>
+
+    <h3>不准動哪裡：這一行就是邊界</h3>
+
+    <p>開頭說的「不該順手做的事」，寫成規格就是這一行。沒有這一行，三種纏法都擋不住。</p>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：只講要什麼</div>
+        <div class="code-block">
+「幫我加折扣功能，滿萬打九折，VIP 再折 200。」<br>
+<br>
+加在哪一塊？它決定。<br>
+先折還是先減？它決定。<br>
+會不會順手存檔？不知道。<br>
+<br>
+<span style="color: var(--red);">功能會動，邊界沒有人定</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：四行都講</div>
+        <div class="code-block">
+輸入：小計、客戶等級<br>
+輸出：折扣後金額、折扣說明<br>
+怪情況：先打折再減 200；剛好一萬也算滿萬⋯⋯<br>
+不准動：只算，不存檔、不寄信<br>
+<br>
+<span style="color: var(--green);">它知道這一塊管到哪裡為止</span>
+        </div>
+      </div>
+    </div>
+
+    <p>完整寫出來是這樣，可以直接照這個格式改成你的：</p>
+
+    <div class="code-block">
+幫我做「套折扣」這個功能。先不要寫，把你的理解講一次給我確認。<br>
+<br>
+<strong style="color: var(--accent-light);">輸入：</strong>小計金額、客戶等級（一般或 VIP）。<br>
+<br>
+<strong style="color: var(--accent-light);">輸出：</strong>折扣後金額，加一句折扣說明（例如「滿萬九折」）。沒有折扣的時候，說明留空。<br>
+<br>
+<strong style="color: var(--accent-light);">規則和怪情況：</strong><br>
+- 小計滿 10,000 元打九折，剛好 10,000 元也算。<br>
+- VIP 再折 200 元。兩個可以一起用，先打折、再減 200。<br>
+- 金額四捨五入到整數。折完低於 0 就算 0。<br>
+- 小計是 0 或負數，回報錯誤，不要自己猜。<br>
+<br>
+<strong style="color: var(--accent-light);">不准動：</strong><br>
+- 這一塊只負責算。不可以存資料、不可以寄信、不可以改報價單的其他欄位。<br>
+- 別的地方要用到折扣，一律來叫這一塊，不要自己再算一次。<br>
+<br>
+寫完告訴我：動了哪些檔案、有沒有碰到這一塊以外的東西。
+    </div>
+
+    <p>看起來很長，但每一行都是你本來就知道的事。折扣怎麼算是你的生意，不是程式。你只是把它從腦子裡搬到紙上。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「我要加一個功能，先不要寫。你問我問題，把輸入、輸出、怪情況、不准動的地方問清楚，整理成四行給我確認」<br>
+      「這個功能有哪些怪情況？列出來，每一個寫你打算怎麼處理，我來選」<br>
+      「它只負責算，不可以存資料、不可以寄信。別的地方要用，一律來叫它」
+    </div>
+
+    <!-- ===== 6. 功能清單 ===== -->
+    <h2>功能清單當合約：牆上那張職責表</h2>
+
+    <div class="analogy">
+      <strong>早餐店牆上貼的那張表。</strong><br><br>
+      新來的工讀生第一天上班，店長不會把整間店從頭教一次。牆上貼著一張表：點餐台做什麼、煎台做什麼、收銀台做什麼、哪些事不歸你管。看完就能站上去。<br><br>
+      <strong>Claude 每開一個新對話，都是第一天上班的工讀生。</strong>上一次講好的邊界，它不記得。所以要有那張表。
+    </div>
+
+    <p>在專案裡放一份功能清單。檔名隨你，例如 <code>docs/功能清單.md</code>。每個功能一小段：</p>
+
+    <div class="code-block">
+<strong style="color: var(--accent-light);">## 套折扣</strong><br>
+- 進來：小計、客戶等級<br>
+- 交出去：折扣後金額、折扣說明<br>
+- 不碰：資料庫、寄信、報價單的其他欄位<br>
+- 住在這裡的規則：滿萬九折；VIP 再折 200；先打折再減<br>
+<br>
+<strong style="color: var(--accent-light);">## 產生 PDF</strong><br>
+- 進來：整張報價單（金額已算好）<br>
+- 交出去：一個 PDF 檔<br>
+- 不碰：金額（只印不算）、報價單狀態<br>
+- 住在這裡的規則：版面、字體、頁尾的公司資訊<br>
+<br>
+<strong style="color: var(--accent-light);">## 送出報價單（串流程）</strong><br>
+- 照順序叫：算金額 → 套折扣 → 產生 PDF → 寄給客人 → 記到客戶紀錄<br>
+- 不碰：任何計算、任何版面<br>
+<br>
+（其他功能照同樣格式）
+    </div>
+
+    <p>前面那個分不乾淨的問題，折扣說明文字歸誰，答案就寫在這裡。清單上寫「套折扣」交出折扣說明，那就是它的事。</p>
+
+    <h3>三個時間點會用到它</h3>
+
+    <p><strong>改之前</strong>，問一句：「這次改動屬於清單上的哪一個功能？」它的回答只有三種：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Claude 的回答</th>
+            <th>代表什麼</th>
+            <th>你怎麼做</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>「屬於『套折扣』」</td>
+            <td>正常</td>
+            <td>只准動那一塊</td>
+          </tr>
+          <tr>
+            <td>「會動到『套折扣』和『產生 PDF』」</td>
+            <td>有東西跨過邊界了</td>
+            <td>先停。問它：為什麼 PDF 需要知道折扣怎麼算？</td>
+          </tr>
+          <tr>
+            <td>「清單上沒有」</td>
+            <td>這是一個新功能</td>
+            <td>新開一塊、清單加一段，不要塞進舊的</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p><strong>改完之後</strong>，請它更新清單，順便問：「有沒有哪一塊做的事變多了？」</p>
+
+    <p><strong>偶爾巡一次</strong>，請它拿清單對照實際的程式：「有沒有清單上沒寫，但程式裡做了的事？」這一句抓的是纏法三。</p>
+
+    <h3>為什麼說它是合約</h3>
+
+    <p>合約不是每天拿出來讀的，是出事的時候有東西可以對。清單上寫了「產生 PDF 不碰金額」，哪天 PDF 上的金額不對，只有兩種可能：問題不在 PDF 那一塊，或者它違約了。兩種都比「不知道從哪裡查起」好。</p>
+
+    <div class="box box-warning">
+      <div class="box-label">清單會過期</div>
+      Claude 讀到清單，不代表每次都照做；改完也不一定記得更新。所以「改之前先讀清單、改完更新清單」要寫進專案的 <code>CLAUDE.md</code>（<a class="fn-link" href="/chapter10/">第十章 Claude Code 怎麼用</a>講過），你自己偶爾也要問一次上面那句巡查的話。<br><br>
+      清單和程式對不上的那一天，它就只是一張沒人看的表。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「讀完整個專案，整理一份功能清單：每個功能叫什麼、進來什麼、交出什麼、不碰什麼、哪些規則住在這裡。存成 docs/功能清單.md」<br>
+      「在 CLAUDE.md 加上：改任何功能之前先讀 docs/功能清單.md，說明這次改動屬於哪一個功能；改完更新清單」
+    </div>
+
+    <!-- ===== 7. 互動示範 ===== -->
+    <h2>動手按：改一條規則，要動幾塊</h2>
+
+    <p>四個檢查裡，第三個可以直接數：要動幾塊。下面是同一套報價單系統的兩種寫法，功能完全一樣。選一種改動，自己數。</p>
+
+    <div class="demo-container fn-demo" id="fn-demo" data-demo-title="互動示範：纏在一起 vs 切開">
+      <div class="demo-label fn-demo-label">這只是一張圖，按了不會送出任何資料。</div>
+
+      <div class="fn-actions" id="fn-actions" hidden>
+        <button type="button" class="fn-btn" data-fn-case="discount" aria-pressed="false">改折扣規則</button>
+        <button type="button" class="fn-btn" data-fn-case="pdf" aria-pressed="false">改 PDF 版面</button>
+        <button type="button" class="fn-btn" data-fn-case="send" aria-pressed="false">改用 LINE 通知</button>
+        <button type="button" class="fn-btn fn-btn-reset" data-fn-case="" aria-pressed="false">重來</button>
+      </div>
+
+      <p class="fn-case-desc" id="fn-case-desc" aria-live="polite" hidden>選一種改動，看兩邊各有哪些區塊亮起來。</p>
+
+      <div class="fn-panels">
+        <div class="fn-panel fn-panel-bad">
+          <div class="fn-panel-title">纏在一起的版本</div>
+
+          <div class="fn-blob">
+            <div class="fn-blob-name">處理報價單（一大塊）</div>
+            <ul class="fn-segs">
+              <li class="fn-seg" data-fn-side="bad" data-fn-seg="t-calc"><span>算金額</span></li>
+              <li class="fn-seg" data-fn-side="bad" data-fn-seg="t-disc"><span>套折扣</span></li>
+              <li class="fn-seg" data-fn-side="bad" data-fn-seg="t-pdf"><span>產生 PDF</span></li>
+              <li class="fn-seg" data-fn-side="bad" data-fn-seg="t-send"><span>寄給客人</span></li>
+              <li class="fn-seg" data-fn-side="bad" data-fn-seg="t-log"><span>記到客戶紀錄</span></li>
+            </ul>
+          </div>
+
+          <div class="fn-blob">
+            <div class="fn-blob-name">報價列表頁</div>
+            <ul class="fn-segs">
+              <li class="fn-seg" data-fn-side="bad" data-fn-seg="t-list"><span>列出報價單</span></li>
+              <li class="fn-seg" data-fn-side="bad" data-fn-seg="t-list-disc"><span>套折扣<small>抄來的第二份</small></span></li>
+            </ul>
+          </div>
+
+          <div class="fn-blob">
+            <div class="fn-blob-name">月報表</div>
+            <ul class="fn-segs">
+              <li class="fn-seg" data-fn-side="bad" data-fn-seg="t-rep"><span>加總營收</span></li>
+              <li class="fn-seg" data-fn-side="bad" data-fn-seg="t-rep-disc"><span>套折扣<small>抄來的第三份</small></span></li>
+            </ul>
+          </div>
+
+          <p class="fn-score" id="fn-score-bad" hidden>要改 <strong id="fn-bad-hit">0</strong> 處，連帶檢查 <strong id="fn-bad-check">0</strong> 件</p>
+          <p class="fn-note" id="fn-note-bad" hidden></p>
+        </div>
+
+        <div class="fn-panel fn-panel-good">
+          <div class="fn-panel-title">切開的版本</div>
+
+          <div class="fn-flow"><strong>送出報價單</strong>：照順序叫下面五塊，自己不算錢、不排版</div>
+
+          <ul class="fn-blocks">
+            <li class="fn-seg" data-fn-side="good" data-fn-seg="s-calc"><span>算金額</span></li>
+            <li class="fn-seg" data-fn-side="good" data-fn-seg="s-disc"><span>套折扣</span></li>
+            <li class="fn-seg" data-fn-side="good" data-fn-seg="s-pdf"><span>產生 PDF</span></li>
+            <li class="fn-seg" data-fn-side="good" data-fn-seg="s-send"><span>寄給客人</span></li>
+            <li class="fn-seg" data-fn-side="good" data-fn-seg="s-log"><span>記到客戶紀錄</span></li>
+          </ul>
+
+          <ul class="fn-blocks fn-blocks-readers">
+            <li class="fn-seg" data-fn-side="good" data-fn-seg="s-list"><span>報價列表頁<small>讀報價單上算好的金額，自己不算</small></span></li>
+            <li class="fn-seg" data-fn-side="good" data-fn-seg="s-rep"><span>月報表<small>讀報價單上算好的金額，自己不算</small></span></li>
+          </ul>
+
+          <p class="fn-score" id="fn-score-good" hidden>要改 <strong id="fn-good-hit">0</strong> 處，連帶檢查 <strong id="fn-good-check">0</strong> 件</p>
+          <p class="fn-note" id="fn-note-good" hidden></p>
+        </div>
+      </div>
+
+      <div class="fn-legend" id="fn-legend" hidden>
+        <span class="fn-legend-hit">要改</span>
+        <span class="fn-legend-check">要檢查：沒有要改，但和被改的東西寫在同一塊</span>
+        <span>不受影響</span>
+      </div>
+
+      <div class="fn-static" id="fn-static">
+        <p>這個示範要開 JavaScript 才能按。下面是同一件事的文字版：三種改動，兩種寫法各要動幾塊。</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>改動</th>
+                <th>纏在一起</th>
+                <th>切開</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>改折扣規則（九折改八五折）</td>
+                <td>要改 3 處（三份折扣都要改），連帶檢查 6 件</td>
+                <td>要改 1 處（套折扣），連帶檢查 0 件</td>
+              </tr>
+              <tr>
+                <td>改 PDF 版面（多一欄備註）</td>
+                <td>要改 1 處，連帶檢查 4 件（同一大塊裡的其他四件事）</td>
+                <td>要改 1 處（產生 PDF），連帶檢查 0 件</td>
+              </tr>
+              <tr>
+                <td>改用 LINE 通知</td>
+                <td>要改 1 處，連帶檢查 4 件</td>
+                <td>要改 1 處（寄給客人），連帶檢查 0 件</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <p>三種改動，切開的版本每次都是改一塊。纏在一起的版本不是每次都要改很多地方，改 PDF 版面也只改一處，但每次都得把同一塊裡的其他事重新確認一遍。</p>
+
+    <p>所以纏的代價有兩種：<strong>要改的地方變多</strong>，以及<strong>每次改完都不敢確定沒碰壞別的</strong>。第二種更磨人，因為它每一次都發生。</p>
+
+    <p>切開的版本那個 0，不是說改完不用測，整個流程還是要從頭跑一次看結果。它的意思是：別塊的程式沒有被打開過，你不用擔心它被碰到。</p>
+
+    <p>真實的專案不會像切開的版本那麼整齊，總有一兩塊黏著，這沒關係。你要的不是零，是每次改之前數得出來，而且這個數字沒有一個月比一個月大。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「如果我要改折扣規則，要改幾個地方？另外有哪些功能跟它寫在同一塊，需要重新測？」<br>
+      「這次改完，把同一塊裡的其他功能都跑一次，確認沒被碰壞，結果列給我看」<br>
+      「列表頁和報表不要自己算折扣，改成讀報價單上已經算好的金額」
+    </div>
+
+    <!-- ===== 8. 術語表 ===== -->
+    <h2>本章術語表</h2>
+
+    <p>這些詞會出現在 Claude 的回覆裡。看得懂就好，不用背。</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>術語</th>
+            <th>白話</th>
+            <th>早餐店裡是什麼</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Function</strong>（函式）</td>
+            <td>一個有名字的工作步驟：收東西、做事、交東西</td>
+            <td>一個工作站</td>
+          </tr>
+          <tr>
+            <td><strong>Parameter</strong>（參數）</td>
+            <td>交給功能的東西，就是輸入</td>
+            <td>遞進來的點單</td>
+          </tr>
+          <tr>
+            <td><strong>Return value</strong>（回傳值）</td>
+            <td>功能做完交出來的東西，就是輸出</td>
+            <td>算好的金額、做好的餐</td>
+          </tr>
+          <tr>
+            <td><strong>Call</strong>（呼叫）</td>
+            <td>一個功能請另一個功能做事</td>
+            <td>店長喊：「三號單，交給收銀」</td>
+          </tr>
+          <tr>
+            <td><strong>Side effect</strong>（副作用）</td>
+            <td>交出結果以外，另外動到外面的東西：存資料、寄信、改紀錄</td>
+            <td>順手換成大杯</td>
+          </tr>
+          <tr>
+            <td><strong>Single Responsibility</strong>（單一職責）</td>
+            <td>一塊只做一件事</td>
+            <td>煎台只煎，收銀只收</td>
+          </tr>
+          <tr>
+            <td><strong>Duplicate code</strong>（重複程式碼）</td>
+            <td>同一條規則被抄到好幾個地方，就是纏法二。反過來的原則叫 DRY（Don't Repeat Yourself，不要重複自己）</td>
+            <td>三個人各背一份價目表</td>
+          </tr>
+          <tr>
+            <td><strong>Coupling</strong>（耦合）</td>
+            <td>功能黏在一起的程度。黏得越緊，改一個越容易壞別的</td>
+            <td>煎台和收銀台共用一本會被塗改的價目表</td>
+          </tr>
+          <tr>
+            <td><strong>Edge case</strong>（怪情況）</td>
+            <td>平常不太遇到、但遲早會遇到的特殊狀況。也有人翻成「邊界情況」，跟這一章說的「邊界」（每一塊管到哪裡）不是同一件事</td>
+            <td>「蛋餅不要蛋」</td>
+          </tr>
+          <tr>
+            <td><strong>Spec</strong>（規格）</td>
+            <td>動手之前寫下來的「要做成什麼樣」</td>
+            <td>點單本身</td>
+          </tr>
+          <tr>
+            <td><strong>Refactor</strong>（重構）</td>
+            <td>做的事不變，只整理裡面的結構。把一大塊切成五塊就是重構</td>
+            <td>重排工作站的位置，菜單不變</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>這章帶走什麼</h2>
+
+    <ul>
+      <li><strong>每個功能講清楚三件事：</strong>進來什麼、交出什麼、不該順手做什麼。</li>
+      <li><strong>一塊只做一件事，同一條規則只寫一份。</strong>串流程的「店長」只管順序，自己不算錢。</li>
+      <li><strong>AI 的三種纏法：</strong>「順便加」、同一段計算抄三份、偷偷改別人的資料。看徵兆就抓得到，不用讀程式。</li>
+      <li><strong>不是自己寫，是知道每一塊管到哪裡為止。</strong>五塊功能都可以交給 Claude 寫，但「有哪幾塊、每一塊進來什麼、交出什麼、不准碰什麼」這張表要你來定，而且在它動手之前講。邊界畫不到百分之百乾淨，選一邊、寫進功能清單，之後照清單走。</li>
+    </ul>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說：整章只記三句</div>
+      <strong>動手之前</strong><br>
+      「這次改動屬於哪一個功能？只動那一塊。需要動到別的地方，先停下來問我」<br><br>
+      <strong>改完之後</strong><br>
+      「這次動了哪些檔案？有沒有哪個功能做的事變多了？更新功能清單」<br><br>
+      <strong>偶爾巡一次</strong><br>
+      「同一條規則有沒有出現在兩個以上的地方？有沒有功能改了清單上沒寫的資料？」
+    </div>
+
+    <p>功能切好了，每一塊要讀寫的資料放在哪裡？下一章<a class="fn-link" href="/chapter15/">第十五章 資料表與欄位</a>，把資料的家先蓋好。</p>
+
+    <div class="chapter-nav">
+      <a href="/chapter13/" class="prev">
+        <span class="nav-label">上一章</span>
+        <span class="nav-title">架構拓樸</span>
+      </a>
+      <a href="/chapter15/" class="next">
+        <span class="nav-label">下一章</span>
+        <span class="nav-title">資料表與欄位</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/main.js"></script>
+<script>
+// 第十四章互動示範：改一條規則，纏在一起與切開各要動幾塊（只在本頁運作，不送出任何資料）
+(function () {
+  var demo = document.getElementById('fn-demo');
+  var actions = document.getElementById('fn-actions');
+  var fallback = document.getElementById('fn-static');
+  var desc = document.getElementById('fn-case-desc');
+  if (!demo || !actions || !fallback || !desc) return;
+
+  // 每一種改動：兩邊各有哪些區塊「要改」（hit）、哪些「要檢查」（check）。數字一律由這裡的清單算出來。
+  var CASES = {
+    discount: {
+      desc: '改動：滿萬九折，改成滿萬八五折。',
+      bad: {
+        hit: ['t-disc', 't-list-disc', 't-rep-disc'],
+        check: ['t-calc', 't-pdf', 't-send', 't-log', 't-list', 't-rep'],
+        note: '折扣寫了三份，三份都要改。漏掉一份，同一張小計 10,000 元的報價單，PDF 上是 8,500 元，列表頁還是 9,000 元。'
+      },
+      good: {
+        hit: ['s-disc'],
+        check: [],
+        note: '規則只住在「套折扣」這一塊。其他地方拿到的數字會變，但程式一行都不用動。'
+      }
+    },
+    pdf: {
+      desc: '改動：報價單 PDF 多一欄「備註」。',
+      bad: {
+        hit: ['t-pdf'],
+        check: ['t-calc', 't-disc', 't-send', 't-log'],
+        note: '只改一處，但它和算錢、寄信寫在同一塊。改版面的時候碰壞了金額，要等客人來問才會發現。'
+      },
+      good: {
+        hit: ['s-pdf'],
+        check: [],
+        note: '「產生 PDF」只印不算。版面怎麼改，金額都不會變。'
+      }
+    },
+    send: {
+      desc: '改動：報價單不寄 Email 了，改用 LINE 傳給客人。',
+      bad: {
+        hit: ['t-send'],
+        check: ['t-calc', 't-disc', 't-pdf', 't-log'],
+        note: '寄信那一段夾在中間。改完要整塊重跑，才知道前面的 PDF 和後面的紀錄有沒有被碰到。'
+      },
+      good: {
+        hit: ['s-send'],
+        check: [],
+        note: '換掉「寄給客人」這一塊就好。它只收 PDF 和收件人，不知道金額怎麼算。'
+      }
+    }
+  };
+
+  var segs = demo.querySelectorAll('[data-fn-seg]');
+  var buttons = actions.querySelectorAll('[data-fn-case]');
+  var els = {
+    bad: {
+      score: document.getElementById('fn-score-bad'),
+      hit: document.getElementById('fn-bad-hit'),
+      check: document.getElementById('fn-bad-check'),
+      note: document.getElementById('fn-note-bad')
+    },
+    good: {
+      score: document.getElementById('fn-score-good'),
+      hit: document.getElementById('fn-good-hit'),
+      check: document.getElementById('fn-good-check'),
+      note: document.getElementById('fn-note-good')
+    }
+  };
+  var legend = document.getElementById('fn-legend');
+  var IDLE_DESC = '選一種改動，看兩邊各有哪些區塊亮起來。';
+
+  function has(list, id) { return list.indexOf(id) !== -1; }
+
+  function apply(key) {
+    var c = CASES[key] || null;
+    var i;
+
+    for (i = 0; i < segs.length; i++) {
+      var seg = segs[i];
+      if (!c) { seg.removeAttribute('data-fn-state'); continue; }
+      var side = c[seg.getAttribute('data-fn-side')];
+      var id = seg.getAttribute('data-fn-seg');
+      seg.setAttribute('data-fn-state', has(side.hit, id) ? 'hit' : (has(side.check, id) ? 'check' : 'idle'));
+    }
+
+    for (i = 0; i < buttons.length; i++) {
+      var k = buttons[i].getAttribute('data-fn-case');
+      buttons[i].setAttribute('aria-pressed', (c && k === key) ? 'true' : 'false');
+    }
+
+    desc.textContent = c ? c.desc : IDLE_DESC;
+
+    ['bad', 'good'].forEach(function (sideName) {
+      var e = els[sideName];
+      if (!c) {
+        e.score.hidden = true;
+        e.note.hidden = true;
+        return;
+      }
+      e.hit.textContent = c[sideName].hit.length;
+      e.check.textContent = c[sideName].check.length;
+      e.note.textContent = c[sideName].note;
+      e.score.hidden = false;
+      e.note.hidden = false;
+      e.score.classList.remove('fn-pop');
+      void e.score.offsetWidth;          // 讓數字的進場動畫可以重播
+      e.score.classList.add('fn-pop');
+    });
+
+    legend.hidden = !c;
+  }
+
+  actions.addEventListener('click', function (ev) {
+    var btn = ev.target.closest ? ev.target.closest('[data-fn-case]') : null;
+    if (!btn) return;
+    apply(btn.getAttribute('data-fn-case'));
+  });
+
+  fallback.hidden = true;
+  actions.hidden = false;
+  desc.hidden = false;
+  apply('');
+})();
+</script>
+</body>
+</html>

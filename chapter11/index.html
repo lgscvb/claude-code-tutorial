@@ -3,8 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第十一章：工具生態 — Claude Code 指南</title>
+  <title>第十一章：技術棧 — Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* 第十一章專用樣式（前綴 stack-，從舊版技術棧章搬來） */
+    .stack-demo {
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin: 24px 0;
+      background: var(--bg-card);
+    }
+    .stack-demo-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+    .stack-demo-hint {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .stack-demo label { display: block; font-size: 15px; }
+    .stack-demo label strong { color: var(--accent-light); font-size: 18px; }
+    #stack-pages-note { color: var(--text-muted); font-size: 13px; }
+    .stack-range {
+      display: block;
+      width: 100%;
+      margin: 10px 0 18px;
+      accent-color: var(--accent);
+    }
+    .stack-nb { white-space: nowrap; }
+    .stack-row { margin: 14px 0; }
+    .stack-row-head {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 4px 12px;
+      font-size: 14px;
+    }
+    .stack-row-head strong { color: var(--text-heading); }
+    .stack-files {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+    }
+    .stack-file {
+      width: 14px;
+      height: 18px;
+      border-radius: 3px;
+      background: var(--red);
+      opacity: 0.8;
+    }
+    .stack-file-new { animation: stack-pop 0.2s ease-out; }
+    .stack-file-one { background: var(--green); }
+    .stack-wait {
+      margin-left: 6px;
+      padding: 1px 10px;
+      border: 1px dashed var(--yellow);
+      border-radius: 999px;
+      color: var(--yellow);
+      font-size: 12px;
+    }
+    .stack-verdict {
+      margin: 16px 0 0;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 15px;
+    }
+    /* 沒有 JavaScript 時，滑桿拉不動，先藏起來；頁數與結論照樣讀得到 */
+    .stack-nojs .stack-range { display: none; }
+    .stack-compare > * { min-width: 0; }
+    @keyframes stack-pop {
+      from { transform: scale(0.3); opacity: 0; }
+      to { transform: scale(1); opacity: 0.8; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .stack-file-new { animation: none; }
+    }
+    @media (max-width: 480px) {
+      .stack-demo { padding: 16px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -13,11 +97,11 @@
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
       <a href="/">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/">下指令</a>
-      <a href="/chapter3/">工作流程</a>
-      <a href="/chapter9/">術語字典</a>
-      <a href="/appendix/">附錄</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,276 +111,533 @@
 
 <nav class="mobile-nav">
   <a href="/">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/">第二章：下指令</a>
-  <a href="/chapter3/">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/">第六章：Claude Code</a>
-  <a href="/chapter7/">第七章：技術棧</a>
-  <a href="/chapter8/">第八章：API</a>
-  <a href="/chapter9/">第九章：術語字典</a>
-  <a href="/chapter10/">第十章：進階問題</a>
-  <a href="/chapter11/" class="active">第十一章：工具生態</a>
-  <a href="/appendix/">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/" class="active">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
   <section class="container">
     <div class="page-header">
       <div class="chapter-label">第十一章</div>
-      <h1>工具生態</h1>
-      <p class="lead">知道有哪些工具可以用，比自己從零開始重要一百倍。這一章分享我實際在用的工具組合，以及為什麼選它們。</p>
-    </div>
-  </section>
-
-  <section class="container content">
-
-    <!-- ===== A. Obsidian ===== -->
-    <h2>Obsidian + Markdown：你的大腦外掛</h2>
-
-    <h3>Obsidian 是什麼？</h3>
-
-    <p>Obsidian 是一個用 <strong>Markdown（.md）</strong>寫筆記的軟體。如果你不知道什麼是 Markdown，它就是一種「用純文字寫格式」的方法。比如用 <code>#</code> 代表標題、用 <code>-</code> 代表清單項目。</p>
-
-    <p>你現在看到的這個教學網站，每一頁的內容其實都可以用 Markdown 來寫。</p>
-
-    <h3>為什麼推薦 Obsidian？</h3>
-
-    <div class="analogy">
-      <strong>最關鍵的理由：你的筆記永遠是你的。</strong><br><br>
-      很多筆記軟體（Notion、Evernote）把你的資料存在它們的伺服器上。如果哪天公司倒了、改方案了、漲價了——你的筆記可能就拿不回來了。<br><br>
-      Obsidian 不同。你的所有筆記都是 <code>.md</code> 純文字檔，存在你自己的電腦裡。即使 Obsidian 明天消失了，你用任何文字編輯器都能打開這些檔案。<br><br>
-      <strong>你的資料不被任何軟體綁架。</strong>
+      <h1>技術棧：不打包，先找 GitHub</h1>
+      <p class="lead">上一章，Claude Code 開始替你動手。這一章講它動手時用什麼材料：蓋房子之前，你得知道要用鋼筋還是木頭。材料選得簡單，你才看得懂它做了什麼，也才看得出哪裡能動、哪裡不能動。</p>
     </div>
 
-    <p>Obsidian 的第二個優勢：<strong>Claude Code 可以直接讀寫你的筆記。</strong></p>
+    <div class="content">
 
-    <p>因為 Obsidian 的筆記就是電腦裡的 <code>.md</code> 檔案，Claude Code 可以用 Read/Write 工具直接操作它們。這代表：</p>
+      <p><strong>技術棧</strong>就是做一個東西用到的整套材料：頁面用什麼寫、放在哪裡、資料存在哪、程式碼怎麼留版本。<a href="/chapter7/">第七章</a>到<a href="/chapter9/">第九章</a>你已經照著把網站放上去、接好網域、開了資料庫，這一章退一步講：為什麼是這幾樣，換別的會怎樣。</p>
 
-    <ul>
-      <li>你在跟 Claude 聊天時產生的想法，可以直接存進 Obsidian</li>
-      <li>Claude 可以讀取你之前的筆記，了解專案的來龍去脈</li>
-      <li>任務管理、專案規劃、知識庫——全部在一個地方</li>
-    </ul>
+      <p>這件事你不講，Claude 會自己選。它常選工程師團隊那一套，做得出來，但你看不懂、改不動，等於把邊界整個交出去。<a href="/chapter1/">第一章</a>說過，能改能修靠的是知道邊界。材料選對，邊界才看得見。</p>
 
-    <h3>搭配 Claude Code 的工作流</h3>
+      <p>我的立場就兩句：<strong>動手前，先上 GitHub 找有沒有現成的；頁面不打包，改完直接上傳。</strong>下面一樣一樣講。</p>
 
-    <div class="code-block">
-<strong style="color: var(--accent-light);">Obsidian + Claude Code 協作流程</strong><br>
-<br>
-你的想法 / 需求<br>
-　　↓<br>
-寫進 Obsidian（Inbox/ 資料夾）<br>
-　　↓<br>
-Claude Code 讀取筆記<br>
-　　↓<br>
-拆解成具體任務<br>
-　　↓<br>
-執行（寫程式 / 研究 / 設定）<br>
-　　↓<br>
-完成後更新 Obsidian 狀態<br>
-<br>
-<span style="color: var(--green);">Obsidian 是你的「大腦外掛」</span><br>
-<span style="color: var(--green);">Claude Code 是你的「手腳」</span>
+      <!-- ========== A. 選擇原則 ========== -->
+      <h2 id="stack-rules">選擇原則</h2>
+
+      <p>市面上的工具和服務多到眼花撩亂。身為一個想用 Claude Code 做事的非工程師，你不需要每個都懂，但你需要知道<strong>怎麼選</strong>。四個原則：</p>
+
+      <ol>
+        <li>
+          <strong>先找現成的</strong><br>
+          你想做的東西，很可能已經有人做好、公開放在 GitHub 上。動手前先找，做法在下面。
+        </li>
+        <li>
+          <strong>有 CLI 優先</strong><br>
+          終端機是打字下指令的那個視窗；CLI 是在終端機裡用打字操作的工具，<code>claude</code>、<code>gh</code>、<code>wrangler</code> 都是 CLI。服務有 CLI，Claude Code 就能直接下指令操作，不用截圖找按鈕。後面會解釋為什麼這很省 Token。
+        </li>
+        <li>
+          <strong>API 好接、省 Token</strong><br>
+          好的 API＝一行指令就能拿到資料。不好的 API＝要寫一大堆程式碼才能拿到同樣的東西。Claude Code 多寫一行程式碼，就多花一點 Token。API 是什麼，<a href="/chapter12/">下一章</a>細講。
+        </li>
+        <li>
+          <strong>免費額度夠用</strong><br>
+          初期的個人專案，免費額度通常就夠了。等真的有流量再升級，不要一開始就花錢。
+        </li>
+      </ol>
+
+      <div class="box box-tip">
+        <div class="box-label">重點</div>
+        你不是在選「功能最多的工具」，是在選「跟 Claude Code 配合得好、你自己也看得懂的工具」。一個有 CLI、有好 API、有免費額度的工具，比一個功能強大但只能在網頁上點的工具好用得多。
+      </div>
+
+      <!-- ========== B. 先上 GitHub 找 ========== -->
+      <h2 id="stack-github">第一條：動手前，先上 GitHub 找</h2>
+
+      <p>GitHub 是放程式碼的平台，很多人把自己做的東西公開放在上面。預約、報價單、問卷、會員系統這類常見的東西，常常已經有人做過。先找，比從零做快，別人踩過的坑你也不用再踩一次。</p>
+
+      <p>三步：</p>
+
+      <ol>
+        <li>
+          <strong>搜</strong><br>
+          用功能的<strong>英文</strong>關鍵字，GitHub 上的說明大多是英文。不知道英文怎麼講，請 Claude 幫你想，再讓它用 <code>gh</code>（GitHub 的 CLI）直接搜：<br>
+          <code>gh search repos "booking system" <span class="stack-nb">--sort stars</span> <span class="stack-nb">--limit 10</span></code><br>
+          自己在 github.com 搜也行，關鍵字後面可以加條件：<code>stars:&gt;100</code>（星星超過 100 個）、<code>pushed:&gt;2026-01-01</code>（2026 年以後有更新）。
+        </li>
+        <li>
+          <strong>判斷能不能用</strong>，看五件事：
+          <ul>
+            <li><strong>最近有沒有更新</strong>：停在一兩年前，或標了 Archived（封存），先跳過</li>
+            <li><strong>星星數和 Fork 數</strong>：多少人收藏、多少人複製一份去用。只有個位數的要小心</li>
+            <li><strong>授權條款（License）</strong>：MIT、Apache-2.0 這類可以商用；GPL、AGPL 有附帶條件；沒寫授權的，別人不能拿去複製、改寫</li>
+            <li><strong>說明文件（README）</strong>：有沒有寫清楚怎麼安裝、怎麼用</li>
+            <li><strong>問題回報（Issues）</strong>：一堆人回報、好幾個月沒人理，代表沒人在顧</li>
+          </ul>
+        </li>
+        <li>
+          <strong>找到之後，先讀懂再決定</strong><br>
+          請 Claude 把專案讀一遍、用白話講出它分成哪幾塊，再三選一：直接用、改一部分、只借做法。
+        </li>
+      </ol>
+
+      <div class="box box-tip">
+        <div class="box-label">跟 Claude 怎麼說</div>
+        「我想做美髮店的線上預約。先不要寫程式，幫我想三組英文關鍵字，用 gh 搜 GitHub，列出前五個專案的星星數、最後更新日期、授權條款。」<br>
+        「把第二個讀一遍，用白話講它分成哪幾塊、資料存在哪。再建議我直接用、改一部分，還是只借做法。」
+      </div>
+
+      <!-- ========== C. 什麼要一直開著 ========== -->
+      <h2 id="stack-always-on">什麼需要「一直跑」、什麼不用</h2>
+
+      <p>選材料之前，先搞懂一個根本問題：<strong>你做的東西，需不需要一台一直開著的機器？</strong>多數時候，答案是不用。</p>
+
+      <div class="analogy">
+        <strong>白話比喻：</strong><br><br>
+        <strong>靜態網站</strong>＝傳單。印好放在架上，有人來就拿走看，不用有人顧。<br><br>
+        <strong>函式</strong>（Serverless）＝門鈴。平常沒人站櫃檯，有人按鈴才出來應門，辦完就回去休息。<br><br>
+        <strong>資料庫</strong>＝檔案櫃。要隨時查得到，但可以請人代管。<br><br>
+        <strong>VM</strong>（虛擬機器）＝請一個人 24 小時站櫃檯。沒客人也要付薪水。
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>要做的東西</th>
+              <th>要顧機器？</th>
+              <th>白話</th>
+              <th>放哪裡</th>
+              <th>免費額度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>網站頁面</strong><br>（靜態網站、前端）</td>
+              <td style="color: var(--green);">不用</td>
+              <td>傳單放著就好</td>
+              <td>Cloudflare</td>
+              <td>靜態檔案被瀏覽不限次數、不計費</td>
+            </tr>
+            <tr>
+              <td><strong>後端小程式</strong><br>（例如收到表單就寄信）</td>
+              <td style="color: var(--green);">不用</td>
+              <td>有人按鈴才應門</td>
+              <td>Cloudflare Workers<br>或 Supabase Edge Functions</td>
+              <td>Workers 每天 10 萬次請求<br>Edge Functions 每月 50 萬次</td>
+            </tr>
+            <tr>
+              <td><strong>資料庫</strong></td>
+              <td style="color: var(--green);">不用</td>
+              <td>檔案櫃請人代管</td>
+              <td>Supabase（PostgreSQL）<br>或 Cloudflare D1</td>
+              <td>Supabase：每個專案 500 MB<br>D1：每個資料庫 500 MB（整個帳號合計 5 GB）</td>
+            </tr>
+            <tr>
+              <td><strong>排程</strong></td>
+              <td style="color: var(--green);">不用</td>
+              <td>鬧鐘定時做事</td>
+              <td>Cloudflare Cron Triggers<br>或 Supabase Cron</td>
+              <td>Cloudflare 免費版可設 5 個</td>
+            </tr>
+            <tr>
+              <td><strong>LINE 機器人</strong></td>
+              <td style="color: var(--green);">不用</td>
+              <td>LINE 把訊息送到你的網址，函式醒來回覆</td>
+              <td>同後端小程式</td>
+              <td>同後端小程式</td>
+            </tr>
+            <tr>
+              <td><strong>一跑很久的爬蟲、背景程式</strong></td>
+              <td style="color: var(--yellow);">看情況</td>
+              <td>一做就是很久，門鈴撐不住</td>
+              <td>先在自己電腦跑<br>不行再開 VM</td>
+              <td>見後面 VM 一節</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">為什麼要在意「需不需要機器」</div>
+        因為這直接影響成本和維護。傳單和門鈴是有人來才算一次，沒人用就不花錢。一直開著的機器按時間計費，沒人用也照算，還得有人盯著它有沒有掛掉。
+      </div>
+
+      <!-- ========== D. 不打包 ========== -->
+      <h2 id="stack-nobuild">要不要「打包」：我的答案是先不要</h2>
+
+      <p>請 Claude 做網站，它常會順手選 React、Vue 或 Next.js。這類做法都要先<strong>打包</strong>才能上線：把你寫的檔案丟進一套工具，壓成另一批檔案，再把那批放上網。我不推薦。我自己用的是<strong>純靜態頁面</strong>：HTML、CSS、JS 三種檔案，改完直接上傳。</p>
+
+      <div class="analogy">
+        <strong>白話：</strong>純靜態頁面＝手寫卡片，寫完就能寄。打包＝送印刷廠：你改的是版型，要等印好才能寄。
+      </div>
+
+      <p>不推薦打包，三個理由：</p>
+      <ul>
+        <li><strong>每改一次都要等</strong>：改一個字也要重新打包。打包失敗，就上不了線</li>
+        <li><strong>套件要一直跟著升級</strong>：打包那一套靠一大堆別人寫的套件撐著，放著不管，就會冒出安全性問題</li>
+        <li><strong>上線的東西你看不懂</strong>：上線的是機器壓過的檔案。AI 改壞了，你查不出是哪裡。純靜態頁面你存了什麼，上線的就是什麼</li>
+      </ul>
+
+      <p>第三點最要緊。AI 會改會修，但會一直改，改到後來沒人知道哪裡牽著哪裡。上線的東西你看得懂，才有辦法說「這裡不准動」。</p>
+
+      <p>代價也老實講：共用的區塊（例如選單）要每頁各改一次。這個站就是例子：章節和附錄共 20 頁，加上首頁，每一頁各有一份選單。要多放一個章節連結，我是請 Claude 寫一支小程式，一次改完全部，再檢查有沒有漏。</p>
+
+      <div class="stack-demo stack-nojs" id="stack-demo">
+        <div class="stack-demo-title">拉拉看</div>
+        <div class="stack-demo-hint">同一件小事「選單多放一個連結」，兩種做法各要動幾個檔案？</div>
+        <label for="stack-pages">網站頁數：<strong id="stack-pages-num">20</strong> 頁<span id="stack-pages-note">（這個站的章節和附錄頁數）</span></label>
+        <input class="stack-range" id="stack-pages" type="range" min="1" max="150" value="20">
+        <div class="stack-row">
+          <div class="stack-row-head"><strong>純靜態頁面</strong><span>改 <span id="stack-html-count">20</span> 個檔案，改完直接上傳</span></div>
+          <div class="stack-files" id="stack-html-files" aria-hidden="true"><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i><i class="stack-file"></i></div>
+        </div>
+        <div class="stack-row">
+          <div class="stack-row-head"><strong>有打包</strong><span>改 1 個檔案，再等一次打包</span></div>
+          <div class="stack-files" aria-hidden="true"><i class="stack-file stack-file-one"></i><span class="stack-wait">打包</span></div>
+        </div>
+        <p class="stack-verdict" id="stack-verdict" aria-live="polite">檔案是多，但不用你一頁一頁改，交給 Claude 一次改完。頁數上百了，才值得考慮打包那一套。</p>
+      </div>
+
+      <p>什麼時候才值得上打包那一套？頁面上百、好幾個人一起改，或者你身邊已經有工程師。那不是你現在該煩惱的事。</p>
+
+      <div class="box box-tip">
+        <div class="box-label">跟 Claude 怎麼說</div>
+        「用純靜態頁面做：HTML、CSS、JS。不要用 React、Vue、Next.js，不要有打包步驟，改完要能直接上傳。」
+      </div>
+
+      <!-- ========== E. 推薦組合 ========== -->
+      <h2 id="stack-combo">我用的組合：Cloudflare、Supabase 或 D1、GitHub</h2>
+
+      <p>我自己的專案在用的組合：網站做成<strong>純靜態頁面放 Cloudflare</strong>，資料放 <strong>Supabase</strong>（資料單純的話用 Cloudflare D1），程式碼放 <strong>GitHub</strong>。資料庫、會員登入不自己從頭寫。大部分小專案，這三樣就夠了。</p>
+
+      <h3>1. 網站：純靜態頁面放 Cloudflare</h3>
+      <p>HTML、CSS、JS 放上去就是網站，這個站也是。怎麼一步一步放上去，<a href="/chapter7/">第七章 部署</a>帶你做過。</p>
+      <ul>
+        <li><strong>新專案用 Workers</strong>：Cloudflare 能放網站的服務有 Workers 和 Pages 兩個，官方文件現在寫「新專案從 Workers 開始」。Pages 還能用，舊專案不用急著搬</li>
+        <li><strong>免費版夠大</strong>：靜態檔案被瀏覽不限次數、不計費；一個網站免費版最多放 20,000 個檔案</li>
+        <li><strong>接上 GitHub 就自動上線</strong>：推上去就部署。純靜態頁面沒有打包這一步，不用等</li>
+        <li>有 CLI <code>wrangler</code>，Claude Code 可以直接下指令部署</li>
+      </ul>
+
+      <h3>2. 資料：Supabase 或 Cloudflare D1</h3>
+      <p><strong>Supabase</strong> 是現成的後端服務，底層是 PostgreSQL 資料庫。要會員登入、要存檔案的專案選它：</p>
+      <ul>
+        <li><strong>不用自己寫後端</strong>：資料表授權開放之後，它就提供現成的存取窗口（API）。新建的表要先明確授權才會開放，再搭配 RLS，時程和做法見<a href="/chapter9/#step4">第九章 資料庫</a></li>
+        <li><strong>純靜態頁面也接得上</strong>：頁面上的 JS 直接連它，做會員登入、後台都不用打包</li>
+        <li><strong>有 CLI 管資料表的變更</strong>：每次改資料表都留一份紀錄，這叫 Migration，等於資料庫結構的版本控制。Claude Code 用 <code>supabase</code> CLI 就能改，不用你去網站上點</li>
+        <li><strong>免費版的限制先知道</strong>：同時最多 2 個專案，一週沒有動靜就會被暫停，要到後台手動恢復。給客人用的正式服務請升級付費方案</li>
+      </ul>
+
+      <div class="analogy">
+        <strong>白話：</strong>Supabase 像一個自帶管理員的檔案櫃。你建好抽屜（資料表），說好這個抽屜可以對外，它就安排一個人坐在旁邊幫你遞資料（API）。你不用自己雇人。沒交代的抽屜，管理員一律不開。
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">管理員要先交代規矩</div>
+        把關分兩層。第一層是授權（GRANT）：這張表開不開放給頁面連。新建的表預設不開放，頁面連過去會看到「permission denied for table」，這是正常的，請 Claude 只替要給頁面用的表補上授權。第二層是 RLS（Row Level Security，逐列權限）：每一列資料誰能看、誰能改。規則沒設好，任何打開你網頁的人都可能讀到、改到別人的資料。什麼可以放在頁面上、什麼一定要放在後面，<a href="/chapter16/">第十六章 前後端邊界</a>會細講。先跟 Claude 說：「每張表都開 RLS，要給頁面用的表才授權，列出每張表誰能讀、誰能寫。」
+      </div>
+
+      <p><strong>Cloudflare D1</strong> 是 Cloudflare 自己的資料庫（SQLite 語法），一樣用 <code>wrangler</code> 管。資料單純、不需要會員登入時用它，跟網站放同一家，少管一個帳號。兩家怎麼開、怎麼選，<a href="/chapter9/">第九章 資料庫</a>講過；資料表怎麼設計，兩邊都一樣，見<a href="/chapter15/">第十五章 資料表與欄位</a>。</p>
+
+      <h3>3. 版控：GitHub</h3>
+      <p>版控就是存檔加上每一次修改的紀錄，改壞了可以退回去。GitHub 是放這些紀錄的地方（像程式碼的 Google Drive），也是前面自動上線的起點、你找現成專案的地方。</p>
+      <ul>
+        <li>有 <code>gh</code> CLI：Claude Code 可以直接用指令建專案（Repository）、送修改（Pull Request）、管問題回報（Issue）</li>
+        <li>免費帳號就夠用，公開、私人的專案（repo）都不限數量；私人專案有些進階功能要付費</li>
+      </ul>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>用途</th>
+              <th>推薦工具</th>
+              <th>CLI</th>
+              <th>免費額度</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>網站（純靜態頁面）</td>
+              <td>Cloudflare Workers<br>（舊專案可留在 Pages）</td>
+              <td><code>wrangler</code></td>
+              <td>靜態檔案被瀏覽不限次數；後端小程式每天 10 萬次請求</td>
+            </tr>
+            <tr>
+              <td>資料庫＋會員登入</td>
+              <td>Supabase</td>
+              <td><code>supabase</code></td>
+              <td>2 個專案，每個資料庫 500 MB；API 請求不限次；每月 5 萬名活躍使用者；Edge Functions 每月 50 萬次</td>
+            </tr>
+            <tr>
+              <td>輕量資料庫</td>
+              <td>Cloudflare D1</td>
+              <td><code>wrangler</code></td>
+              <td>每個資料庫 500 MB、整個帳號合計 5 GB、每天 500 萬列讀取</td>
+            </tr>
+            <tr>
+              <td>版控</td>
+              <td>GitHub</td>
+              <td><code>gh</code></td>
+              <td>公開、私人 repo 都不限數量</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>怎麼選</h3>
+
+      <div class="analogy">
+        <strong>只是要讓人看的網站？</strong>（介紹頁、作品集、活動頁）<br>
+        → 純靜態頁面放 <strong>Cloudflare</strong>。<br><br>
+        <strong>要存資料？</strong>（會員、訂單、表單）<br>
+        → 頁面一樣放 Cloudflare，資料放 <strong>Supabase</strong>；資料單純、不需要會員登入，用 <strong>D1</strong>。<br><br>
+        <strong>要定時自動做一件事？</strong>（每天早上寄報表、每小時檢查訂單）<br>
+        → 不用為了排程開機器。用 <strong>Cloudflare Cron Triggers</strong>（免費版可設 5 個）或 <strong>Supabase Cron</strong>。<br><br>
+        <strong>一定要一台一直開著的機器？</strong><br>
+        → 看下一節。
+      </div>
+
+      <p>手上已經有一個 Next.js 專案的，可以放 Vercel，它跟 Next.js 是同一家做的。但 Vercel 免費方案只限個人、非商業用途，新專案我不從那裡開始。其他部署服務（Vercel、Netlify、Render、GCP）的比較在<a href="/chapter7/">第七章 部署</a>。</p>
+
+      <p>材料選好了，怎麼接在一起，看<a href="/chapter13/">第十三章 架構拓樸</a>。</p>
+
+      <!-- ========== F. VM ========== -->
+      <h2 id="stack-vm">什麼時候才需要一台自己的機器（GCP VM）</h2>
+
+      <h3>VM 是什麼？</h3>
+      <p>VM（Virtual Machine，虛擬機器）＝在雲端租一台 24 小時開著的電腦。它不在你桌上，但你可以遠端連上去操作，就像遠端遙控一台電腦。</p>
+
+      <h3>VM 規格的白話翻譯</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>規格</th>
+              <th>白話</th>
+              <th>例子</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CPU</strong></td>
+              <td>腦袋聰不聰明（同時處理幾件事）</td>
+              <td>1 vCPU＝一次做一件事<br>4 vCPU＝同時做四件事</td>
+            </tr>
+            <tr>
+              <td><strong>RAM（記憶體）</strong></td>
+              <td>桌子夠不夠大（同時放幾份文件）</td>
+              <td>1 GB＝小桌子，跑簡單程式<br>8 GB＝大桌子，跑資料庫沒問題</td>
+            </tr>
+            <tr>
+              <td><strong>Disk（硬碟）</strong></td>
+              <td>儲藏室的容量</td>
+              <td>10 GB＝放程式碼夠了<br>100 GB＝可以存大量資料</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>什麼時候需要 VM？三個場景</h3>
+
+      <p>前面那張表，只有最後一列可能用到它：一跑就很久的爬蟲、要一直保持連線的程式、要裝特殊軟體的環境。這些門鈴做不來。</p>
+
+      <div class="compare">
+        <div class="compare-good">
+          <div class="compare-label">免費方案就夠的情況</div>
+          <div class="code-block">
+<strong>場景一：個人網站＋簡單後端＋LINE 機器人</strong><br><br>
+- 網站放 Cloudflare<br>
+- 後端和 LINE 機器人用 Workers 或 Edge Functions<br>
+- 資料放 Supabase 或 D1<br><br>
+剛起步的流量，通常碰不到免費上限。<br><br>
+<span style="color: var(--green);">總成本：每月 0 美元</span>
+          </div>
+        </div>
+        <div class="compare-bad">
+          <div class="compare-label">需要 VM 的情況</div>
+          <div class="code-block">
+<strong>場景二：長時間爬蟲＋背景程式</strong><br><br>
+- 一跑就很久的爬蟲<br>
+- 要一直保持連線的程式<br>
+- 要裝特殊軟體的環境<br><br>
+這些函式做不來。先在自己電腦跑，<br>
+能跑就不用租。<br><br>
+<span style="color: var(--yellow);">GCP e2-micro：免費，或每月約 6 美元</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">場景三：正式產品上線</div>
+        有付費客人之後，先升級代管服務：Cloudflare Workers 付費版每月 5 美元起、Supabase Pro 每月 25 美元起，一樣不用顧機器。真的需要自訂環境才開 VM：照 Google 價目表換算，e2-small 每月約 12 美元、e2-medium 約 24 美元（不含硬碟和流量，各區域價格不同）。
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">開了機器就要顧帳單</div>
+        Google Cloud（GCP）免費的 e2-micro 每月一台，限定美國三個區域（us-west1、us-central1、us-east1），開在別的區域就會收費，而且沒人用也照算。跟 Claude 說：「開在免費額度的區域，開完告訴我每月預估多少錢，還有怎麼關機。」
+      </div>
+
+      <!-- ========== G. CLI 省 Token ========== -->
+      <h2 id="cli-token">選服務，先看它有沒有 CLI</h2>
+
+      <p>這是很多人忽略、但<strong>很影響成本</strong>的觀念。上面推薦的每一樣都有官方 CLI，這是我挑材料的條件之一。讓 Claude Code 操作一個服務，有兩種方式：</p>
+
+      <h3>看畫面操作 vs CLI 操作</h3>
+
+      <div class="compare stack-compare">
+        <div class="compare-bad">
+          <div class="compare-label">看畫面操作（很花 Token）</div>
+          <div class="code-block">
+Claude Code 要做的事：<br>
+1. 截圖整個畫面 → 花 Token<br>
+2. 分析圖片找按鈕位置 → 花 Token<br>
+3. 點擊按鈕 → 花 Token<br>
+4. 等頁面載入 → 花時間<br>
+5. 再截圖確認結果 → 花 Token<br>
+6. 分析結果圖片 → 花 Token<br><br>
+一個簡單的「部署網站」動作<br>
+＝6 個以上的步驟＝大量 Token<br><br>
+<span style="color: var(--red);">慢，Token 花得多</span>
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">用 CLI 操作（省 Token）</div>
+          <div class="code-block">
+Claude Code 要做的事：<br>
+1. 打一行指令<br><br>
+<code>npx wrangler deploy</code><br><br>
+結束。<br><br>
+<span style="color: var(--green);">快，Token 花得少</span>
+          </div>
+        </div>
+      </div>
+
+      <p>差多少？依 Claude 官方文件的算法，一張全螢幕截圖要一千多到兩千多個 Token，畫面更大的可到四千多個，而一個動作常常要截好幾張。一行指令只有十幾個字。<strong>同一件事，看畫面做要花的 Token 多出一大截，也慢得多。</strong>CLI 還有一個好處：它做了什麼，指令都留在畫面上，你看得到。</p>
+
+      <h3>常用 CLI 一覽</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>CLI</th>
+              <th>對應服務</th>
+              <th>拿來做什麼</th>
+              <th>一行指令範例</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>wrangler</code></td>
+              <td>Cloudflare</td>
+              <td>部署網站、管 Workers 和 D1</td>
+              <td><code>npx wrangler deploy</code></td>
+            </tr>
+            <tr>
+              <td><code>gh</code></td>
+              <td>GitHub</td>
+              <td>搜專案、建 repo、送修改、管問題回報</td>
+              <td><code>gh pr create --fill</code></td>
+            </tr>
+            <tr>
+              <td><code>supabase</code></td>
+              <td>Supabase</td>
+              <td>改資料表、套用變更紀錄（Migration）</td>
+              <td><code>supabase db push</code></td>
+            </tr>
+            <tr>
+              <td><code>gcloud</code></td>
+              <td>Google Cloud</td>
+              <td>開關 VM、連上去操作</td>
+              <td><code>gcloud compute ssh my-vm</code></td>
+            </tr>
+            <tr>
+              <td><code>vercel</code></td>
+              <td>Vercel（免費方案限個人、非商業用途）</td>
+              <td>部署前端、全端專案。手上已經有 Next.js 專案才會用到，新專案我不從這裡開始</td>
+              <td><code>vercel --prod</code></td>
+            </tr>
+            <tr>
+              <td><code>npm</code></td>
+              <td>Node.js 生態</td>
+              <td>安裝套件、跑腳本。純靜態頁面本身用不到，Claude 裝工具、跑工具時你會看到它（還有 <code>npx</code>）</td>
+              <td><code>npm install</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">選工具的鐵則</div>
+        一個服務沒有 CLI、也沒有 API，Claude Code 就只能看畫面、點按鈕，<strong>Token 成本會暴增</strong>，也慢得多。所以選服務之前，先看它有沒有 CLI。
+      </div>
+
+      <p>工具的先後順序：有官方 CLI 先用 CLI；沒有才裝 MCP（連接器）；操作網頁交給瀏覽器工具；都不行才用 Computer Use。每一種怎麼開、什麼時候該讓 Claude 直接操作畫面，在<a href="/chapter10/">第十章 Claude Code 怎麼用</a>。</p>
+
+      <!-- ========== H. 帶走 ========== -->
+      <h2 id="stack-takeaway">這章帶走什麼</h2>
+
+      <ul>
+        <li><strong>先找再做</strong>：動手前上 GitHub 找現成的，看更新日期、星星數、授權條款</li>
+        <li><strong>不打包</strong>：純靜態頁面，存了什麼上線的就是什麼，你看得懂才守得住邊界</li>
+        <li><strong>一套組合</strong>：頁面放 Cloudflare，資料放 Supabase 或 D1，程式碼放 GitHub</li>
+        <li><strong>Supabase 要守兩層</strong>：表要授權才會開放，開放的表都要開 RLS</li>
+        <li><strong>多數東西不用一直開著的機器</strong>：真的要，先在自己電腦跑，再考慮 VM，開了就要顧帳單</li>
+        <li><strong>選服務先看 CLI</strong>：有 CLI，Claude 做得快、花得少，你也看得到它做了什麼</li>
+      </ul>
+
+      <div class="box box-tip">
+        <div class="box-label">跟 Claude 怎麼說</div>
+        「做之前先用 gh 上 GitHub 找有沒有現成的，列給我看再決定。」<br>
+        「用純 HTML、CSS、JS 做，不要有打包步驟。頁面放 Cloudflare，資料放 Supabase，每張表都開 RLS，要給頁面用的表才授權。程式碼推到 GitHub。」<br>
+        「要用到新服務之前，先告訴我它有沒有官方 CLI、免費額度是多少。」<br>
+        「這件事需不需要一台一直開著的機器？不需要的話，用 Workers 或排程做。」
+      </div>
+
+      <p>材料選好了。下一章講這些材料之間怎麼講話：頁面跟後端、跟資料庫、跟外部服務，靠的都是 API。</p>
+
+      <!-- Chapter Navigation -->
+      <div class="chapter-nav">
+        <a href="/chapter10/" class="prev">
+          <span class="nav-label">上一章</span>
+          <span class="nav-title">Claude Code 怎麼用</span>
+        </a>
+        <a href="/chapter12/" class="next">
+          <span class="nav-label">下一章</span>
+          <span class="nav-title">API</span>
+        </a>
+      </div>
+
     </div>
-
-    <div class="box box-tip">
-      <div class="box-label">建議的資料夾結構</div>
-      <code>Inbox/</code> — 還沒分類的想法、靈感<br>
-      <code>專案/</code> — 有開始有結束的事<br>
-      <code>知識庫/</code> — 事實、參考資料（不會過期）<br>
-      <code>學習/</code> — 正在學的東西<br>
-      <code>SOP/</code> — 反覆執行的流程
-    </div>
-
-    <!-- ===== B. MCP 生態系 ===== -->
-    <h2>MCP 生態系：Claude Code 的「手臂」</h2>
-
-    <h3>MCP 是什麼？</h3>
-
-    <p><strong>MCP（Model Context Protocol）</strong>讓 Claude Code 可以操控外部服務。如果把 Claude Code 想成一個大腦，MCP 就是它的手臂——讓它能伸出去「做事情」，而不只是「講話」。</p>
-
-    <p>沒有 MCP 的 Claude Code：只能讀寫你電腦上的檔案、跑終端機指令。</p>
-    <p>有了 MCP 的 Claude Code：可以操作資料庫、部署網站、管理 GitHub、操控瀏覽器、管雲端服務。</p>
-
-    <div class="analogy">
-      <strong>比喻：手機本身 vs 手機上的 App。</strong><br><br>
-      手機出廠只能打電話、傳簡訊。但你裝了 LINE 就能聊天、裝了 Uber 就能叫車、裝了 Google Maps 就能導航。<br><br>
-      MCP 就是 Claude Code 的「App Store」。每裝一個 MCP，Claude Code 就多會一項技能。
-    </div>
-
-    <h3>常用 MCP 列表</h3>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>MCP</th>
-            <th>功能</th>
-            <th>白話說</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Supabase</strong></td>
-            <td>操作資料庫</td>
-            <td>直接跟 Claude 說「幫我查所有 VIP 客戶」</td>
-          </tr>
-          <tr>
-            <td><strong>Cloudflare</strong></td>
-            <td>管理網站部署</td>
-            <td>「幫我把這個網站上線」</td>
-          </tr>
-          <tr>
-            <td><strong>GitHub</strong></td>
-            <td>管理程式碼版本</td>
-            <td>「幫我開一個 PR」「合併這個分支」</td>
-          </tr>
-          <tr>
-            <td><strong>Chrome DevTools</strong></td>
-            <td>操控瀏覽器</td>
-            <td>「幫我打開這個網頁，看看有沒有 bug」</td>
-          </tr>
-          <tr>
-            <td><strong>Google Cloud</strong></td>
-            <td>管理雲端服務</td>
-            <td>「幫我開一台 VM」「查一下 log」</td>
-          </tr>
-          <tr>
-            <td><strong>Google Calendar</strong></td>
-            <td>管理行事曆</td>
-            <td>「幫我查下週二有什麼會議」</td>
-          </tr>
-          <tr>
-            <td><strong>Gmail</strong></td>
-            <td>管理電子郵件</td>
-            <td>「幫我找最近客戶寄來的信」</td>
-          </tr>
-          <tr>
-            <td><strong>Brave Search</strong></td>
-            <td>搜尋網路</td>
-            <td>「幫我查一下這個技術的最新文件」</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="box box-info">
-      <div class="box-label">不用一次全裝</div>
-      MCP 是「需要什麼裝什麼」。剛開始只需要 GitHub 和一個部署工具就夠了。等你的專案變複雜了，再慢慢加。
-    </div>
-
-    <!-- ===== C. Quickstart ===== -->
-    <h2>Claude Code Quickstart 懶人包</h2>
-
-    <p>如果你覺得上面這些東西要一個一個設定太麻煩——有一個懶人包可以一鍵搞定。</p>
-
-    <div class="analogy">
-      <strong><a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank" style="color: var(--accent-light);">github.com/lgscvb/claude-code-quickstart</a></strong><br><br>
-      這個 Quickstart 懶人包包含：<br><br>
-      - 所有常用 MCP 的預設設定<br>
-      - 一組精選的 Skills（讓 Claude Code 更聰明的指令集）<br>
-      - 環境設定的最佳實踐<br>
-      - 適合完全新手的安裝流程<br><br>
-      <strong>你只需要：Clone 這個 repo → 跑安裝腳本 → 完成。</strong>
-    </div>
-
-    <p>如果你身邊有朋友想開始用 Claude Code，把這個連結丟給他就好。不用解釋太多，跑一次安裝就能開始用。</p>
-
-    <div class="box box-tip">
-      <div class="box-label">安裝步驟（極簡版）</div>
-      1. 打開終端機<br>
-      2. <code>git clone https://github.com/lgscvb/claude-code-quickstart.git</code><br>
-      3. <code>cd claude-code-quickstart</code><br>
-      4. 按照 README 的指示執行安裝腳本<br>
-      5. 完成！
-    </div>
-
-    <!-- ===== D. 部署工具選擇 ===== -->
-    <h2>常用部署工具選擇</h2>
-
-    <p>你寫好了程式，接下來要讓別人看到。「部署」就是把你電腦上的程式碼搬到網路上。不同的工具適合不同的場景：</p>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>工具</th>
-            <th>適合什麼</th>
-            <th>免費額度</th>
-            <th>難度</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Cloudflare Pages</strong></td>
-            <td>靜態網站、純前端</td>
-            <td>無限（靜態網站免費）</td>
-            <td style="color: var(--green);">簡單</td>
-          </tr>
-          <tr>
-            <td><strong>Vercel</strong></td>
-            <td>前端、Next.js 專案</td>
-            <td>有（個人免費方案）</td>
-            <td style="color: var(--green);">簡單</td>
-          </tr>
-          <tr>
-            <td><strong>Render</strong></td>
-            <td>後端 API、小型服務</td>
-            <td>有（免費方案會休眠）</td>
-            <td style="color: var(--yellow);">中等</td>
-          </tr>
-          <tr>
-            <td><strong>Supabase</strong></td>
-            <td>資料庫、後端即服務</td>
-            <td>有（2 個免費專案）</td>
-            <td style="color: var(--green);">簡單</td>
-          </tr>
-          <tr>
-            <td><strong>GCP（Google Cloud）</strong></td>
-            <td>什麼都能跑</td>
-            <td>有（新用戶免費額度）</td>
-            <td style="color: var(--red);">較難</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <h3>怎麼選？</h3>
-
-    <div class="analogy">
-      <strong>簡單判斷法：</strong><br><br>
-      <strong>你的網站沒有「後端」嗎？</strong>（純 HTML/CSS/JS，不需要資料庫）<br>
-      → <strong>Cloudflare Pages</strong>。免費、快、設定最少。<br><br>
-      <strong>你用 Next.js 嗎？</strong><br>
-      → <strong>Vercel</strong>。它就是做 Next.js 的公司，整合最好。<br><br>
-      <strong>你需要後端 API？</strong><br>
-      → <strong>Render</strong>。免費方案夠用，但閒置 15 分鐘會休眠（第一次打開要等 30 秒）。<br><br>
-      <strong>你需要資料庫？</strong><br>
-      → <strong>Supabase</strong>。免費方案有 2 個專案，PostgreSQL 資料庫 + API 一次搞定。<br><br>
-      <strong>你要跑比較複雜的東西？</strong>（自訂 Docker、排程、大量運算）<br>
-      → <strong>GCP</strong>。什麼都能做，但學習門檻最高。
-    </div>
-
-    <div class="box box-warning">
-      <div class="box-label">Render 免費方案的「休眠」問題</div>
-      Render 的免費方案，如果 15 分鐘沒人使用，服務會「睡著」。下一個使用者要等 30 秒到 1 分鐘才會醒過來。<br><br>
-      解法：用 cron job 每 10 分鐘 ping 一次你的服務。這在第九章的 Cold Start 有提過。
-    </div>
-
-    <!-- Chapter Nav -->
-    <div class="chapter-nav">
-      <a href="/chapter10/" class="prev">
-        <span class="nav-label">上一章</span>
-        <span class="nav-title">蓋大樓才會遇到的問題</span>
-      </a>
-      <a href="/appendix/" class="next">
-        <span class="nav-label">下一章</span>
-        <span class="nav-title">附錄：常見問題</span>
-      </a>
-    </div>
-
   </section>
 </main>
 
@@ -311,5 +652,47 @@ Claude Code 讀取筆記<br>
 </footer>
 
 <script src="/main.js"></script>
+<script>
+// 第十一章：「要不要打包」滑桿（前綴 stack-）
+(function () {
+  var demo = document.getElementById('stack-demo');
+  var range = document.getElementById('stack-pages');
+  var num = document.getElementById('stack-pages-num');
+  var note = document.getElementById('stack-pages-note');
+  var count = document.getElementById('stack-html-count');
+  var files = document.getElementById('stack-html-files');
+  var verdict = document.getElementById('stack-verdict');
+  if (!demo || !range || !num || !note || !count || !files || !verdict) return;
+
+  demo.classList.remove('stack-nojs');
+
+  var SITE_PAGES = 20;
+
+  function render() {
+    var n = Number(range.value);
+    num.textContent = n;
+    count.textContent = n;
+    note.hidden = n !== SITE_PAGES;
+
+    while (files.children.length < n) {
+      var f = document.createElement('i');
+      f.className = 'stack-file stack-file-new';
+      files.appendChild(f);
+    }
+    while (files.children.length > n) {
+      files.removeChild(files.lastChild);
+    }
+
+    if (n < 100) {
+      verdict.textContent = '檔案是多，但不用你一頁一頁改，交給 Claude 一次改完。';
+    } else {
+      verdict.textContent = '上百頁了，每改一次就動上百個檔案，漏改的機會變大。到這裡才值得考慮打包那一套。';
+    }
+  }
+
+  range.addEventListener('input', render);
+  render();
+})();
+</script>
 </body>
 </html>

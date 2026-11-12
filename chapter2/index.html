@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第二章：怎麼跟 LLM 下指令 — Claude Code 指南</title>
+  <title>第二章：LLM 本質 — Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -13,11 +13,11 @@
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
       <a href="/">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/" class="active">下指令</a>
-      <a href="/chapter3/">工作流程</a>
-      <a href="/chapter9/">術語字典</a>
-      <a href="/appendix/">附錄</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,345 +27,480 @@
 
 <nav class="mobile-nav">
   <a href="/">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/" class="active">第二章：下指令</a>
-  <a href="/chapter3/">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/">第六章：Claude Code</a>
-  <a href="/chapter7/">第七章：技術棧</a>
-  <a href="/chapter8/">第八章：API</a>
-  <a href="/chapter9/">第九章：術語字典</a>
-  <a href="/chapter10/">第十章：進階問題</a>
-  <a href="/chapter11/">第十一章：工具生態</a>
-  <a href="/appendix/">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/" class="active">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
+<style>
+  /* 第二章小目錄 */
+  .c2-toc { margin-top: 24px; padding: 16px 20px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: var(--radius); }
+  .c2-toc-title { font-size: 14px; font-weight: 700; color: var(--text-heading); margin-bottom: 8px; }
+  .c2-toc ol { margin: 0; padding-left: 1.4em; columns: 2; column-gap: 32px; font-size: 15px; line-height: 1.9; }
+  .c2-toc li { break-inside: avoid; }
+  .c2-toc a { color: var(--accent-light); text-decoration: none; }
+  .c2-toc a:hover { text-decoration: underline; }
+  .c2-toc a:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; border-radius: 2px; }
+  @media (max-width: 600px) { .c2-toc ol { columns: 1; } }
+  .content h2[id] { scroll-margin-top: 80px; }
+</style>
+
   <section class="container">
     <div class="page-header">
       <div class="chapter-label">第二章</div>
-      <h1>怎麼跟 LLM 下指令</h1>
-      <p class="lead">你給 AI 的每一句話叫 Prompt（提示詞）。學會怎麼寫好 Prompt，就是學會怎麼寫「讓員工一次做對的工作交辦事項」。</p>
+      <h1>LLM 本質：你在跟什麼東西說話</h1>
+      <p class="lead">在你開始下指令之前，先搞清楚：坐在螢幕另一邊的，到底是什麼東西。它不是人，也不是搜尋引擎，它是一台「文字接龍機器」。</p>
+
+      <nav class="c2-toc" aria-label="本章小目錄">
+        <div class="c2-toc-title">本章目錄</div>
+        <ol>
+          <li><a href="#nature">LLM 的本質：文字接龍機器</a></li>
+          <li><a href="#models">各家模型有什麼不同</a></li>
+          <li><a href="#context">Context Window：AI 的桌面大小</a></li>
+          <li><a href="#rot">對話越長，品質越爛</a></li>
+          <li><a href="#token">Token：AI 的計費單位</a></li>
+          <li><a href="#takeaway">這章帶走什麼</a></li>
+          <li><a href="#say">跟 Claude 怎麼說</a></li>
+        </ol>
+      </nav>
     </div>
   </section>
 
   <section class="container content">
 
-    <!-- 1. 基本概念 -->
-    <h2>Prompt 和 Prompt Engineering</h2>
+    <p><a href="/chapter1/">上一章</a>說，用 AI 做出別人能用的工具，難的不是叫它動手，是做完之後還改得動、修得好，靠的是知道邊界。邊界要講給 AI 聽，講之前，先認識聽的那一方。這章講它怎麼運作、它記得多少、每一句話花多少錢；懂了這些，<a href="/chapter3/">下一章</a>學下指令才知道為什麼要那樣講。</p>
 
-    <p>先搞清楚兩個詞：</p>
+    <!-- 1. LLM 的本質 -->
+    <h2 id="nature">LLM 的本質：一台超級文字接龍機器</h2>
 
-    <ul>
-      <li><strong>Prompt</strong>：你給 AI 的「工作交辦事項」。你打的每一句話，每一段指令，都是 Prompt。</li>
-      <li><strong>Prompt Engineering</strong>：學會怎麼寫出「讓 AI 一次做對」的交辦事項。不是什麼高深技術，就是「把話說清楚」的學問。</li>
-    </ul>
+    <p>Claude、ChatGPT、Gemini 這類 AI 叫 <strong>LLM</strong>，全名是 <strong>Large Language Model</strong>（大型語言模型）。聽起來很厲害，但它做的事情本質上非常單純：<strong>根據你前面說的話，預測「下一個字」最可能是什麼。</strong></p>
 
-    <div class="analogy">
-      <strong>比喻：交辦事項寫得好不好</strong><br><br>
-      你請一個新來的助理幫你買咖啡。<br><br>
-      你說：「幫我買咖啡。」——他可能買了一杯美式、一杯拿鐵、或是三合一即溶。因為你沒講清楚。<br><br>
-      你說：「去樓下 7-11 買一杯大杯冰美式，不要加糖。」——他一次搞定，不用再打電話問你。<br><br>
-      <strong>Prompt Engineering 就是學會寫出第二種交辦。</strong>
-    </div>
+    <p>你跟它說「今天天氣」，它不是去查氣象局，而是根據它讀過的大量文字，判斷「今天天氣」後面最常接什麼字，可能是「很好」、「不錯」、「真熱」。然後它從這些可能的答案裡挑一個。</p>
 
-    <!-- 2. 三層溝通模型 -->
-    <h2>三層溝通模型：目標、邊界、情境</h2>
-
-    <p>每一次跟 AI 溝通，你需要想清楚三層東西：</p>
-
-    <ol>
-      <li><strong>目標（要什麼）</strong>——你希望 AI 產出什麼結果</li>
-      <li><strong>邊界（不要什麼）</strong>——你不希望 AI 做什麼、哪些是禁區</li>
-      <li><strong>情境（在什麼狀況下）</strong>——目前的背景、限制條件、已有的東西</li>
-    </ol>
-
-    <p>很多人只講了第一層（我要一個購物車功能），然後 AI 就自由發揮了。你收到的東西可能完全不是你要的，但你也不能怪 AI——因為你沒告訴它不要什麼。</p>
-
-    <div class="box box-danger">
-      <div class="box-label">核心觀念</div>
-      <strong>「不要什麼」比「要什麼」更重要。</strong><br><br>
-      因為「要什麼」的範圍是有限的，但「AI 可能自作主張做的事」是無限的。你沒說不要，它就可能會做。你得用邊界把它框住。
-    </div>
+    <p>接著，它拿「今天天氣很好」這整句話，再預測下一個字。如此反覆，一個字接一個字，直到它覺得該停了。</p>
 
     <div class="analogy">
-      <strong>比喻：裝潢師傅</strong><br><br>
-      你跟裝潢師傅說：「幫我裝潢客廳。」<br><br>
-      師傅很認真，做了天花板造型、電視牆、木地板、間接照明、訂製書櫃。<br><br>
-      但你只是想<strong>刷白漆、換一盞燈</strong>。<br><br>
-      師傅做錯了嗎？沒有。他做了「裝潢客廳」這件事。是你沒說清楚你的邊界：不要動天花板、不要做電視牆、不要換地板。<br><br>
-      <strong>跟 AI 溝通也一樣：不說清楚邊界，它就會「好心幫你多做」。</strong>
+      <strong>比喻：讀過全世界圖書館的鸚鵡</strong><br><br>
+      想像有一隻鸚鵡，它讀過非常多的書、網頁、對話紀錄和程式碼。你問它什麼，它都能說出一段聽起來很有道理的話。<br><br>
+      但是，它並不「理解」它在說什麼。它不知道「悲傷」是什麼感覺，它只知道「悲傷」這個詞後面，通常會接「難過」、「流淚」、「心痛」這些字。<br><br>
+      <strong>說出來的話很有道理，但它不真的懂。</strong>這就是 LLM 最重要的本質。
     </div>
 
-    <!-- 3. 你不知道你不知道的 -->
-    <h2>你不知道可能有什麼問題</h2>
-
-    <p>三層模型的「情境」這一層最容易被忽略，因為——<strong>你不知道你不知道什麼</strong>。</p>
-
-    <div class="analogy">
-      <strong>比喻：蓋房子的故事</strong><br><br>
-      有個台灣人要蓋房子，找了三國的建築師來：美國人、日本人、台灣人。<br><br>
-      美國人蓋了一棟漂亮的木造房子。日本人蓋了一棟鋼骨結構的建築。台灣人也蓋了鋼筋混凝土的房子。<br><br>
-      結果地震來了。<br><br>
-      美國人蓋的房子倒了——因為美國很多地方沒地震，他不知道要考慮耐震。<br>
-      日本人和台灣人蓋的都沒事——因為他們的「情境知識」包含了「這裡會地震」。<br><br>
-      <strong>重點不是技術差，而是「情境」不同。</strong>你跟 AI 講「幫我蓋房子」，它不一定知道你在台灣、台灣會地震、需要耐震結構。你得主動告訴它。
-    </div>
-
-    <p>這就是為什麼很多人覺得「AI 好笨」——不是 AI 笨，是你沒給它足夠的情境。它不知道你的產業、你的客戶、你的限制條件。你得像跟一個外國新員工交接工作一樣，把所有背景交代清楚。</p>
-
-    <!-- 4. 實際對比 -->
-    <h2>新手 vs 有效的指令</h2>
-
-    <p>來看幾個實際的對比，你就知道差異有多大：</p>
-
-    <div class="compare">
-      <div class="compare-bad">
-        <div class="compare-label">新手的說法</div>
-        <div class="code-block">
-「幫我做一個網站。」
-        </div>
-      </div>
-      <div class="compare-good">
-        <div class="compare-label">有效的說法</div>
-        <div class="code-block">
-「用 Next.js 做一個單頁式產品介紹頁，<br>
-內容包含：Hero 區塊、三個功能特色、<br>
-價格方案比較表、聯絡表單。<br>
-風格參考 Linear.app，深色主題。<br>
-不需要後端、不需要資料庫。」
-        </div>
-      </div>
-    </div>
-
-    <div class="compare">
-      <div class="compare-bad">
-        <div class="compare-label">新手的說法</div>
-        <div class="code-block">
-「登入功能壞了，幫我修。」
-        </div>
-      </div>
-      <div class="compare-good">
-        <div class="compare-label">有效的說法</div>
-        <div class="code-block">
-「登入頁面按送出後，console 顯示<br>
-401 Unauthorized。<br>
-後端是 Express + JWT，<br>
-token 有正確產生但前端沒存到<br>
-localStorage。<br>
-可能是 CORS 問題或 response<br>
-header 沒設對。」
-        </div>
-      </div>
-    </div>
-
-    <div class="compare">
-      <div class="compare-bad">
-        <div class="compare-label">新手的說法</div>
-        <div class="code-block">
-「加一個搜尋功能。」
-        </div>
-      </div>
-      <div class="compare-good">
-        <div class="compare-label">有效的說法</div>
-        <div class="code-block">
-「在商品列表頁加搜尋框，<br>
-用前端過濾就好，不用打 API。<br>
-搜尋範圍只包含商品名稱，<br>
-不搜描述。打字時即時過濾，<br>
-不用按送出按鈕。<br>
-沒結果時顯示『找不到相關商品』。」
-        </div>
-      </div>
-    </div>
-
-    <!-- 5. 先後順序陷阱 -->
-    <h2>先後順序陷阱：先講跟後講，成本差 10 倍</h2>
-
-    <p>除了「說什麼」，「什麼時候說」也很重要。很多需求如果在一開始就提出來，AI 會自然地把它融入架構。但如果你等到做完了才補充，AI 就得把原本的東西拆掉重做。</p>
-
-    <div class="analogy">
-      <strong>比喻：水電管線</strong><br><br>
-      蓋房子的時候，水電管線要在砌牆之前就埋好。如果牆都砌好了，你才說「欸，這裡加一個插座」——那就得打牆、埋管、補牆、重新粉刷。<br><br>
-      本來只要 100 塊的事，變成 1000 塊。<br><br>
-      <strong>跟 AI 溝通也一樣。在開始動工前就把需求說完整，改起來只是調整設計圖。動工後才補需求，就是打牆重來。</strong>
-    </div>
-
-    <h3>案例：i18n 國際化</h3>
-
-    <p><strong>i18n</strong> 是 internationalization 的縮寫（i 和 n 之間有 18 個字母）。白話說就是：讓你的網站支援多種語言。</p>
-
-    <div class="compare">
-      <div class="compare-good">
-        <div class="compare-label">一開始就說（成本 1x）</div>
-        <div class="code-block">
-「做一個產品介紹頁，<br>
-要支援中文和英文切換，<br>
-用 i18n 架構，文字都放在<br>
-語言檔案裡，不要寫死在 HTML。」<br><br>
-<span style="color: var(--green);">AI 從第一行程式碼就會用正確的架構。</span>
-        </div>
-      </div>
-      <div class="compare-bad">
-        <div class="compare-label">做完才說（成本 10x）</div>
-        <div class="code-block">
-（網站已做完，30 個檔案，<br>
-所有文字都寫死在 HTML 裡）<br><br>
-「欸，加一個英文版。」<br><br>
-<span style="color: var(--red);">AI 要翻遍 30 個檔案，<br>
-把每一段文字抽出來，<br>
-建立語言檔，重寫引用方式。<br>
-可能改一改還會改壞其他功能。</span>
-        </div>
-      </div>
-    </div>
+    <p>所以，當 LLM 給你一個錯誤的答案，它不是在「騙你」，它只是接龍接錯了。就像鸚鵡不是故意說錯話，它根本不知道什麼是對什麼是錯。麻煩的是，<strong>它接錯的時候，講得跟接對的時候一樣有自信。</strong>這個現象有個專有名詞，叫 <strong>Hallucination（幻覺）</strong>：AI 一本正經地講錯。</p>
 
     <div class="box box-warning">
-      <div class="box-label">記住這個原則</div>
-      <strong>在動工前，把你「可能會要的東西」都先列出來。</strong>就算不確定要不要做，先告訴 AI「可能會有 XX 需求」，讓它預留空間。砌牆前埋管線是 100 塊，砌完牆才打洞是 1000 塊。
+      <div class="box-label">重要觀念</div>
+      LLM 本身的知識全部來自「訓練資料」，也就是它被餵過的那些文字。訓練資料有截止日期，截止之後發生的事它不知道。<br><br>
+      現在很多 AI 工具會幫它接上「查資料」的能力。Claude Code 就可以上網搜尋、讀官方文件、查錯誤訊息，也會讀你資料夾裡的檔案。但它查到什麼、讀到什麼，還是要經過「接龍」這一關才講給你聽，所以重要的事，請它附上出處。
     </div>
 
-    <h3>案例：搜尋功能的邊界比你想像的複雜</h3>
+    <h3>訓練資料決定一切</h3>
 
-    <p>你跟 LLM 說「加一個搜尋功能」，聽起來很簡單，但搜尋其實有很多種：</p>
+    <p>文字接龍接得好不好，完全取決於這台機器「讀過什麼」。這就是<strong>訓練資料（Training Data）</strong>的重要性。兩個例子可以幫你理解：</p>
+
+    <div class="analogy">
+      <strong>例子一：白日依山盡</strong><br><br>
+      在台灣只要講「白日依山盡」，幾乎每個人都會接「黃河入海流」。為什麼？因為受過中文教育的人都讀過這首詩，腦中早就建立了這個連結。<br><br>
+      但如果這是一個<strong>沒讀過中文資料的模型</strong>，它可能覺得「白日依山盡」後面接「早餐正好吃」也很合理，然後就這樣輸出了。它不是故意搞笑，它只是從來沒讀過唐詩，所以不知道「正確答案」是什麼。<br><br>
+      <strong>這就是訓練資料的差異。</strong>同樣的文字接龍機器，餵不同的資料，產出完全不同的結果。
+    </div>
+
+    <div class="analogy">
+      <strong>例子二：孫悟空</strong><br><br>
+      你跟在華人文化裡長大的人講「孫悟空」三個字，腦中自然浮現一隻猴子拿著金箍棒，旁邊還有唐僧和白馬。這個畫面是《西遊記》幾百年的文化沉澱。<br><br>
+      但你跟一個從小看日本動漫的美國人說「Son Goku」，他腦中浮現的可能是《七龍珠》裡那個金色頭髮的超級賽亞人，完全不同的東西。<br><br>
+      LLM 也是一樣，<strong>它「腦中浮現什麼」，取決於訓練資料裡有什麼。</strong>一個大量讀日本動漫資料的模型，和一個大量讀中國古典文學的模型，對「孫悟空」的理解天差地別。
+    </div>
+
+    <p>這帶出一件很實際的事：<strong>你公司的事，它沒讀過。</strong>訓練資料裡不會有你的客戶、你的報價規則、你家系統哪一張表不能動。它會讀你給它的檔案，也會上網查，但「哪些不能動」這種只在你腦子裡的東西，要你講。</p>
+
+    <!-- RAG 簡介 -->
+    <h3>RAG：讓 AI 從閉卷考變開書考</h3>
+
+    <p><strong>RAG</strong> 的全名是 <strong>Retrieval-Augmented Generation</strong>（檢索增強生成）。聽起來很學術，白話講就是：<strong>讓 AI 先翻你的資料，再回答問題，不是只靠它自己記住的東西。</strong></p>
+
+    <div class="analogy">
+      <strong>比喻：閉卷考 vs. 開書考</strong><br><br>
+      沒有 RAG 的 AI 就像在考閉卷考：它只能靠訓練時記住的知識來回答。如果這個知識它沒學過（比如你公司內部的 SOP、最新的法規修訂），它就只能瞎猜，或說「我不知道」。<br><br>
+      有 RAG 的 AI 就像在考開書考：回答之前，它會先去翻你提供的「參考書」（可以是你的文件、資料庫、知識庫），找到相關段落之後，再根據這些資料組織答案。<br><br>
+      <strong>同一個學生，開書考通常考得比閉卷考好。</strong>但書要給對：參考書本身寫錯，它就照著錯的抄。
+    </div>
+
+    <p>RAG 跟前面講的訓練資料直接相關：AI 沒學過的東西，如果你不即時補充給它，它就只能用「文字接龍的直覺」去猜，而猜出來的東西，就是 Hallucination。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">白話總結</div>
+      訓練資料 = AI 的長期記憶（學校學的）。RAG = AI 的即時參考書（考試時翻的）。兩者結合，AI 才能又有基礎知識、又能處理它沒見過的新資訊。<br><br>
+      平常用 Claude Code 時，你把檔案、截圖、錯誤訊息、公司的規矩交給它，就是在做最簡單的「開書考」。它不知道的，要你給。
+    </div>
+
+    <!-- 2. 各家模型比較 -->
+    <h2 id="models">各家模型有什麼不同</h2>
+
+    <p>市面上有好幾家在做 LLM，最常聽到的是 OpenAI 的 GPT（ChatGPT 背後的模型）、Anthropic 的 Claude、Google 的 Gemini。它們的原理差不多，都是文字接龍，但各有擅長的地方。</p>
+
+    <div class="analogy">
+      <strong>比喻：三個不同性格的顧問</strong><br><br>
+      下面是作者自己用下來的印象，不是評測結果；各家每隔幾個月就出新版，印象也會跟著變。<br><br>
+      <strong>GPT（OpenAI）</strong>像一個什麼都會一點的萬用顧問。你問什麼它都能答，生態成熟、外掛多，但有時候會太自信，明明不確定的事也講得斬釘截鐵。<br><br>
+      <strong>Claude（Anthropic）</strong>像一個謹慎的技術顧問。它擅長讀長文件、寫程式碼、做分析，不確定的事比較會跟你說「我不確定」。Claude Code 用的就是 Claude 模型。<br><br>
+      <strong>Gemini（Google）</strong>像一個資料量很大的研究員。它能接上 Google 搜尋，擅長整合各種來源的資訊，看圖、看影片、聽聲音這類多模態的能力也強。
+    </div>
 
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
-            <th>搜尋類型</th>
-            <th>白話</th>
-            <th>例子</th>
+            <th>特性</th>
+            <th>GPT (OpenAI)</th>
+            <th>Claude (Anthropic)</th>
+            <th>Gemini (Google)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>精確搜尋</strong></td>
-            <td>打什麼找什麼，一字不差</td>
-            <td>搜「iPhone 16」只找到 iPhone 16</td>
+            <td>擅長</td>
+            <td>通用任務、外掛生態</td>
+            <td>長文分析、程式碼、安全性</td>
+            <td>多模態、搜尋整合</td>
           </tr>
           <tr>
-            <td><strong>模糊搜尋</strong></td>
-            <td>打錯字也能找到</td>
-            <td>搜「iPhoen」也能找到 iPhone</td>
+            <td>Context Window</td>
+            <td>常隨新版調整，以官方模型頁為準</td>
+            <td>目前各款都是 1M（100 萬）tokens</td>
+            <td>常隨新版調整，以官方模型頁為準</td>
           </tr>
           <tr>
-            <td><strong>範圍搜尋</strong></td>
-            <td>在某個範圍內搜</td>
-            <td>價格 1000-5000 元</td>
+            <td>個性（作者印象）</td>
+            <td>自信、什麼都敢答</td>
+            <td>謹慎、會說「我不確定」</td>
+            <td>中規中矩、偏學術</td>
           </tr>
           <tr>
-            <td><strong>過濾 Filter</strong></td>
-            <td>用條件篩選</td>
-            <td>只看紅色、只看 XL</td>
+            <td>適合</td>
+            <td>日常問答、創意寫作</td>
+            <td>寫程式、讀文件、技術任務</td>
+            <td>研究、整合多種來源</td>
           </tr>
           <tr>
-            <td><strong>全文搜尋</strong></td>
-            <td>搜內文，不只標題</td>
-            <td>搜「退貨」會找到文章裡提到退貨的</td>
-          </tr>
-          <tr>
-            <td><strong>即時搜尋</strong></td>
-            <td>打字的同時就跑出結果</td>
-            <td>Google 搜尋的自動建議</td>
+            <td>要留意</td>
+            <td>講錯時也很有自信</td>
+            <td>有時太保守，會拒絕回答</td>
+            <td>回答有時不夠聚焦</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="box box-warning">
-      <div class="box-label">注意</div>
-      如果你只說「加搜尋功能」，LLM 可能只做精確搜尋。但你的使用者期待的是模糊搜尋 + 過濾。這就是為什麼邊界要講清楚。
-    </div>
-
-    <!-- 6. Prompt Checklist -->
-    <h2>下指令的 Checklist</h2>
-
-    <p>每次下指令前，過一遍這個清單，可以幫你大幅提高品質、減少來回修改：</p>
-
-    <h3>目標面（要什麼）</h3>
-    <ul>
-      <li>我要的最終產出是什麼？（一個頁面？一支 API？一段分析？）</li>
-      <li>它給誰用的？（一般使用者？管理者？我自己？）</li>
-      <li>成功的標準是什麼？（能登入就好？還是要有忘記密碼流程？）</li>
-      <li>有沒有參考範例？（像 XXX 網站那樣）</li>
-    </ul>
-
-    <h3>邊界面（不要什麼）</h3>
-    <ul>
-      <li>哪些功能<strong>不要</strong>做？（不要社群登入、不要第三方套件）</li>
-      <li>哪些技術<strong>不要</strong>用？（不要 jQuery、不要 class component）</li>
-      <li>複雜度上限在哪？（先做最簡單的版本就好）</li>
-      <li>有什麼已經做好了，<strong>不要動</strong>的？（資料庫結構已定，不能改）</li>
-    </ul>
-
-    <h3>情境面（在什麼狀況下）</h3>
-    <ul>
-      <li>目前用什麼技術棧？（Next.js + Supabase + Tailwind）</li>
-      <li>現有的檔案結構長什麼樣？（列出主要資料夾）</li>
-      <li>有什麼已知的限制？（免費方案、流量限制、手機要能用）</li>
-      <li>這是全新專案，還是要加進現有系統？</li>
-      <li>團隊有幾個人？只有你自己？（影響程式碼複雜度的決定）</li>
-    </ul>
-
     <div class="box box-tip">
-      <div class="box-label">不用每次都寫這麼多</div>
-      小任務不需要寫完整個 checklist。但大任務（做新功能、開新專案、改架構）一定要盡量涵蓋。養成習慣之後，你會自然知道哪些該講。
+      <div class="box-label">白話總結</div>
+      沒有「最好」的模型，只有「適合你當下需求」的模型。用 Claude Code 做專案，背後就是 Claude；你要選的不是哪一家，而是用大一點還是小一點的那款（下面會講）。
     </div>
-
-    <!-- 7. CLAUDE.md -->
-    <h2>CLAUDE.md：你的「邊界文件」</h2>
-
-    <p>如果你用 Claude Code，有一個非常重要的檔案叫 <code>CLAUDE.md</code>。它是放在你專案根目錄的一個文字檔，AI 每次啟動時都會自動讀取。</p>
-
-    <div class="analogy">
-      <strong>比喻：新員工的 SOP 手冊</strong><br><br>
-      想像你請了一個新員工。他第一天上班，你會給他一本公司 SOP：「我們用什麼工具」、「我們的命名規則」、「客戶的忌諱」、「出包了找誰」。<br><br>
-      <code>CLAUDE.md</code> 就是 AI 的那本 SOP 手冊。你把專案的規則、偏好、禁忌、架構說明全部寫在裡面。這樣你不用每次開新 Session 都重複講一遍——<strong>AI 每次都會先讀這本手冊。</strong>
-    </div>
-
-    <p>一個 CLAUDE.md 裡通常會寫什麼：</p>
-
-    <ul>
-      <li>這個專案用什麼技術（Next.js 14 + App Router + Supabase）</li>
-      <li>程式碼風格（用 TypeScript、用 functional component、不用 any）</li>
-      <li>檔案放哪裡（元件放 components/、API 放 app/api/）</li>
-      <li>不能做什麼（不要動 database schema、不要改 auth 邏輯）</li>
-      <li>常見的坑（這個專案的 API 有 rate limit，一分鐘最多 60 次）</li>
-    </ul>
 
     <div class="box box-info">
-      <div class="box-label">CLAUDE.md 的好處</div>
-      <strong>寫一次，每個 Session 都有效。</strong><br><br>
-      前一章講過 Context Window 的問題——每次開新 Session，AI 都會忘記之前的對話。但 CLAUDE.md 是持久的。你寫進去的東西，AI 每次啟動都會讀。這是對抗 Context 遺失最有效的方法之一。
+      <div class="box-label">關於本網站</div>
+      本網站內容通用於所有 LLM，不限特定廠商。文字接龍、Context Window、Token 這些觀念，不管你用哪家都適用。案例採用 Anthropic 的 Claude，是因為作者的使用經驗最多。
     </div>
 
-    <!-- 8. 本章小結 -->
-    <h2>本章小結</h2>
+    <h3>模型大小就是物理規律</h3>
 
-    <p>這一章你學到了以下幾件事：</p>
+    <p>Anthropic（Claude）目前有幾個值得注意的特點：</p>
+
+    <ul>
+      <li><strong>1M Context Window</strong>：Claude 目前各款模型都支援 100 萬 token 的上下文視窗，一次能攤開的資料量很大（2026 年 11 月官方模型頁）。</li>
+      <li><strong>讓 AI 操作電腦</strong>：Anthropic 很早就推出 Computer Use，讓 AI 看螢幕、點滑鼠、打字。Claude Code 的桌面版也能用。不過在這本書的順序裡它排最後：有官方 CLI 先用 CLI，沒有才裝 MCP，網頁交給瀏覽器工具，都不行才用 Computer Use（<a href="/chapter10/">第十章 Claude Code 怎麼用</a>）。</li>
+      <li><strong>安全規矩比較嚴</strong>：有些事它會拒絕，或停下來先問你。有時候會讓你覺得「怎麼這麼囉嗦」，但這是 Anthropic 的設計取向，既是特色也是門檻。</li>
+    </ul>
+
+    <p>但是，<strong>這不代表 Anthropic 就特別優秀。</strong></p>
+
+    <p>如果你用 Anthropic 最便宜（最小）的那款模型，它的效果通常比不上其他家的中階模型。這不是品牌問題，這是<strong>物理規律</strong>：同一個世代裡，模型越大、參數越多，能力通常越強。就像一台 2 公升引擎的車，不管品牌多好，很難跑贏對手的 5 公升引擎。選模型的時候，品牌忠誠度遠不如「選對大小」來得重要。</p>
+
+    <p>大的模型比較聰明，也比較貴、比較慢；小的便宜、快，適合簡單、大量的工作。在 Claude Code 裡打 <code>/model</code> 就能換，難的事用大的，例行的事用小的。</p>
+
+    <!-- 3. Context Window -->
+    <h2 id="context">Context Window：AI 的「桌面大小」</h2>
+
+    <p><strong>Context Window</strong>（上下文視窗）是 LLM 最重要的概念之一。簡單說，它就是 AI 在一次對話中「能同時攤開多少東西」的上限。</p>
+
+    <div class="analogy">
+      <strong>比喻：你的辦公桌</strong><br><br>
+      想像你在處理一個案子，你的辦公桌就這麼大。你可以攤開幾份文件、幾張圖表，同時對照著看。但如果文件太多，桌子放不下，你就得把舊的收起來，才能放新的。<br><br>
+      AI 的 Context Window 就是這張桌子。你說的話、它的回答、它讀過的檔案、背景設定，全部攤在這張桌上。<strong>桌子越大，能同時看的資料越多。桌子滿了，就得收掉一些：有的工具會把最舊的直接推掉，Claude Code 則是把前面的對話壓成摘要。</strong>
+    </div>
+
+    <p>這個「桌子」的大小用 <strong>Token</strong> 來衡量（Token 是什麼，這章後面會講）。以 Claude 為例，目前各款模型都是 1,000,000 tokens（100 萬）。其他家的數字也一直在往上加，而且常隨新版調整，要知道確切的數字，查各家的官方模型頁。</p>
+
+    <p>聽起來很多？但實際上消耗速度比你想像的快。因為 Context Window 裝的不只是你說的話，還包括：</p>
 
     <ol>
-      <li><strong>Prompt 就是你給 AI 的工作交辦事項</strong>，Prompt Engineering 就是學會怎麼寫讓 AI 一次做對的交辦。</li>
-      <li><strong>三層溝通模型</strong>——目標（要什麼）、邊界（不要什麼）、情境（在什麼狀況下）。大部分人只講了目標，忘了邊界和情境。</li>
-      <li><strong>「不要什麼」比「要什麼」更重要</strong>——裝潢師傅的故事：不說不要，AI 就會好心多做。</li>
-      <li><strong>你不知道你不知道什麼</strong>——蓋房子的故事：情境知識（地震、法規、限制）要主動告訴 AI。</li>
-      <li><strong>先後順序影響巨大</strong>——水電管線的故事：先講成本 1x，後講成本 10x。</li>
-      <li><strong>CLAUDE.md 是你的邊界文件</strong>——寫一次，每個 Session 都有效，是對抗 Context 遺失的最佳武器。</li>
+      <li><strong>系統指令</strong>（System Prompt）：告訴 AI「你是誰、該怎麼做事」的背景設定</li>
+      <li><strong>你的每一句話</strong>：包括你之前所有的對話歷史</li>
+      <li><strong>AI 的每一句回覆</strong>：它自己說過的話也算</li>
+      <li><strong>程式碼、文件內容</strong>：如果你叫它讀檔案，檔案內容也會佔空間；它跑指令印出來的結果也算</li>
+      <li><strong>每次開工先讀的說明檔</strong>：Claude Code 會先讀專案裡的 <code>CLAUDE.md</code> 和它自己記的筆記（<a href="/chapter3/#claude-md">下一章</a>會講）</li>
     </ol>
 
-    <p>現在你知道怎麼「說話」了。但光會說話還不夠——你還需要知道正確的「做事順序」。下一章我們來講工作流程。</p>
+    <p>現在的桌子已經很大，而且 Claude Code 快滿的時候會自動整理，真的放不下的情況不常見。但<strong>桌子大，不代表可以亂堆</strong>：</p>
+
+    <ul>
+      <li><strong>每一輪都要重讀整張桌子。</strong>AI 不會「記得」上一句，每次回答，都是把整段對話重新送一次。對話越長，每一句越貴。</li>
+      <li><strong>堆太多雜物，它會分心。</strong>三件不相干的事、兩次失敗的嘗試都還攤在桌上，它每次都會看到，回答就容易被帶歪。</li>
+    </ul>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">桌子太亂的症狀</div>
+        <div class="code-block">
+AI 開始「忘記」你之前說過的事<br>
+回答變得前後矛盾<br>
+你說「照之前的格式」，<br>
+它卻做出完全不同的格式<br>
+程式碼開始出現重複或遺漏
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">桌面清爽的狀態</div>
+        <div class="code-block">
+AI 記得你這次的所有需求<br>
+回答邏輯連貫、前後一致<br>
+能引用你之前提過的細節<br>
+程式碼能正確銜接之前的架構
+        </div>
+      </div>
+    </div>
+
+    <h3>上下文壓縮與對話分支</h3>
+
+    <p>既然桌子會滿，有沒有辦法「自動整理桌面」？有的。Claude Code 有幾個機制可以幫忙：</p>
+
+    <p><strong>上下文壓縮（Compaction）</strong>：對話太長、快要塞滿 Context Window 時，Claude Code 會自動把前面的對話壓成摘要，騰出空間繼續做。就像你把桌上的文件整理成一頁摘要，騰出空間放新東西。你不需要手動觸發，它會自己判斷什麼時候該壓。想自己決定什麼時候壓、要留哪些重點，可以打 <code>/compact</code>，後面加一句「保留 API 的修改和測試指令」這類說明。</p>
+
+    <p>要注意的是，官方文件也寫明：摘要會留下你的要求和關鍵的程式碼，但<strong>對話很前面交代的細節可能在壓縮時遺失</strong>。所以每次都要遵守的規矩，不要只講在對話裡，要寫進 <code>CLAUDE.md</code>（<a href="/chapter3/#claude-md">下一章</a>）。</p>
+
+    <p><strong>對話分支（Fork）</strong>：你可以從目前的對話「分叉」出一條新的分支。打 <code>/branch</code>，它會把到目前為止的對話複製成一個新的對話，原本那條原封不動留著。就像遊戲裡的存檔點：先存一份，再去試另一條路，走錯了，原本的存檔還在。</p>
+
+    <p><strong>倒回去（Rewind）</strong>：打 <code>/rewind</code>，或在輸入框是空的時候連按兩次 <code>Esc</code>，可以選一句你說過的話，把對話、程式，或兩個一起倒回那句之前。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">實用場景</div>
+      你請 AI 用方案 A 做了一個功能，做到一半覺得方案 B 可能更好。這時候先 <code>/branch</code> 留住方案 A 的對話，再在新的分支裡 <code>/rewind</code> 回到「還沒開始做」的那一句，改走方案 B。方案 A 的對話還在，隨時可以回去看。<br><br>
+      但要記得：<strong>對話可以分兩條，資料夾裡的檔案只有一份。</strong>倒回程式碼，方案 A 改過的檔案也會跟著退回。想把方案 A 的程式也留著，先請 Claude 用 Git（版本控制）存一個版本再分叉。這些指令細節在<a href="/chapter10/">第十章 Claude Code 怎麼用</a>。
+    </div>
+
+    <!-- 4. Context rot -->
+    <h2 id="rot">對話越長，品質越爛</h2>
+
+    <p>就算桌子還沒完全滿，AI 的表現也會隨著對話變長而下降。Anthropic 的官方文件把這個現象叫 <strong>context rot</strong>（上下文腐壞）：放進去的東西越多，它找得準、記得住的能力越差。也有人叫它 Context Fragmentation（上下文碎片化）或 Context Degradation（上下文退化），講的是同一件事。</p>
+
+    <div class="analogy">
+      <strong>比喻：堆滿東西的桌子</strong><br><br>
+      你的桌子雖然還有空間，但上面堆了 100 份文件。你要找其中一份的某個數字，得翻半天。就算找到了，你可能也忘了剛剛另一份文件上寫了什麼。<br><br>
+      AI 也一樣。當 Context Window 裡塞了太多東西，各種需求、修改紀錄、程式碼、錯誤訊息，它就越來越難「找到重點」。它不是忘了，而是被噪音淹沒了。
+    </div>
+
+    <p>實際的症狀包括：</p>
+
+    <ul>
+      <li>你一開始提的需求，聊到後面它已經「沒在管了」</li>
+      <li>你明明修正過的 bug，它又做回原本有問題的版本</li>
+      <li>回答開始變得泛泛的，不夠具體</li>
+      <li>程式碼的風格、命名規則開始不一致</li>
+    </ul>
+
+    <h3>何時該開新對話</h3>
+
+    <p>當你感覺到上面任何一個症狀，就是該開新對話（新 Session）的時候。在 Claude Code 裡打 <code>/clear</code> 就是開一場全新的對話；舊的不會不見，用 <code>/resume</code> 找得回來。以下是一些經驗法則：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>情境</th>
+            <th>建議</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>對話已經拉得很長，回頭找東西要捲很久</td>
+            <td>開新對話，把重要的結論整理成一段摘要貼給它</td>
+          </tr>
+          <tr>
+            <td>主題已經換了（從 A 功能跳到 B 功能）</td>
+            <td>開新對話，一個對話只做一件事</td>
+          </tr>
+          <tr>
+            <td>AI 開始忘記之前的決定</td>
+            <td>開新對話，在開頭摘要之前的重要決定</td>
+          </tr>
+          <tr>
+            <td>同樣的規矩你已經講了好幾次</td>
+            <td>寫進 <code>CLAUDE.md</code>，以後每次開工它都會先讀（<a href="/chapter3/#claude-md">下一章</a>）</td>
+          </tr>
+          <tr>
+            <td>單純修一個小 bug</td>
+            <td>可以繼續；但同一件事糾正兩次還不對，不要糾正第三次，<code>/clear</code> 之後把剛剛學到的寫成一句更完整的指令重來</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>最後一條是官方使用建議（Best practices）的意思：糾正兩次還錯，對話裡已經堆了兩次失敗的嘗試，它每次都會重讀；清掉重來，加一句更好的指令，通常比較快。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">實用建議</div>
+      開新對話不代表「砍掉重練」。你可以在新對話的第一句話裡，把之前的重要結論、架構決定、檔案路徑整理成一段摘要貼上去，或者叫舊對話的 Claude 先幫你寫好這段摘要。這比讓 AI 在很長的對話裡自己翻找有效太多了。
+    </div>
+
+    <!-- 5. Token -->
+    <h2 id="token">Token：AI 的計費單位</h2>
+
+    <p>前面一直提到 Token，到底 Token 是什麼？</p>
+
+    <p><strong>Token 是 AI 處理文字的最小單位。</strong>你可以把它想像成「AI 版的音節」。它不是一個字、也不一定是一個詞，而是 AI 自己切割文字的方式。</p>
+
+    <div class="analogy">
+      <strong>比喻：寄包裹的重量計費</strong><br><br>
+      就像寄國際包裹用「公斤」計費，AI 用 Token 計費。你寫給它的每一個字都有重量，它回覆你的每一個字也有重量。來回越多輪，包裹越重，費用越高。<br><br>
+      而且 AI 不只是秤你寄出去的（Input Token），還秤它寄回來的（Output Token）。<strong>你講的多花錢，它回的長也花錢。</strong>
+    </div>
+
+    <p>不同的內容，切法不一樣：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>內容</th>
+            <th>怎麼切</th>
+            <th>要知道的</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>英文</td>
+            <td>常見的單字常常整個是一塊</td>
+            <td>長的、少見的字會被切成好幾塊</td>
+          </tr>
+          <tr>
+            <td>中文</td>
+            <td>一個字可能是一塊，也可能被切成好幾塊</td>
+            <td>同一句話用掉多少，每家、每一代模型都不一樣</td>
+          </tr>
+          <tr>
+            <td>程式碼</td>
+            <td>符號、空格、縮排都算</td>
+            <td>一大段程式碼或一長串錯誤訊息，很快就吃掉桌面</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>想知道一段文字確切是幾個 Token，各家都有官方的計算工具；平常不用算，知道「越長越貴」就夠了。</p>
+
+    <p>為什麼要在乎 Token？因為：</p>
+
+    <ol>
+      <li><strong>Token = 錢</strong>：用 API 的話，是照 Token 數量收費；用訂閱方案的話，Token 用得越多，越快碰到用量上限。在 Claude Code 裡打 <code>/usage</code> 可以看用了多少。</li>
+      <li><strong>Token = 桌子空間</strong>：前面講的 Context Window 就是用 Token 來衡量大小的。你浪費 Token 在無意義的對話上，就是在佔桌子空間。</li>
+      <li><strong>Token = 時間</strong>：Token 越多，AI 處理的時間越長，回覆越慢。</li>
+    </ol>
+
+    <div class="compare">
+      <div class="compare-bad">
+        <div class="compare-label">浪費 Token 的做法</div>
+        <div class="code-block">
+你：「嗯……我想想看……<br>
+那個功能……就是……<br>
+你知道那種可以讓使用者……<br>
+算了我重新說好了」<br><br>
+<span style="color: var(--red);">燒了 Token，什麼資訊也沒給</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">省 Token 的做法</div>
+        <div class="code-block">
+你：「新增會員登入功能，<br>
+用 email + 密碼驗證，<br>
+登入成功後跳到 /dashboard」<br><br>
+<span style="color: var(--green);">短，資訊完整且精確</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-warning">
+      <div class="box-label">Token 省錢公式</div>
+      <strong>說清楚 + 說具體 + 一次到位 = 最省 Token。</strong><br><br>
+      每多一輪來回對話，Token 消耗是「累加」的，因為 AI 每次回覆都要重新讀一遍整個對話歷史。第 1 輪它讀 1 段，第 10 輪它讀 10 段，第 30 輪它讀 30 段。所以同樣的事情，1 輪搞定跟 10 輪搞定，差距會越滾越大。<br><br>
+      Claude Code 會用「快取」讓重讀前面的內容便宜一些，但只在短時間內有效，而且快取省的是錢，不會讓那些內容少佔桌面。
+    </div>
+
+    <h3>節省 Token 的實用工具</h3>
+
+    <p>除了養成「說清楚、說具體」的習慣之外，還有工具可以幫你精簡輸入：</p>
+
+    <ul>
+      <li><strong>Typeless</strong>：一個語音輸入工具。你用講的，它把「嗯」、「那個」、「就是」這類填充詞自動刪掉，整理成乾淨的文字，再貼給 AI。上面那段「嗯……我想想看……」就是它會幫你砍掉的東西。電腦和手機都有，適合想到什麼就講、不想打字的人。</li>
+    </ul>
+
+    <!-- 6. 這章帶走什麼 -->
+    <h2 id="takeaway">這章帶走什麼</h2>
+
+    <ol>
+      <li><strong>LLM 的本質是文字接龍。</strong>它不理解，它只是預測下一個字。所以它會 Hallucination（一本正經地講錯），而且講錯時跟講對時一樣有自信。</li>
+      <li><strong>訓練資料決定一切。</strong>同樣的接龍機器，餵不同資料就有不同結果。你公司的事它沒讀過，要你給。</li>
+      <li><strong>RAG 讓 AI 從閉卷考變開書考。</strong>讓 AI 先翻你的資料再回答，可以減少幻覺；前提是給它的資料是對的。</li>
+      <li><strong>不同模型有不同個性。</strong>GPT 萬用但太自信、Claude 謹慎擅長程式碼、Gemini 多模態強但有時不聚焦。這是作者的印象，版本一換就會變。</li>
+      <li><strong>模型大小是物理規律。</strong>品牌忠誠度不如選對大小，小模型就是很難跑贏大模型。</li>
+      <li><strong>Context Window 是 AI 的桌面。</strong>桌子現在很大，快滿時 Claude Code 會自動壓縮；想保留某個時間點，用 <code>/branch</code>，想倒回去，用 <code>/rewind</code>。</li>
+      <li><strong>對話越長品質越差。</strong>這叫 context rot，不是 bug。換主題就 <code>/clear</code>，糾正兩次還錯就重寫一句完整的指令。</li>
+      <li><strong>Token 是計費單位。</strong>講越多、AI 回越多，就越花錢也越慢。說清楚、說具體、一次到位才省。</li>
+    </ol>
+
+    <p>理解了這些，你就知道為什麼不能隨便跟 AI 閒聊：<strong>每一句話都有成本</strong>，而且你沒講的，它只能猜。下一章，我們來學怎麼用最少的話，把最多的資訊傳達給 AI。</p>
+
+    <!-- 7. 跟 Claude 怎麼說 -->
+    <h2 id="say">跟 Claude 怎麼說</h2>
+
+    <div class="box box-tip">
+      <div class="box-label">可以直接抄</div>
+      要它照你的資料回答：<br>
+      「這是我們公司的報價規則（貼上或給檔案路徑）。照這份回答，裡面沒寫的就說不知道，不要自己補。」<br><br>
+      怕它講錯：<br>
+      「你剛剛說的那個規定，出處是哪裡？給我官方頁面的連結；查不到就直接說查不到。」<br><br>
+      要開新對話之前：<br>
+      「把目前已經決定的事、改過的檔案、還沒做完的部分，整理成一段摘要給我，我要開新對話接著做。」<br><br>
+      要它記住每次都要遵守的事：<br>
+      「把『金額只能在後端算』這條加進 CLAUDE.md。」
+    </div>
 
     <!-- Chapter Navigation -->
     <div class="chapter-nav">
       <a href="/chapter1/" class="prev">
         <span class="nav-label">上一章</span>
-        <span class="nav-title">你在跟什麼東西說話</span>
+        <span class="nav-title">為什麼要懂</span>
       </a>
       <a href="/chapter3/" class="next">
         <span class="nav-label">下一章</span>
-        <span class="nav-title">正確的工作流程</span>
+        <span class="nav-title">下指令</span>
       </a>
     </div>
 

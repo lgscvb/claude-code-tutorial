@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十五章：資料表與欄位 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ===== 第十五章專用樣式（一律 db- 前綴）===== */
+
+    .db-compare > div { min-width: 0; }
+    .db-compare .code-block { margin: 0; overflow-wrap: anywhere; }
+    .db-note { font-size: 14px; color: var(--text-muted); }
+    .db-link { color: var(--accent-light); text-underline-offset: 3px; }
+    .db-link:hover { color: var(--accent); }
+
+    /* SQL 區塊：保留換行與縮排，太長就在框內左右捲 */
+    .db-sql { white-space: pre; color: var(--text); tab-size: 2; }
+    .db-kw { color: var(--accent-light); font-weight: 700; }
+    .db-cm { color: var(--text-muted); }
+    .db-plain {
+      margin: -8px 0 20px;
+      padding-left: 14px;
+      border-left: 2px solid var(--border-light);
+      font-size: 15px;
+      color: var(--text-muted);
+    }
+    .db-plain strong { color: var(--text); }
+
+    /* 靜態關聯圖：三張表 */
+    .db-er {
+      display: flex;
+      align-items: stretch;
+      margin: 24px 0 8px;
+      padding: 0;
+    }
+    .db-er-table {
+      flex: 1 1 0;
+      min-width: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .db-er-name {
+      padding: 10px 14px;
+      background: var(--accent-glow);
+      border-bottom: 1px solid var(--border-light);
+      font-weight: 700;
+      color: var(--text-heading);
+      font-size: 15px;
+    }
+    .db-er-name code { background: none; padding: 0; }
+    .content .db-er-table ul { list-style: none; margin: 0; padding: 6px 0; }
+    .db-er-table li {
+      margin: 0;
+      padding: 5px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+    .db-er-table li code { background: none; padding: 0; color: var(--text); }
+    .db-er-table li span { color: var(--text-muted); font-size: 13px; }
+    .db-tag {
+      display: inline-block;
+      margin-left: 4px;
+      padding: 0 6px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.7;
+      vertical-align: 1px;
+    }
+    .db-er-table li span.db-tag-pk, .db-tag-pk { border: 1px solid var(--accent); color: var(--accent-light); font-size: 11px; }
+    .db-er-table li span.db-tag-fk, .db-tag-fk { border: 1px solid var(--blue); color: var(--blue); font-size: 11px; }
+    .db-er-link {
+      flex: 0 0 68px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-light);
+    }
+    .db-er-bar { flex: 1 1 auto; height: 2px; background: var(--accent); border-radius: 2px; }
+    .db-er-caption { margin: 0 0 24px; font-size: 14px; color: var(--text-muted); }
+
+    /* 越加越多的時間軸 */
+    .db-timeline {
+      list-style: none;
+      margin: 20px 0;
+      padding: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-code);
+      font-size: 15px;
+    }
+    .content .db-timeline { padding-left: 0; }
+    .db-timeline li {
+      display: grid;
+      grid-template-columns: 5em minmax(0, 1fr);
+      gap: 4px 16px;
+      margin: 0;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .db-timeline li:last-child { border-bottom: none; }
+    .db-when {
+      color: var(--accent-light);
+      font-weight: 700;
+      font-size: 13px;
+      padding-top: 3px;
+      font-variant-numeric: tabular-nums;
+    }
+    .db-step { min-width: 0; overflow-wrap: anywhere; }
+    .db-step span { display: block; color: var(--text-muted); }
+    .db-timeline li.db-end .db-step span { color: var(--red); }
+
+    /* 三句問法 */
+    .db-asks { display: grid; gap: 14px; margin: 24px 0; }
+    .db-ask {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      min-width: 0;
+    }
+    .db-ask-title { font-size: 17px; font-weight: 700; color: var(--text-heading); margin-bottom: 8px; }
+    .db-ask-num { color: var(--accent); margin-right: 8px; font-variant-numeric: tabular-nums; }
+    .db-ask p { margin: 6px 0 0; font-size: 15px; }
+
+    /* 互動示範 */
+    .db-demo {
+      position: relative;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      padding: 24px;
+      margin: 28px 0 20px;
+    }
+    .db-demo::before {
+      content: attr(data-demo-title);
+      position: absolute;
+      top: -11px;
+      left: 16px;
+      background: var(--bg-card);
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .db-demo-label { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .db-modes, .db-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 16px; }
+    .db-actions { margin: 16px 0 12px; }
+    .db-btn {
+      min-height: 44px;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .db-btn:hover { border-color: var(--accent); }
+    .db-btn:focus-visible, .db-row:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+    .db-btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .db-btn-warn[aria-pressed="true"] { background: var(--bg); border-color: var(--red); color: var(--red); }
+
+    .db-diagram {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0 44px;
+      align-items: start;
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    .db-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: visible;
+    }
+    .db-line { fill: none; stroke: #444; stroke-width: 1.5; }
+    .db-line-on { stroke: var(--accent); stroke-width: 2.5; }
+    .db-line-broken { stroke: var(--red); stroke-width: 1.5; stroke-dasharray: 4 5; }
+    .db-cut-bg { fill: var(--bg); stroke: var(--red); stroke-width: 1.5; }
+    .db-cut { stroke: var(--red); stroke-width: 1.8; stroke-linecap: round; }
+
+    .db-col { position: relative; min-width: 0; display: grid; gap: 8px; }
+    .db-col-title { font-size: 13px; font-weight: 700; color: var(--text-heading); line-height: 1.4; }
+    .db-col-title code { background: none; padding: 0; }
+    .db-col-hint { font-size: 12px; color: var(--text-muted); margin-top: -4px; min-height: 1.6em; }
+    .db-row {
+      display: block;
+      width: 100%;
+      min-height: 52px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text);
+      font: inherit;
+      font-size: 14px;
+      line-height: 1.5;
+      text-align: left;
+      overflow-wrap: anywhere;
+      transition: border-color 0.25s, background 0.25s, opacity 0.25s;
+    }
+    button.db-row { cursor: pointer; }
+    button.db-row:hover { border-color: var(--accent); }
+    .db-row-id { color: var(--accent-light); font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 6px; }
+    .db-row-sub { display: block; font-size: 12px; color: var(--text-muted); font-family: "SF Mono", "Fira Code", "Consolas", monospace; }
+    .db-row-flag { display: block; font-size: 12px; font-weight: 700; color: var(--red); }
+    .db-row-flag[hidden] { display: none; }
+    .db-row.db-on { border-color: var(--accent); background: var(--accent-glow); }
+    .db-row.db-picked { border-color: var(--accent); background: var(--accent-glow); box-shadow: 0 0 0 1px var(--accent); }
+    .db-row.db-orphan { border-color: var(--red); border-style: dashed; }
+    .db-diagram.db-has-pick .db-row:not(.db-on):not(.db-picked):not(button) { opacity: 0.55; }
+
+    .db-status {
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px dashed var(--border-light);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      min-height: 3.2em;
+    }
+    .db-status.db-is-ok { color: var(--green); border-color: rgba(74, 222, 128, 0.35); }
+    .db-status.db-is-bad { color: var(--red); border-color: rgba(248, 113, 113, 0.35); }
+
+    .db-static > p { font-size: 14px; color: var(--text-muted); }
+    .db-static .compare { margin-bottom: 0; }
+
+    @media (max-width: 680px) {
+      .db-er { flex-direction: column; }
+      .db-er-table { flex: 0 0 auto; }
+      .db-er-link { flex: 0 0 auto; flex-direction: column; padding: 4px 0; }
+      .db-er-bar { flex: 0 0 18px; width: 2px; height: 18px; }
+      .db-timeline li { grid-template-columns: minmax(0, 1fr); padding: 12px 14px; }
+      .db-demo { padding: 20px 16px 16px; }
+      .db-diagram { grid-template-columns: minmax(0, 1fr); gap: 20px 0; padding: 14px 12px 14px 38px; }
+      .db-btn { flex: 1 1 100%; }
+      .db-sql { font-size: 13px; padding: 16px; }
+      /* 手機上三張表很長：結果列貼在畫面底部，滑到哪都看得到 */
+      .db-status { position: sticky; bottom: 10px; z-index: 2; background: var(--bg-card); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .db-btn, .db-row { transition: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="/">首頁</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="/">首頁</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/" class="active">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第十五章</div>
+      <h1>資料表與欄位：資料的家要先蓋好</h1>
+      <p class="lead">資料的家要先蓋好。<a href="/chapter9/" class="db-link">第九章</a>你已經開過一張預約表，存進第一筆資料；上一章又把功能切成一塊一塊，每一塊都要讀寫資料。這一章講表要怎麼設計，才不會越加越亂。你說一句「再記一個⋯⋯」，Claude 就加一欄；半年後，同一位客戶的電話有三個地方在存，沒有人知道哪一個才對。這一章不教你寫 SQL，教你看懂資料放在哪、為什麼這樣放，以及它動手之前你該問哪三句。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <!-- ===== 0. 為什麼要懂 ===== -->
+    <h2>畫面可以重做，資料不行</h2>
+
+    <p>網頁的畫面做壞了，請 Claude 重做一版，舊的丟掉就好。資料不一樣。裡面已經躺著半年的客戶、合約、收款紀錄，結構一開始排錯，之後每改一次都是帶著全部家當搬家。</p>
+
+    <p><a href="/chapter13/" class="db-link">第十三章 架構拓樸</a>說，每一種資料要有一個家。這一章走進那個家，看裡面的表和欄位怎麼排。你不用自己設計資料庫，但要看得懂它的設計，才知道哪裡不能讓 AI 隨手加東西。這就是本書一直講的「知道邊界」，落在資料上的那一段。</p>
+
+    <p>這一章要帶走三件事：</p>
+
+    <ul>
+      <li><strong>看得懂</strong>：資料表、欄位、表和表之間的線。</li>
+      <li><strong>會判斷</strong>：一份資料設計，哪裡以後會出事。</li>
+      <li><strong>知道邊界</strong>：它要加欄位、開新表之前，你問得出那三句話。</li>
+    </ul>
+
+    <!-- ===== 1. 表與欄位 ===== -->
+    <h2>表與欄位：檔案櫃、抽屜、表單上的格子</h2>
+
+    <div class="analogy">
+      <strong>比喻：辦公室的檔案櫃。</strong><br><br>
+      一座檔案櫃有好幾個抽屜。第一個抽屜只放「客戶資料表」，第二個只放「合約」，第三個只放「收款單」。不會有人把收款單塞進客戶那個抽屜。<br><br>
+      同一個抽屜裡的表單都是同一種格式：印好的格子，名稱一格、電話一格、狀態一格。每張表單右上角有一個流水號，整個抽屜不重複。<br><br>
+      <strong>資料庫就是這座檔案櫃。</strong>整章都會回到這座櫃子。
+    </div>
+
+    <p>你用過 Excel 的話，其實已經懂一半了。三種說法對起來是這樣：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>檔案櫃</th>
+            <th>Excel</th>
+            <th>資料庫的叫法</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>整座檔案櫃</td>
+            <td>一個 Excel 檔</td>
+            <td>資料庫（Database）</td>
+          </tr>
+          <tr>
+            <td>一個抽屜</td>
+            <td>一張工作表</td>
+            <td>資料表（Table）</td>
+          </tr>
+          <tr>
+            <td>表單上印好的格子</td>
+            <td>最上面那一列的欄名</td>
+            <td>欄位（Column）</td>
+          </tr>
+          <tr>
+            <td>一張填好的表單</td>
+            <td>一列</td>
+            <td>一列資料，也叫一筆紀錄（Row）</td>
+          </tr>
+          <tr>
+            <td>右上角的流水號</td>
+            <td>沒有，要自己編</td>
+            <td>主鍵（Primary Key）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>打開「客戶」那個抽屜，裡面長這樣。表名和欄位名照慣例用英文小寫：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>name</th>
+            <th>phone</th>
+            <th>status</th>
+            <th>created_at</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>A 設計工作室</td>
+            <td>0912-000-001</td>
+            <td>active</td>
+            <td>2026-01-08</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>B 咖啡店</td>
+            <td>0912-000-002</td>
+            <td>active</td>
+            <td>2026-02-14</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>C 補習班</td>
+            <td>04-0000-0003</td>
+            <td>inactive</td>
+            <td>2026-03-03</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="db-note">這張表叫 <code>customers</code>。<code>status</code> 那一欄的 active 是「往來中」，inactive 是「已停用」。這種固定選項，資料庫裡多半存英文代號，畫面上再換成中文給人看。</p>
+
+    <h3>跟 Excel 差在哪</h3>
+
+    <p>差兩件事。</p>
+
+    <p><strong>第一，格子有規定。</strong>Excel 的「金額」那一欄，你打「三萬」「30,000」「約 3 萬」它全收。資料庫的金額欄位先講好只收數字，打「三萬」會被退回來。麻煩在前面，省事在後面：之後要加總、要排序，不會被一格「約 3 萬」卡住。</p>
+
+    <p><strong>第二，表和表之間有正式的連結。</strong>Excel 裡你用眼睛對「這張合約是哪位客戶的」。資料庫裡這條線是明寫的，下一節講。</p>
+
+    <h3>主鍵：每張表單的流水號</h3>
+
+    <p><strong>主鍵（Primary Key）</strong>是每一列的身分：整張表不重複，發了就不改。通常是一欄叫 <code>id</code> 的編號，由資料庫自動發，你不用管它是幾號。</p>
+
+    <p>不要拿「有意義的東西」當主鍵。電話會換，公司名會改，個人客戶沒有統一編號。編號什麼意思都沒有，所以永遠不用改。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「現在這個專案有哪些資料表？每張表用一句話說明它放什麼」<br>
+      「每張表都要有自動編號的 id 當主鍵，不要用電話、名字、統編當主鍵」
+    </div>
+
+    <!-- ===== 2. 表和表怎麼連 ===== -->
+    <h2>表和表怎麼連：用編號，不用名字</h2>
+
+    <p>整章用同一組例子。你接案子，手上有三種東西：客戶、合約、付款。</p>
+
+    <ul>
+      <li>一位客戶可以簽很多張合約。</li>
+      <li>一張合約可以分很多次付款。</li>
+    </ul>
+
+    <p>這種關係叫<strong>一對多（One-to-many）</strong>。檔案櫃的做法你早就會了：合約上不會把客戶的電話地址整份再抄一遍，只留一格寫「客戶編號：1」。要看這位客戶的資料，拿著編號去客戶那個抽屜翻。</p>
+
+    <figure class="db-er">
+      <div class="db-er-table">
+        <div class="db-er-name"><code>customers</code> 客戶</div>
+        <ul>
+          <li><code>id</code> <span>編號</span><span class="db-tag db-tag-pk">主鍵</span></li>
+          <li><code>name</code> <span>名稱</span></li>
+          <li><code>phone</code> <span>電話</span></li>
+          <li><code>status</code> <span>狀態</span></li>
+          <li><code>created_at</code> <span>建立時間</span></li>
+          <li><code>updated_at</code> <span>更新時間</span></li>
+        </ul>
+      </div>
+      <div class="db-er-link" aria-hidden="true"><span>1</span><span class="db-er-bar"></span><span>多</span></div>
+      <div class="db-er-table">
+        <div class="db-er-name"><code>contracts</code> 合約</div>
+        <ul>
+          <li><code>id</code> <span>編號</span><span class="db-tag db-tag-pk">主鍵</span></li>
+          <li><code>customer_id</code> <span>哪位客戶</span><span class="db-tag db-tag-fk">外鍵</span></li>
+          <li><code>title</code> <span>合約名稱</span></li>
+          <li><code>amount</code> <span>合約金額</span></li>
+          <li><code>signed_on</code> <span>簽約日</span></li>
+          <li><code>status</code> <span>狀態</span></li>
+          <li><code>created_at</code>、<code>updated_at</code></li>
+        </ul>
+      </div>
+      <div class="db-er-link" aria-hidden="true"><span>1</span><span class="db-er-bar"></span><span>多</span></div>
+      <div class="db-er-table">
+        <div class="db-er-name"><code>payments</code> 付款</div>
+        <ul>
+          <li><code>id</code> <span>編號</span><span class="db-tag db-tag-pk">主鍵</span></li>
+          <li><code>contract_id</code> <span>哪張合約</span><span class="db-tag db-tag-fk">外鍵</span></li>
+          <li><code>amount</code> <span>這次付多少</span></li>
+          <li><code>paid_at</code> <span>付款時間</span></li>
+          <li><code>created_at</code>、<code>updated_at</code></li>
+        </ul>
+      </div>
+    </figure>
+    <p class="db-er-caption">關聯圖：一位客戶對多張合約，一張合約對多筆付款。「多」的那一邊，多一欄記「一」的那一邊的編號。</p>
+
+    <p>合約表的 <code>customer_id</code>、付款表的 <code>contract_id</code>，這種「記著別張表編號」的欄位叫<strong>外鍵（Foreign Key）</strong>。</p>
+
+    <p>注意付款表沒有 <code>customer_id</code>。這筆錢是誰付的？順著線走：付款 → 合約 → 客戶。<strong>順著線走得到的，就不用再存一份。</strong></p>
+
+    <h3>為什麼用編號連，不用名字連</h3>
+
+    <div class="compare db-compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：合約上寫客戶的名字</div>
+        <div class="code-block">
+合約 101｜客戶：A 設計工作室<br>
+合約 102｜客戶：A設計工作室<br>
+<br>
+<span style="color: var(--red);">少一個空格，被當成兩位客戶。</span><br>
+<span style="color: var(--red);">客戶改名成「A 設計有限公司」，舊合約全部找不到主人。</span><br>
+<span style="color: var(--red);">兩位客戶剛好同名，合約混在一起。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：合約上寫客戶的編號</div>
+        <div class="code-block">
+合約 101｜customer_id：1<br>
+合約 102｜customer_id：1<br>
+<br>
+<span style="color: var(--green);">名字只存在客戶表一個地方，改一次全部跟著對。</span><br>
+<span style="color: var(--green);">編號不會多一個空格、不會同名、不會改。</span>
+        </div>
+      </div>
+    </div>
+
+    <p>外鍵設好之後，資料庫還會幫你看門。合約上寫「客戶編號 99」，客戶表沒有 99 號，資料庫直接拒收。Supabase 用的 PostgreSQL 和 Cloudflare D1 都會照外鍵擋。用名字連沒有這道門，打錯字照樣存得進去。</p>
+
+    <div class="box box-info">
+      <div class="box-label">還有一種：多對多</div>
+      一張合約包好幾個服務項目，同一個服務項目也出現在很多張合約。兩邊都是「多」，一欄編號記不下來，中間要多一張表（例如「合約項目」），每一列記「哪張合約、哪個項目、多少錢」。<br><br>
+      看到 Claude 開了一張名字像 <code>contract_items</code> 的表，多半就是這個用途。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「表和表之間一律用 id 連，不要用名字或電話去比對」<br>
+      「外鍵要設起來，指到不存在的客戶要被資料庫擋下來」<br>
+      「畫一張關聯圖給我：哪張表的哪一欄，連到哪張表」
+    </div>
+
+    <!-- ===== 3. 互動示範 ===== -->
+    <h2>動手玩：點一位客戶，看線怎麼走</h2>
+
+    <p>下面是三張表裡的資料。先點一位客戶，看線怎麼一路走到付款。再切到「用名字連」，按一次改名，看同一批資料會發生什麼事。</p>
+
+    <div class="demo-container db-demo" id="db-demo" data-demo-title="互動示範：三張表怎麼連">
+      <div class="demo-label db-demo-label">這些都是示範用的假資料，只在你眼前這一頁運作，不會送出任何東西。</div>
+
+      <div id="db-live" hidden>
+        <div class="db-modes" role="group" aria-label="合約用什麼連到客戶">
+          <button type="button" class="db-btn" id="db-mode-id" aria-pressed="true">用編號連</button>
+          <button type="button" class="db-btn" id="db-mode-name" aria-pressed="false">用名字連</button>
+        </div>
+
+        <div class="db-diagram" id="db-diagram">
+          <svg class="db-lines" id="db-lines" aria-hidden="true" focusable="false"></svg>
+          <div class="db-col" id="db-col-customers">
+            <div class="db-col-title"><code>customers</code> 客戶</div>
+            <div class="db-col-hint">點一位客戶</div>
+          </div>
+          <div class="db-col" id="db-col-contracts">
+            <div class="db-col-title"><code>contracts</code> 合約</div>
+            <div class="db-col-hint" id="db-hint-contracts">記著客戶的編號</div>
+          </div>
+          <div class="db-col" id="db-col-payments">
+            <div class="db-col-title"><code>payments</code> 付款</div>
+            <div class="db-col-hint">記著合約的編號</div>
+          </div>
+        </div>
+
+        <div class="db-actions">
+          <button type="button" class="db-btn db-btn-warn" id="db-rename" aria-pressed="false">客戶 1 改名成「A 設計有限公司」</button>
+          <button type="button" class="db-btn" id="db-reset">重來</button>
+        </div>
+
+        <p class="db-status" id="db-status" aria-live="polite">合約上記的是客戶的編號。點一位客戶試試。</p>
+      </div>
+
+      <div class="db-static" id="db-static">
+        <p>這個示範要開 JavaScript 才能點。看不到按鈕的話，下面是同一件事的文字版。</p>
+        <div class="code-block">
+客戶 1　A 設計工作室<br>
+├─ 合約 101　年度網站維護<br>
+│　　├─ 付款 501　18,000 元<br>
+│　　└─ 付款 502　18,000 元<br>
+└─ 合約 102　報價系統<br>
+　　　└─ 付款 503　40,000 元<br>
+<br>
+從客戶 1 出發：2 張合約、3 筆付款，共收 76,000 元。
+        </div>
+        <p>現在客戶 1 改名成「A 設計有限公司」：</p>
+        <div class="compare db-compare">
+          <div class="compare-bad">
+            <div class="compare-label">用名字連</div>
+            <div class="code-block">
+合約上寫的還是舊名字「A 設計工作室」<br>
+用新名字去找，一張都找不到<br>
+<br>
+<span style="color: var(--red);">2 張合約、3 筆付款還在資料庫裡，只是沒有人找得到。線斷了。</span>
+            </div>
+          </div>
+          <div class="compare-good">
+            <div class="compare-label">用編號連</div>
+            <div class="code-block">
+合約上寫的是 customer_id：1<br>
+名字改了，編號沒變<br>
+<br>
+<span style="color: var(--green);">2 張合約、3 筆付款都還連著，共收 76,000 元。</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p>兩個版本的資料一模一樣。差別只有合約上那一格寫的是「1」還是「A 設計工作室」。這一格是設計資料表那天決定的，之後所有功能都踩在它上面。名字會撞名、會多空格、會改；編號不會。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「合約表是用什麼連到客戶表的？編號還是名字？」<br>
+      「找出所有拿名字、電話、Email 比對來連資料的地方，列給我，先不要改」
+    </div>
+
+    <!-- ===== 4. 欄位怎麼定 ===== -->
+    <h2>欄位怎麼定：一格只放一種東西</h2>
+
+    <p>回到表單。印表單的人要先決定兩件事：有哪些格子、每個格子可以填什麼。</p>
+
+    <h3>一格只放一種東西</h3>
+
+    <p>「聯絡方式」不是一種東西。「手機」是，「Email」是，「LINE ID」是。判斷方法：<strong>你之後會不會想單獨用它來找、排序、加總？</strong>會，就該自己一格。</p>
+
+    <p>那「地址」要不要拆成縣市、區、路？看你用不用得到。要統計「台中的客戶有幾位」就拆；只是印在信封上就不用。這裡沒有百分之百乾淨的答案，切到你會用到的細度就停。</p>
+
+    <h3>每個格子可以填什麼：型別</h3>
+
+    <p>格子的規定叫<strong>型別（Data type）</strong>。常見的就這幾種，第二欄是 PostgreSQL（Supabase 用的那種資料庫）的寫法，看到認得就好。Cloudflare D1 用的是 SQLite 那一套，型別的叫法不太一樣，道理相同：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>白話</th>
+            <th>常見寫法</th>
+            <th>放什麼</th>
+            <th>要注意</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>文字</td>
+            <td><code>text</code></td>
+            <td>名稱、備註、電話、統編</td>
+            <td>電話、統編、郵遞區號是文字，不是數字。開頭的 0 不能掉，也不會拿來加減。</td>
+          </tr>
+          <tr>
+            <td>整數</td>
+            <td><code>integer</code><br><code>bigint</code></td>
+            <td>數量、次數、編號</td>
+            <td>沒有小數點。</td>
+          </tr>
+          <tr>
+            <td>金額</td>
+            <td><code>integer</code><br><code>numeric</code></td>
+            <td>合約金額、付款金額</td>
+            <td>台幣用整數存到「元」；要小數的用 numeric。不要用 float 這一類，下一節的坑四會講。</td>
+          </tr>
+          <tr>
+            <td>日期</td>
+            <td><code>date</code></td>
+            <td>簽約日、到期日</td>
+            <td>只記哪一天。</td>
+          </tr>
+          <tr>
+            <td>日期時間</td>
+            <td><code>timestamptz</code></td>
+            <td>建立時間、付款時間、收到預約的時間</td>
+            <td>存成一個不會因時區搞錯的時間點：內部存成國際標準時間（UTC），顯示時再換成你的時區。</td>
+          </tr>
+          <tr>
+            <td>幾點</td>
+            <td><code>time</code></td>
+            <td>營業時間、預約的時段</td>
+            <td>只記幾點幾分，不含哪一天。<a href="/chapter9/" class="db-link">第九章</a>的預約表就是日期一欄、時間一欄。</td>
+          </tr>
+          <tr>
+            <td>是或否</td>
+            <td><code>boolean</code></td>
+            <td>要不要開發票</td>
+            <td>只有兩種答案才用。三種以上，用下面講的「狀態」。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>還有一個會一直遇到的字：<strong>NULL</strong>，意思是「這格還沒填」。它跟 0、跟空白文字都不一樣：付款金額是 0，代表收了零元；是 NULL，代表還不知道。哪些格子不准空著（必填），也是設計的一部分。</p>
+
+    <h3>每張表都該有的三個欄位，加一個常用的</h3>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>欄位</th>
+            <th>白話</th>
+            <th>沒有它會怎樣</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>id</code></td>
+            <td>編號</td>
+            <td>沒辦法指著某一列說「就是這一筆」，別張表也連不過來。</td>
+          </tr>
+          <tr>
+            <td><code>created_at</code></td>
+            <td>建立時間</td>
+            <td>「上個月新增幾位客戶」答不出來。</td>
+          </tr>
+          <tr>
+            <td><code>updated_at</code></td>
+            <td>最後修改時間</td>
+            <td>資料怪怪的時候，查不到是什麼時候被動過。</td>
+          </tr>
+          <tr>
+            <td><code>status</code></td>
+            <td>狀態（會換狀態的表才要，例如客戶、合約、預約）</td>
+            <td>只能靠刪除來表示「不要了」，或是長出一排是或否的欄位。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>狀態用一欄，不要用一排開關</h3>
+
+    <div class="compare db-compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：一排是或否</div>
+        <div class="code-block">
+is_signed　　已簽約：是<br>
+is_cancelled　已作廢：是<br>
+is_expired　　已到期：否<br>
+<br>
+<span style="color: var(--red);">已簽約又已作廢，現在到底算哪一種？三個開關有八種組合，其中好幾種根本不該存在。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：一欄 status</div>
+        <div class="code-block">
+status 只能填這四種：<br>
+draft（草稿）、active（進行中）、<br>
+ended（已結束）、void（已作廢）<br>
+<br>
+<span style="color: var(--green);">一張合約同一時間只會在一種狀態。清單先講死，填別的會被擋。</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>同一個東西，只叫一個名字</h3>
+
+    <p>這張表叫 <code>customer_id</code>，那張表叫 <code>client_id</code>，再一張叫 <code>member_id</code>，指的都是客戶。半年後連 Claude 都會以為這是三種人。開工那天先定下來：我們叫「客戶」，英文一律 customer。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這一欄打算用什麼型別？為什麼？」<br>
+      「狀態用一個 status 欄位。先列出所有可能的值給我確認，不要開一排是或否的欄位」<br>
+      「每張表都要有 id、created_at、updated_at」<br>
+      「這個專案裡『客戶』一律叫 customer，不要 client、member、user 混著用」
+    </div>
+
+    <!-- ===== 5. 五個坑 ===== -->
+    <h2>常見的五個坑</h2>
+
+    <p>下面五個，是請 AI 做系統常看到的。每一個剛發生的時候都不會壞，畫面照樣正常，所以才危險。</p>
+
+    <h3>坑一：一格塞好幾個值</h3>
+
+    <div class="compare db-compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事</div>
+        <div class="code-block">
+合約 101｜服務項目：網站維護、主機、網域<br>
+合約 103｜服務項目：主機代管，網域<br>
+<br>
+<span style="color: var(--red);">「買了主機的客戶有哪些？」只能拿文字去比，「主機」和「主機代管」算不算同一個？</span><br>
+<span style="color: var(--red);">「每個項目各賣多少？」算不出來，金額沒有拆。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對</div>
+        <div class="code-block">
+另開一張「合約項目」表，一個項目一列：<br>
+<br>
+合約 101｜網站維護｜24,000<br>
+合約 101｜主機　　｜ 9,000<br>
+合約 101｜網域　　｜ 3,000<br>
+<br>
+<span style="color: var(--green);">要數、要加總、要改其中一項，都是對「一列」動手。</span>
+        </div>
+      </div>
+    </div>
+
+    <p>認法很簡單：<strong>一格裡面出現頓號、逗號、換行，就該問一句。</strong></p>
+
+    <h3>坑二：同一筆資料存兩個地方</h3>
+
+    <div class="compare db-compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事</div>
+        <div class="code-block">
+客戶表有 phone<br>
+合約表又抄一份 contact_phone<br>
+合約表還有一欄 paid_amount（已收金額）<br>
+<br>
+<span style="color: var(--red);">客戶換電話，只改到客戶表，合約頁還是舊號碼。</span><br>
+<span style="color: var(--red);">補登一筆付款，忘了改已收金額：合約說收了 18,000，付款表加起來是 36,000。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對</div>
+        <div class="code-block">
+電話只放客戶表<br>
+已收金額不存<br>
+<br>
+<span style="color: var(--green);">合約頁要顯示電話，順著 customer_id 去客戶表拿。</span><br>
+<span style="color: var(--green);">要看收了多少，把這張合約的付款加起來。</span>
+        </div>
+      </div>
+    </div>
+
+    <p>原則只有一句：<strong>同一筆資料只存一個地方</strong>，這叫單一資料來源（SSOT）。落到資料表上，可以記成一句：<strong>查得到的不存，算得出來的不存。</strong>為什麼一份資料存兩個地方遲早會出事，<a href="/chapter17/" class="db-link">第十七章 會出事的地方</a>會整個攤開講。</p>
+
+    <div class="box box-info">
+      <div class="box-label">看起來重複，其實不是：留底</div>
+      合約金額是簽約那天講定的數字。之後你的價目表漲價，舊合約不該跟著變。所以合約上自己記一份金額是對的，那是「當時的事實」，不是抄一份。<br><br>
+      分辨方法只有一句：<strong>來源改了，這一格該不該跟著變？</strong><br>
+      該跟著變的（客戶電話）：只存一處。<br>
+      不該跟著變的（簽約金額、開發票當下的抬頭）：留底。<br><br>
+      所以「不重複」沒辦法照字面做到百分之百，要一格一格問。
+    </div>
+
+    <h3>坑三：用名字當關聯</h3>
+
+    <p>上面的示範玩過一次了。同樣的事不只發生在客戶名稱上。付款表記「合約名稱：年度網站維護」，明年同一位客戶又簽一張同名的，這筆錢算哪一年的？用 LINE 的顯示名稱認會員，客人換個暱稱就變成一位新客人，點數歸零。</p>
+
+    <p>改法一樣：付款表記 <code>contract_id</code>；會員表記 LINE 平台給的使用者 ID，暱稱隨他換。</p>
+
+    <p>原則：<strong>拿來連的那個東西，必須不會變、不會重複。</strong>名字、電話、Email、暱稱，四個都會變。</p>
+
+    <h3>坑四：金額用會有小數誤差的型別</h3>
+
+    <p>電腦有一種存小數的方式叫浮點數（float）。它算得快，但很多小數只能存成「很接近」的值。</p>
+
+    <div class="compare db-compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：金額用 float、real、double precision</div>
+        <div class="code-block">
+0.1 + 0.2<br>
+= 0.30000000000000004<br>
+<br>
+<span style="color: var(--red);">一筆只差一點點。幾千筆加起來、再四捨五入，報表和發票差一塊錢，會計來問你。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：integer 或 numeric</div>
+        <div class="code-block">
+台幣：用整數存到「元」<br>
+18000 + 18000 = 36000<br>
+<br>
+要小數的（外幣、稅率）：用 numeric<br>
+0.1 + 0.2 = 0.3<br>
+<br>
+<span style="color: var(--green);">存多少就是多少。</span>
+        </div>
+      </div>
+    </div>
+
+    <p>這不是本書自己的偏好。PostgreSQL 官方文件也寫：金額這種要算準的東西，用 numeric，不要用 real、double precision 這類浮點數。</p>
+
+    <p>型別選對了還有一件事要講好：稅金、折扣在哪一步四捨五入。這種會影響錢的計算要放在後端，不能交給畫面上的 JavaScript，<a href="/chapter16/" class="db-link">第十六章 前後端邊界</a>會講。</p>
+
+    <h3>坑五：刪除直接把資料抹掉</h3>
+
+    <div class="compare db-compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事：真的刪掉</div>
+        <div class="code-block">
+你：「把這位客戶刪掉」<br>
+<br>
+下場一：他名下還有合約，<br>資料庫擋下來，畫面跳錯誤。<br>
+<br>
+下場二：Claude 為了讓刪除「成功」，<br>設成連帶刪除（ON DELETE CASCADE）。<br>
+<span style="color: var(--red);">客戶一刪，他的合約、付款紀錄整串消失。去年的營收少了一塊，救不回來。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對：改狀態</div>
+        <div class="code-block">
+status 改成 inactive（已停用）<br>
+或加一欄 deleted_at 記下停用的時間<br>
+<br>
+<span style="color: var(--green);">清單預設只列往來中的客戶。舊合約、舊帳都還在，報表對得起來。按錯了，改回來就好。</span>
+        </div>
+      </div>
+    </div>
+
+    <p>這種「標記成不要了，但資料還在」的做法叫<strong>軟刪除（Soft delete）</strong>。</p>
+
+    <p>真的要刪的情況也有，例如客人要求刪掉他的個人資料。那是你本人要點頭的決定：哪些連帶的紀錄該留、該怎麼處理，先問清楚再做。不該是 AI 為了修掉一個錯誤訊息，順手做的。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「檢查現在的資料表：有沒有哪一欄一格裡塞了好幾個值？」<br>
+      「有沒有哪些欄位的內容，其實可以從別張表查到或算出來？列給我，先不要改」<br>
+      「所有金額欄位是什麼型別？有 float、real、double precision 的列出來」<br>
+      「刪除一律做成軟刪除。不要用 ON DELETE CASCADE，除非先問過我」
+    </div>
+
+    <!-- ===== 6. AI 一直加欄位 ===== -->
+    <h2>AI 一直加欄位，半年後會怎樣</h2>
+
+    <p>Claude 每次只處理你眼前講的那一件事。對它來說，加一欄很省事：不用先讀懂舊的結構，不會弄壞現有的功能，馬上能交差。所以它傾向於「加」，不傾向於「整理」。</p>
+
+    <ol class="db-timeline">
+      <li>
+        <div class="db-when">第 1 週</div>
+        <div class="db-step">你：「客戶要記電話」<span>客戶表多一欄 phone。</span></div>
+      </li>
+      <li>
+        <div class="db-when">第 3 週</div>
+        <div class="db-step">你：「合約頁也要看到聯絡電話」<span>合約表多一欄 contact_phone，把電話抄了一份。</span></div>
+      </li>
+      <li>
+        <div class="db-when">第 7 週</div>
+        <div class="db-step">你：「再記一個客戶的 LINE」<span>客戶表多一欄 line。過一陣子你換個說法又講了一次，又多一欄 line_id。</span></div>
+      </li>
+      <li>
+        <div class="db-when">第 12 週</div>
+        <div class="db-step">你：「要看得出這張合約收款了沒」<span>合約表多一欄 is_paid。可是付款表早就在了。</span></div>
+      </li>
+      <li>
+        <div class="db-when">第 18 週</div>
+        <div class="db-step">你：「有客戶要分期」<span>合約表再多一欄 paid_amount。</span></div>
+      </li>
+      <li class="db-end">
+        <div class="db-when">半年後</div>
+        <div class="db-step">你：「這張合約到底繳清了沒？」<span>is_paid 說繳清了，paid_amount 說還差一萬，付款表加起來是第三個數字。</span></div>
+      </li>
+    </ol>
+
+    <p>沒有哪一步是錯的，每一次都「做好了」。合起來，同一件事有三個答案，而且沒有人記得哪一個才算數。不同頁面各讀各的欄位，改一處要記得另外兩處，越改越難維護，工程師叫這個「耦合」。Claude 也不記得：它下次開新對話，看到三欄都在，三欄都可能拿來用。</p>
+
+    <h3>加欄位之前，問這三句</h3>
+
+    <div class="db-asks">
+      <div class="db-ask">
+        <div class="db-ask-title"><span class="db-ask-num">01</span>這個東西，已經有地方放了嗎？</div>
+        <p>先找。有，就用現有的；現有的不夠用，就改現有的。不要在旁邊再開一欄差不多的。</p>
+      </div>
+      <div class="db-ask">
+        <div class="db-ask-title"><span class="db-ask-num">02</span>它屬於哪一張表？</div>
+        <p>問「它在描述誰」。電話描述客戶；簽約日描述合約；匯款帳號末五碼描述某一次付款。</p>
+        <p>拿不準就用這個測試：<strong>這位客戶有兩張合約的時候，這個東西有一個還是兩個？</strong>一個，放客戶表；兩個，放合約表。</p>
+      </div>
+      <div class="db-ask">
+        <div class="db-ask-title"><span class="db-ask-num">03</span>加了以後，哪些功能要跟著改？</div>
+        <p>新增的表單、編輯頁、清單、匯出的報表、誰看得到。只加欄位不改這些，那一欄永遠是空的；改了一半，就是下一個對不起來的地方。</p>
+      </div>
+    </div>
+
+    <p>這三句，你不會寫程式也問得出來，答案你也判斷得了。這就是你守的邊界。</p>
+
+    <div class="box box-warning">
+      <div class="box-label">不是不准加</div>
+      新的事實本來就該有新的欄位，例如以前沒記過的統一編號。要擋的是<strong>同一件事的第二個存放處</strong>。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「加欄位之前先回答三件事：現在有沒有欄位已經在放這個？它該放哪一張表、為什麼？加了以後哪些頁面和功能要跟著改？我確認了你再動」<br>
+      「如果現有的欄位可以用，就用現有的，不要新增」<br>
+      「is_paid、paid_amount 和付款表講的是同一件事。以付款表為準，另外兩欄列出還有哪裡在用，先不要刪」
+    </div>
+
+    <!-- ===== 7. 回到預約表 ===== -->
+    <h2>拿第九章的預約表練一次</h2>
+
+    <p>上面講的都是客戶、合約、付款。換成你在<a href="/chapter9/" class="db-link">第九章 資料庫</a>替 B 咖啡店開的那張 <code>reservations</code>（預約）表，同一套問法照樣用得上。</p>
+
+    <p>第九章那張表是一張放全部：姓名、電話、預約日期、預約時間、人數、備註，再加上每筆的編號和收到的時間。起步這樣完全沒問題，你的表沒有做錯。等熟客回來第五次，事情就來了：</p>
+
+    <div class="compare db-compare">
+      <div class="compare-bad">
+        <div class="compare-label">一張表放全部：熟客來了五次</div>
+        <div class="code-block">
+reservations：預約 1｜D 小姐｜0912-000-002｜11/02｜14:00｜2 位<br>
+reservations：預約 2｜D 小姐｜0912-000-002｜11/09｜15:30｜4 位<br>
+reservations：預約 3｜D小姐 ｜0912-000-020｜11/16｜14:00｜2 位<br>
+⋯⋯<br>
+<br>
+<span style="color: var(--red);">她換了電話，舊的四筆還是舊號碼。</span><br>
+<span style="color: var(--red);">名字少一個空格、電話打錯一碼，「她來過幾次」就數不準。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">拆成兩張：客人一張、預約一張</div>
+        <div class="code-block">
+customers：id 7｜D 小姐｜0912-000-002<br>
+<br>
+reservations：預約 1｜customer_id：7｜11/02｜14:00｜2 位<br>
+reservations：預約 2｜customer_id：7｜11/09｜15:30｜4 位<br>
+reservations：預約 3｜customer_id：7｜11/16｜14:00｜2 位<br>
+<br>
+<span style="color: var(--green);">電話只存一處，改一次就對。來過幾次，數 customer_id 就好。</span>
+        </div>
+      </div>
+    </div>
+
+    <p>判斷就是前面那一句：<strong>這位客人有兩筆預約的時候，電話有一個還是兩個？</strong>一個，所以姓名、電話屬於客人，不屬於預約。日期、時間、人數、備註每一次都不一樣，屬於預約。拆完以後，<code>reservations</code> 少了 <code>name</code>、<code>phone</code> 兩欄，多了一欄 <code>customer_id</code>。</p>
+
+    <p>拆表不是只動表。第九章的預約頁是沒登入的客人直接寫進 <code>reservations</code>，而且只開了「新增」；客人讀不到 <code>customers</code>，也就不知道自己是幾號。所以要拆的那天，送出預約的路也要跟著改：交給後端先找到或建好這位客人，再寫進預約。什麼一定要放後端，<a href="/chapter16/" class="db-link">第十六章 前後端邊界</a>會講。</p>
+
+    <p>其他幾件事也一樣套得上：</p>
+
+    <ul>
+      <li><strong>狀態</strong>：第九章的表還沒有這一欄。要加的時候，已預約、已完成、已取消、沒來，用一欄 <code>status</code>，不要開 <code>is_cancelled</code>、<code>is_done</code> 一排開關。</li>
+      <li><strong>取消</strong>：改狀態，不要真的刪掉。不然「上個月取消了幾筆」答不出來。</li>
+      <li><strong>日期和時間</strong>：第九章拆成兩欄，<code>reserve_date</code>（<code>date</code>）和 <code>reserve_time</code>（<code>time</code>），剛好對上預約頁的日期格和時間格。B 咖啡店只有一家店、都在同一個時區，這樣好懂，照用就好。合成一欄日期時間（<code>timestamptz</code>）的好處是一格就是一個確定的時間點，算「兩小時後」、跨時區都不容易錯；等到要開別的時區的分店、或要算兩個時段有沒有重疊，再請 Claude 評估要不要換。不管哪一種，都不要用文字存「下週三下午」。</li>
+    </ul>
+
+    <p>不過，不一定要一開始就拆。小店剛起步、客人很少重複，一張表先用著也行；等你開始想問「這位客人來過幾次」，就是該拆的時候。這裡一樣沒有百分之百乾淨的答案，要拆的那天，照下面講的寫成 migration，不要讓 AI 直接改正式的資料。</p>
+
+    <p class="db-note">兩位客人同時搶最後一個時段，誰算數？那是另一種會出事的情況，不是表怎麼切的問題，<a href="/chapter17/" class="db-link">第十七章 會出事的地方</a>會講。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「我們的預約表裡，有哪些欄位其實是在描述客人、不是在描述這一次預約？列給我，先不要改」<br>
+      「如果要把客人拆成一張表，給我看 migration 的內容，還有舊的預約資料要怎麼對到新的客人編號」<br>
+      「拆完以後，預約頁送出時要怎麼找到或建好客人？哪一段要放後端、為什麼？先講給我聽，不要改」
+    </div>
+
+    <!-- ===== 8. SQL ===== -->
+    <h2>SQL：讀得懂就好</h2>
+
+    <p>SQL 是跟資料庫講話用的語言，<a href="/glossary/" class="db-link">附錄：術語字典</a>裡也查得到。你不用自己寫，Claude 會寫。你要做到的是，它寫完之後看得出兩件事：<strong>它去了哪幾張表、它是在看資料還是在改資料。</strong></p>
+
+    <p>讀法：先找大寫的字。下面五個例子都用前面那三張表。</p>
+
+    <h3>SELECT … FROM：從哪個抽屜，拿哪幾格</h3>
+
+    <div class="code-block db-sql"><span class="db-kw">SELECT</span> name, phone
+<span class="db-kw">FROM</span> customers;</div>
+    <p class="db-plain"><strong>白話：</strong>從客戶表，把每一位的名稱和電話拿出來。<code>SELECT *</code> 的星號是「每一格都要」。單純的 SELECT 只看不改，不會動到資料。</p>
+
+    <h3>WHERE：只要符合條件的</h3>
+
+    <div class="code-block db-sql"><span class="db-kw">SELECT</span> id, title, amount
+<span class="db-kw">FROM</span> contracts
+<span class="db-kw">WHERE</span> customer_id = 1
+  <span class="db-kw">AND</span> status = 'active';</div>
+    <p class="db-plain"><strong>白話：</strong>從合約表，只拿「客戶編號是 1、而且狀態是進行中」的那幾張，列出編號、名稱、金額。</p>
+
+    <h3>JOIN：把兩個抽屜的表單對起來</h3>
+
+    <div class="code-block db-sql"><span class="db-kw">SELECT</span> customers.name,
+       contracts.title,
+       payments.amount,
+       payments.paid_at
+<span class="db-kw">FROM</span> payments
+<span class="db-kw">JOIN</span> contracts
+  <span class="db-kw">ON</span> contracts.id = payments.contract_id
+<span class="db-kw">JOIN</span> customers
+  <span class="db-kw">ON</span> customers.id = contracts.customer_id
+<span class="db-kw">WHERE</span> payments.paid_at &gt;= '2026-09-01';</div>
+    <p class="db-plain"><strong>白話：</strong>從付款表出發。每一筆付款，用 contract_id 找到它的合約，再用合約的 customer_id 找到客戶。只要九月一日以後的。結果每一列是「誰、哪張合約、付了多少、什麼時候」。</p>
+
+    <p>讀 JOIN 只要盯著 <code>ON</code> 後面那一句：是不是「編號 = 編號」。看到 <code>ON customers.name = contracts.customer_name</code> 這種拿名字對的，就是坑三。</p>
+
+    <h3>INSERT：放一張新表單進去</h3>
+
+    <div class="code-block db-sql"><span class="db-kw">INSERT INTO</span> payments
+  (contract_id, amount, paid_at)
+<span class="db-kw">VALUES</span>
+  (101, 18000, '2026-09-05 14:30');</div>
+    <p class="db-plain"><strong>白話：</strong>付款表新增一列：101 號合約、收 18,000 元、九月五日下午兩點半。前面括號是格子名稱，VALUES 後面是照同樣順序填進去的值。沒寫到的 id 和 created_at，由資料庫自己填。</p>
+
+    <h3>UPDATE：改某一張表單上的格子</h3>
+
+    <div class="code-block db-sql"><span class="db-kw">UPDATE</span> customers
+<span class="db-kw">SET</span> name = 'A 設計有限公司',
+    updated_at = now()
+<span class="db-kw">WHERE</span> id = 1;</div>
+    <p class="db-plain"><strong>白話：</strong>客戶表裡編號 1 的那一位，名稱改掉，順便記下修改時間。</p>
+
+    <div class="box box-danger">
+      <div class="box-label">UPDATE 和 DELETE，第一件事是找 WHERE</div>
+      上面那一段少了最後一行 <code>WHERE id = 1</code>，意思就變成「<strong>每一位</strong>客戶的名稱都改成 A 設計有限公司」。資料庫不會問你確不確定。<br><br>
+      DELETE 也一樣：<code>DELETE FROM customers;</code> 是把整張客戶表清空。<br><br>
+      看到 UPDATE 或 DELETE，先找 WHERE。找不到，先喊停。
+    </div>
+
+    <h3>一張表看完：它是在看，還是在改</h3>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>開頭的字</th>
+            <th>在做什麼</th>
+            <th>你要多小心</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>SELECT</code></td>
+            <td>看資料</td>
+            <td style="color: var(--green);">單純的 SELECT 不會改到東西</td>
+          </tr>
+          <tr>
+            <td><code>INSERT</code></td>
+            <td>新增一列</td>
+            <td style="color: var(--yellow);">會多出資料，看它加到哪張表</td>
+          </tr>
+          <tr>
+            <td><code>UPDATE</code></td>
+            <td>修改現有的列</td>
+            <td style="color: var(--red);">找 WHERE，確認改到的是哪幾筆</td>
+          </tr>
+          <tr>
+            <td><code>DELETE</code></td>
+            <td>刪掉現有的列</td>
+            <td style="color: var(--red);">找 WHERE，而且先問能不能改成軟刪除</td>
+          </tr>
+          <tr>
+            <td><code>CREATE TABLE</code><br><code>ALTER TABLE</code><br><code>DROP TABLE</code></td>
+            <td>改的是結構：開新表、改欄位、整張表丟掉</td>
+            <td style="color: var(--red);">下一節講，這種要留紀錄</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="db-note">「單純」兩個字是有原因的。整段是 WITH 開頭、中間夾著 UPDATE 或 DELETE，或是 SELECT 後面在叫一個專案自己寫的資料庫函式（名字後面帶括號），看起來是 SELECT，還是可能改到資料。看到這兩種，請 Claude 先講清楚會不會改。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這段 SQL 用白話講一次：從哪幾張表、拿哪些欄位、條件是什麼、會不會改到資料」<br>
+      「這一句會改到資料嗎？會改到幾筆？先用 SELECT 把會被改到的那幾筆列給我看」<br>
+      「UPDATE 和 DELETE 都要有 WHERE，沒有的不要執行」
+    </div>
+
+    <!-- ===== 9. Migration ===== -->
+    <h2>改結構要留紀錄：Migration</h2>
+
+    <div class="analogy">
+      <strong>回到檔案櫃。</strong><br><br>
+      客戶資料表要多印一格「統一編號」。你不會拿筆在抽屜裡每一張舊表單上自己畫格子。正規做法是發一張<strong>改版通知</strong>：哪一天、哪一種表單、多了哪一格、舊表單這一格先空著還是補什麼。<br><br>
+      通知單照順序收在一個夾子裡。新來的同事把夾子從頭翻到尾，就知道現在的表單為什麼長這樣。
+    </div>
+
+    <p><strong>Migration</strong> 就是這個夾子：資料結構的修改紀錄。每改一次結構，專案資料夾裡就多一個檔案，裡面是那一次要執行的 SQL，照順序排好。一個 migration 檔的內容大概長這樣：</p>
+
+    <div class="code-block db-sql"><span class="db-cm">-- 客戶表加一格「統一編號」</span>
+<span class="db-kw">ALTER TABLE</span> customers
+<span class="db-kw">ADD COLUMN</span> tax_id text;</div>
+    <p class="db-plain"><strong>白話：</strong>客戶表多一欄 tax_id，型別是文字。舊客戶這一欄先是 NULL。</p>
+
+    <p>這些檔案放在哪，看你用什麼。用 Supabase 的專案在 <code>supabase/migrations/</code>，用 Cloudflare D1 的預設在 <code>migrations/</code>。你不用背，知道「專案裡有一個資料夾專門放這個」就夠了。</p>
+
+    <h3>為什麼不能請 AI 直接在正式的資料上改</h3>
+
+    <p>Claude 連得到資料庫的時候，省事的做法是直接對正式的那一份下指令。當下會動，後面有四個麻煩：</p>
+
+    <ul>
+      <li><strong>沒有紀錄。</strong>三個月後多了一欄，沒有人知道是哪天、為了什麼加的。</li>
+      <li><strong>兩邊對不起來。</strong>正式的資料庫改了，測試用的那一份沒改，或是反過來。程式在一邊跑得動，另一邊壞掉。</li>
+      <li><strong>下一個對話不知道。</strong>新開的 Claude 是從專案資料夾裡的檔案認識結構的。改動沒寫成檔案，它看到的就是舊的。</li>
+      <li><strong>有些動作回不來。</strong>刪欄位（DROP COLUMN）、刪表（DROP TABLE），一執行那些資料就沒了，沒有「復原」可以按，只能靠備份救。改欄位的型別，也可能讓裝不進新格子的舊資料出錯。</li>
+    </ul>
+
+    <div class="compare db-compare">
+      <div class="compare-bad">
+        <div class="compare-label">這樣會出事</div>
+        <div class="code-block">
+你：「幫我在客戶表加一個統編欄位」<br>
+<br>
+Claude 直接連上正式的資料庫執行。<br>
+<br>
+<span style="color: var(--red);">當下能用。專案裡沒有任何檔案記得這件事，測試用的資料庫也沒有這一欄。</span>
+        </div>
+      </div>
+      <div class="compare-good">
+        <div class="compare-label">這樣才對</div>
+        <div class="code-block">
+你：「寫成一個 migration 檔，先給我看內容」<br>
+<br>
+1. 你看到要加哪一欄、什麼型別<br>
+2. 先在測試用的資料庫跑<br>
+3. 沒問題，才套到正式的<br>
+<br>
+<span style="color: var(--green);">檔案留在專案裡，誰來接手都翻得到。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="box box-danger">
+      <div class="box-label">這三種動作，要你本人點頭</div>
+      <strong>刪欄位、刪表、改欄位的型別或名稱。</strong><br><br>
+      動手之前先確認兩件事：有備份，而且你知道怎麼還原。確認不了，就先不要做。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「資料表結構的修改一律寫成 migration 檔，不要直接改正式的資料庫」<br>
+      「先給我看這個 migration 會做什麼：加哪一欄、什麼型別、舊資料這一欄會是什麼值」<br>
+      「這個 migration 有沒有會讓資料消失的動作？有的話列出來，等我說可以才執行」<br>
+      「先在測試用的資料庫跑一次，把結果給我看」
+    </div>
+
+    <!-- ===== 10. 實際怎麼用 ===== -->
+    <h2>實際怎麼用：先看清楚，再讓它動</h2>
+
+    <h3>第一步：盤點</h3>
+
+    <p>不管是剛接手別人的專案，還是自己做了三個月，先請 Claude 把現況列出來。這一步只看不改：</p>
+
+    <div class="code-block">
+先不要改任何東西。列出現在所有的資料表，每張表給我：<br>
+1. 它放什麼（一句話）<br>
+2. 每個欄位的名稱、型別、白話說明<br>
+3. 哪一欄連到哪張表<br>
+用表格，最後畫一張關聯圖。
+    </div>
+
+    <p>拿到之後請它存成專案裡的一個檔案，再到 <code>CLAUDE.md</code> 加一句「動資料表之前先讀這份，改完要更新」。<code>CLAUDE.md</code> 在<a href="/chapter10/" class="db-link">第十章 Claude Code 怎麼用</a>講過，每次開新對話都會先載入。</p>
+
+    <h3>第二步：五分鐘健檢</h3>
+
+    <p>清單在手上，拿前面那五個坑一個一個對，再多問一題：每張表都有 id、建立時間、更新時間嗎？看不出來的，直接把題目丟給 Claude 回答。</p>
+
+    <p>答不好的那一題，就是下一次該整理的地方。不用一次全改，先知道洞在哪。</p>
+
+    <h3>還沒開工的話：先找現成的</h3>
+
+    <p>客戶、合約、付款、預約、訂單，這些表別人已經設計過很多遍。動手之前，照<a href="/chapter11/" class="db-link">第十一章 技術棧</a>說的先上 GitHub 找同類的專案，再請 Claude 把它們的資料表列出來對照：別人多了哪些欄位、為什麼。不一定要用它們的程式，光看表怎麼切就值得。</p>
+
+    <h3>之後每一次要改</h3>
+
+    <p>回到前面那三句：這個東西有沒有地方放了、屬於哪張表、哪些功能要跟著改。它答完、你確認了，再讓它動。</p>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「把現在的資料表清單和關聯圖存成一個檔案，以後每次改結構都要更新它」<br>
+      「上 GitHub 找兩個做客戶與合約管理的開源專案，列出它們的資料表和欄位，跟我們的比，差在哪」<br>
+      「用那五個坑檢查我們現在的資料表，一個一個回答，有問題的列出是哪張表哪一欄」
+    </div>
+
+    <!-- ===== 11. 術語表 ===== -->
+    <h2>本章術語表</h2>
+
+    <p>資料庫、資料表、欄位、列、主鍵這五個詞，在開頭那張「檔案櫃對 Excel」的表。其他的：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>術語</th>
+            <th>白話</th>
+            <th>檔案櫃裡的什麼</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>外鍵<br><code>Foreign Key</code></td>
+            <td>記著別張表編號的欄位</td>
+            <td>合約上那一格「客戶編號」</td>
+          </tr>
+          <tr>
+            <td>一對多<br><code>One-to-many</code></td>
+            <td>一位客戶對多張合約</td>
+            <td>很多張合約寫著同一個客戶編號</td>
+          </tr>
+          <tr>
+            <td>多對多<br><code>Many-to-many</code></td>
+            <td>兩邊都是多，中間要多一張表</td>
+            <td>多一個抽屜放「哪張合約配哪個項目」</td>
+          </tr>
+          <tr>
+            <td>型別<br><code>Data type</code></td>
+            <td>這一格只能填哪一種東西</td>
+            <td>格子旁邊印的「請填數字」</td>
+          </tr>
+          <tr>
+            <td><code>NULL</code></td>
+            <td>還沒填，跟 0 和空白不一樣</td>
+            <td>空著的格子</td>
+          </tr>
+          <tr>
+            <td><code>Schema</code></td>
+            <td>有哪些表、哪些欄位、怎麼連的整份設計</td>
+            <td>全部空白表單的樣張</td>
+          </tr>
+          <tr>
+            <td>關聯圖<br><code>ER diagram</code></td>
+            <td>把表和表之間的線畫出來的圖</td>
+            <td>哪個抽屜的編號對到哪個抽屜</td>
+          </tr>
+          <tr>
+            <td>單一資料來源<br><code>SSOT</code></td>
+            <td>同一筆資料只存一個地方</td>
+            <td>客戶電話只寫在客戶那張表單上</td>
+          </tr>
+          <tr>
+            <td><code>SQL</code></td>
+            <td>跟資料庫講話的語言</td>
+            <td>交代管理員「去哪個抽屜拿什麼」的便條</td>
+          </tr>
+          <tr>
+            <td><code>JOIN</code></td>
+            <td>照編號把兩張表的資料對在一起</td>
+            <td>拿合約上的客戶編號，去翻客戶抽屜</td>
+          </tr>
+          <tr>
+            <td>浮點數<br><code>float</code></td>
+            <td>會有小數誤差的數字型別，不要拿來放金額</td>
+            <td>一把刻度不準的尺</td>
+          </tr>
+          <tr>
+            <td>軟刪除<br><code>Soft delete</code></td>
+            <td>標記成不要了，資料還在</td>
+            <td>蓋上「已停用」的章，表單留著</td>
+          </tr>
+          <tr>
+            <td>連帶刪除<br><code>ON DELETE CASCADE</code></td>
+            <td>刪掉一列，連到它的資料一起刪</td>
+            <td>抽掉客戶表單，他的合約和收款單一起進碎紙機</td>
+          </tr>
+          <tr>
+            <td><code>Migration</code></td>
+            <td>資料結構的修改紀錄，一次一個檔案</td>
+            <td>照順序收好的改版通知單</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="db-note">全書的術語都收在<a href="/glossary/" class="db-link">附錄：術語字典</a>。</p>
+
+    <!-- ===== 12. 收尾 ===== -->
+    <h2>這章帶走什麼</h2>
+
+    <ul>
+      <li>表是抽屜，欄位是格子；表和表用編號連，不用名字連。</li>
+      <li>一格只放一種東西；金額不用 float；狀態用一欄 status；刪除做成軟刪除。</li>
+      <li>查得到的不存，算得出來的不存；留底的是「當時的事實」。</li>
+      <li>你要會的不是設計資料庫，是<strong>看得出它在加第二份</strong>。加欄位之前，問那三句。</li>
+      <li>改結構寫成 migration 檔；會讓資料消失的動作，等你點頭。</li>
+    </ul>
+
+    <div class="box box-warning">
+      <div class="box-label">所以你要會的是什麼</div>
+      <strong>不是自己設計資料庫，是看得出它在加第二份。</strong><br><br>
+      不懂這一章，讓 AI 一直改下去：每一次需求多一欄，同一件事存在好幾個地方，半年後沒有人敢說哪一個數字才對，要整理又怕弄丟資料。<br><br>
+      懂了以後，你只要守住一句：<strong>「先告訴我這個東西現在放在哪，再告訴我你要動哪張表的哪一欄。」</strong>其他的可以交給它寫。
+    </div>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說：寫進 CLAUDE.md 的幾條</div>
+      「每張表都要有 id、created_at、updated_at；表和表之間只用 id 連」<br>
+      「同一筆資料只存一個地方。查得到的不存，算得出來的不存；要留底的先跟我說理由」<br>
+      「金額用整數或 numeric，不用 float」<br>
+      「刪除做成軟刪除，不用 ON DELETE CASCADE」<br>
+      「加欄位、開新表之前，先回答：現在有沒有地方放了、它屬於哪張表、哪些功能要跟著改」<br>
+      「結構的修改一律寫成 migration 檔；刪欄位、刪表、改型別要等我說可以」
+    </div>
+
+    <p>資料的家蓋好了，下一個問題是：誰可以直接碰這些資料？畫面上的 JavaScript 能讀能寫到哪裡，哪些一定要經過後端？這是<a href="/chapter16/" class="db-link">第十六章 前後端邊界</a>要講的。</p>
+
+    <div class="chapter-nav">
+      <a href="/chapter14/" class="prev">
+        <span class="nav-label">上一章</span>
+        <span class="nav-title">功能怎麼切</span>
+      </a>
+      <a href="/chapter16/" class="next">
+        <span class="nav-label">下一章</span>
+        <span class="nav-title">前後端邊界</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/main.js"></script>
+<script>
+// 第十五章互動示範：三張表怎麼連（只在本頁運作，全部是假資料，不送出任何東西）
+(function () {
+  var live = document.getElementById('db-live');
+  var fallback = document.getElementById('db-static');
+  var diagram = document.getElementById('db-diagram');
+  var svg = document.getElementById('db-lines');
+  if (!live || !fallback || !diagram || !svg || !document.createElementNS) return;
+
+  var OLD_NAME = 'A 設計工作室';
+  var NEW_NAME = 'A 設計有限公司';
+
+  var customers = [
+    { id: 1, name: OLD_NAME },
+    { id: 2, name: 'B 咖啡店' },
+    { id: 3, name: 'C 補習班' }
+  ];
+  // cname 是「用名字連」那個版本裡，簽約當時抄在合約上的客戶名字
+  var contracts = [
+    { id: 101, cid: 1, cname: OLD_NAME, title: '年度網站維護' },
+    { id: 102, cid: 1, cname: OLD_NAME, title: '報價系統' },
+    { id: 103, cid: 2, cname: 'B 咖啡店', title: '會員系統' },
+    { id: 104, cid: 3, cname: 'C 補習班', title: '預約系統' }
+  ];
+  var payments = [
+    { id: 501, kid: 101, amount: 18000 },
+    { id: 502, kid: 101, amount: 18000 },
+    { id: 503, kid: 102, amount: 40000 },
+    { id: 504, kid: 103, amount: 60000 },
+    { id: 505, kid: 104, amount: 15000 }
+  ];
+
+  var mode = 'id';        // 'id'：合約記客戶編號；'name'：合約記客戶名字
+  var renamed = false;    // 客戶 1 改名了沒
+  var picked = null;      // 目前點的客戶編號
+  var stage = 0;          // 0 只亮客戶、1 亮到合約、2 亮到付款
+  var timers = [];
+
+  var colCustomers = document.getElementById('db-col-customers');
+  var colContracts = document.getElementById('db-col-contracts');
+  var colPayments = document.getElementById('db-col-payments');
+  var hintContracts = document.getElementById('db-hint-contracts');
+  var btnId = document.getElementById('db-mode-id');
+  var btnName = document.getElementById('db-mode-name');
+  var btnRename = document.getElementById('db-rename');
+  var btnReset = document.getElementById('db-reset');
+  var statusEl = document.getElementById('db-status');
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function money(n) { return Math.round(n).toLocaleString('en-US'); }
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+  function customerById(id) {
+    for (var i = 0; i < customers.length; i++) if (customers[i].id === id) return customers[i];
+    return null;
+  }
+  // 合約是不是連得到這位客戶（依目前的連法）
+  function linked(contract, customer) {
+    return mode === 'id' ? contract.cid === customer.id : contract.cname === customer.name;
+  }
+  // 合約找不找得到它的主人
+  function hasOwner(contract) {
+    var owner = customerById(contract.cid);
+    return !!owner && linked(contract, owner);
+  }
+
+  // ---- 建立三欄的列（只建一次，之後只改內容與樣式）----
+  customers.forEach(function (c) {
+    var row = el('button', 'db-row');
+    row.type = 'button';
+    row.setAttribute('aria-pressed', 'false');
+    row.appendChild(el('span', 'db-row-id', 'id ' + c.id));
+    c.nameEl = el('span', '', c.name);
+    row.appendChild(c.nameEl);
+    c.flagEl = el('span', 'db-row-sub', '');
+    row.appendChild(c.flagEl);
+    row.addEventListener('click', function () { pick(c.id, ''); });
+    c.row = row;
+    colCustomers.appendChild(row);
+  });
+  contracts.forEach(function (k) {
+    var row = el('div', 'db-row');
+    row.appendChild(el('span', 'db-row-id', 'id ' + k.id));
+    row.appendChild(el('span', '', k.title));
+    k.subEl = el('span', 'db-row-sub', '');
+    row.appendChild(k.subEl);
+    k.flagEl = el('span', 'db-row-flag', '找不到這位客戶');
+    k.flagEl.hidden = true;
+    row.appendChild(k.flagEl);
+    k.row = row;
+    colContracts.appendChild(row);
+  });
+  payments.forEach(function (p) {
+    var row = el('div', 'db-row');
+    row.appendChild(el('span', 'db-row-id', 'id ' + p.id));
+    row.appendChild(el('span', '', money(p.amount) + ' 元'));
+    row.appendChild(el('span', 'db-row-sub', 'contract_id：' + p.kid));
+    p.row = row;
+    colPayments.appendChild(row);
+  });
+
+  // ---- 畫線 ----
+  var NS = 'http://www.w3.org/2000/svg';
+  function svgEl(tag, cls) {
+    var node = document.createElementNS(NS, tag);
+    if (cls) node.setAttribute('class', cls);
+    return node;
+  }
+  function drawLines(litContracts, litPayments) {
+    var box = diagram.getBoundingClientRect();
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    if (!box.width) return;
+    svg.setAttribute('viewBox', '0 0 ' + box.width + ' ' + box.height);
+    var wide = colCustomers.getBoundingClientRect().right <= colContracts.getBoundingClientRect().left + 1;
+    var layers = { dim: [], broken: [], on: [] };
+
+    function link(fromRow, toRow, state, lane) {
+      var a = fromRow.getBoundingClientRect();
+      var b = toRow.getBoundingClientRect();
+      var d, mx, my;
+      if (wide) {
+        var x1 = a.right - box.left, y1 = a.top + a.height / 2 - box.top;
+        var x2 = b.left - box.left, y2 = b.top + b.height / 2 - box.top;
+        mx = (x1 + x2) / 2;
+        my = (y1 + y2) / 2;
+        d = 'M' + x1 + ' ' + y1 + ' C' + mx + ' ' + y1 + ' ' + mx + ' ' + y2 + ' ' + x2 + ' ' + y2;
+      } else {
+        // 手機：三張表上下排，線走左邊的溝
+        var xa = a.left - box.left, ya = a.top + a.height / 2 - box.top + 7;
+        var xb = b.left - box.left, yb = b.top + b.height / 2 - box.top - 7;
+        mx = lane;
+        my = (ya + yb) / 2;
+        d = 'M' + xa + ' ' + ya + ' H' + lane + ' V' + yb + ' H' + xb;
+      }
+      var path = svgEl('path', 'db-line' + (state === 'on' ? ' db-line-on' : state === 'broken' ? ' db-line-broken' : ''));
+      path.setAttribute('d', d);
+      layers[state].push(path);
+      if (state === 'broken') {
+        var dot = svgEl('circle', 'db-cut-bg');
+        dot.setAttribute('cx', mx); dot.setAttribute('cy', my); dot.setAttribute('r', 8);
+        var s1 = svgEl('line', 'db-cut');
+        s1.setAttribute('x1', mx - 3.5); s1.setAttribute('y1', my - 3.5);
+        s1.setAttribute('x2', mx + 3.5); s1.setAttribute('y2', my + 3.5);
+        var s2 = svgEl('line', 'db-cut');
+        s2.setAttribute('x1', mx - 3.5); s2.setAttribute('y1', my + 3.5);
+        s2.setAttribute('x2', mx + 3.5); s2.setAttribute('y2', my - 3.5);
+        layers.broken.push(dot, s1, s2);
+      }
+    }
+
+    contracts.forEach(function (k) {
+      var owner = customerById(k.cid);
+      var state = !hasOwner(k) ? 'broken' : (litContracts[k.id] ? 'on' : 'dim');
+      link(owner.row, k.row, state, 10);
+    });
+    payments.forEach(function (p) {
+      var k = null;
+      for (var i = 0; i < contracts.length; i++) if (contracts[i].id === p.kid) k = contracts[i];
+      link(k.row, p.row, litPayments[p.id] ? 'on' : 'dim', 22);
+    });
+    ['dim', 'broken', 'on'].forEach(function (name) {
+      layers[name].forEach(function (node) { svg.appendChild(node); });
+    });
+  }
+
+  // ---- 依目前狀態更新整張圖 ----
+  function render() {
+    var who = picked == null ? null : customerById(picked);
+    var litContracts = {};
+    var litPayments = {};
+
+    customers.forEach(function (c) {
+      c.nameEl.textContent = c.name;
+      c.flagEl.textContent = (c.id === 1 && renamed) ? '剛改過名字' : '';
+      var on = who && who.id === c.id;
+      c.row.classList.toggle('db-picked', !!on);
+      c.row.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    contracts.forEach(function (k) {
+      k.subEl.textContent = mode === 'id' ? 'customer_id：' + k.cid : 'customer_name：' + k.cname;
+      var orphan = !hasOwner(k);
+      var on = !!who && stage >= 1 && linked(k, who);
+      if (on) litContracts[k.id] = true;
+      k.row.classList.toggle('db-on', on);
+      k.row.classList.toggle('db-orphan', orphan);
+      k.flagEl.hidden = !orphan;
+    });
+    payments.forEach(function (p) {
+      var on = stage >= 2 && !!litContracts[p.kid];
+      if (on) litPayments[p.id] = true;
+      p.row.classList.toggle('db-on', on);
+    });
+
+    diagram.classList.toggle('db-has-pick', !!who);
+    hintContracts.textContent = mode === 'id' ? '記著客戶的編號' : '記著客戶的名字';
+    btnId.setAttribute('aria-pressed', mode === 'id' ? 'true' : 'false');
+    btnName.setAttribute('aria-pressed', mode === 'name' ? 'true' : 'false');
+    btnRename.setAttribute('aria-pressed', renamed ? 'true' : 'false');
+    btnRename.textContent = renamed ? '客戶 1 改回「' + OLD_NAME + '」' : '客戶 1 改名成「' + NEW_NAME + '」';
+    drawLines(litContracts, litPayments);
+  }
+
+  function setStatus(text, kind) {
+    statusEl.textContent = text;
+    statusEl.className = 'db-status' + (kind ? ' db-is-' + kind : '');
+  }
+  function clearTimers() {
+    while (timers.length) clearTimeout(timers.pop());
+  }
+
+  // 結算：這位客戶連得到幾張合約、幾筆付款
+  function summary(prefix) {
+    var who = customerById(picked);
+    var ids = {};
+    var nContracts = 0;
+    var nPayments = 0;
+    var total = 0;
+    contracts.forEach(function (k) {
+      if (linked(k, who)) { ids[k.id] = true; nContracts++; }
+    });
+    payments.forEach(function (p) {
+      if (ids[p.kid]) { nPayments++; total += p.amount; }
+    });
+    if (nContracts === 0) {
+      setStatus(prefix + '拿新名字去合約表找，一張都找不到：合約上寫的還是舊名字「' + OLD_NAME +
+        '」。2 張合約、3 筆付款還在，只是沒人找得到。線斷了。', 'bad');
+    } else {
+      var by = mode === 'id' ? '編號 ' + who.id + ' ' : '名字「' + who.name + '」';
+      setStatus(prefix + '用' + by + '去找：' + nContracts + ' 張合約 → ' + nPayments + ' 筆付款，共收 ' + money(total) + ' 元。', 'ok');
+    }
+  }
+
+  // 點一位客戶：客戶 → 合約 → 付款 依序亮起
+  function pick(id, prefix) {
+    clearTimers();
+    picked = id;
+    if (reduceMotion && reduceMotion.matches) {
+      stage = 2;
+      render();
+      summary(prefix);
+      return;
+    }
+    stage = 0;
+    render();
+    setStatus(prefix + '從客戶 ' + id + ' 出發，去合約表找⋯⋯', '');
+    timers.push(setTimeout(function () { stage = 1; render(); }, 450));
+    timers.push(setTimeout(function () { stage = 2; render(); summary(prefix); }, 900));
+  }
+
+  function idle() {
+    clearTimers();
+    picked = null;
+    stage = 0;
+    render();
+    if (mode === 'name' && renamed) {
+      setStatus('客戶 1 已經改名，合約上還是舊名字，兩條線斷了。點客戶 1 看看找得到什麼。', 'bad');
+    } else if (mode === 'name') {
+      setStatus('合約上記的是客戶的名字。點一位客戶，再按下面的改名。', '');
+    } else {
+      setStatus('合約上記的是客戶的編號。點一位客戶試試。', '');
+    }
+  }
+
+  btnId.addEventListener('click', function () {
+    mode = 'id';
+    if (picked != null) pick(picked, '換成用編號連。'); else idle();
+  });
+  btnName.addEventListener('click', function () {
+    mode = 'name';
+    if (picked != null) pick(picked, '換成用名字連。'); else idle();
+  });
+  btnRename.addEventListener('click', function () {
+    renamed = !renamed;
+    customers[0].name = renamed ? NEW_NAME : OLD_NAME;
+    pick(1, renamed ? '客戶 1 改名了。' : '名字改回來了。');
+  });
+  btnReset.addEventListener('click', function () {
+    mode = 'id';
+    renamed = false;
+    customers[0].name = OLD_NAME;
+    idle();
+  });
+
+  // 版面寬度變了（轉手機、縮視窗）要重畫線
+  var redrawTimer = null;
+  function scheduleRedraw() {
+    clearTimeout(redrawTimer);
+    redrawTimer = setTimeout(render, 60);
+  }
+  if (window.ResizeObserver) {
+    new ResizeObserver(scheduleRedraw).observe(diagram);
+  } else {
+    window.addEventListener('resize', scheduleRedraw);
+  }
+
+  fallback.hidden = true;
+  live.hidden = false;
+  idle();
+})();
+</script>
+</body>
+</html>

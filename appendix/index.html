@@ -3,8 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>附錄：常見問題 — Claude Code 指南</title>
+  <title>附錄：常見問題 — Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* 附錄常見問題專用。class 一律用 faq- 前綴 */
+    /* .env 對照框：手機上兩欄變一欄時，格子要能縮，長字串在框內換行，不撐破頁面 */
+    .faq-env .compare-bad,
+    .faq-env .compare-good { min-width: 0; }
+    .faq-env .code-block {
+      overflow-wrap: anywhere;
+      word-break: break-all;
+      font-size: 13px;
+      padding: 14px;
+    }
+    @media (max-width: 600px) {
+      .faq-env { grid-template-columns: 1fr; }
+    }
+    /* 錯誤訊息範例：保留換行與縮排，手機上長的一行在框內折行，不用左右捲 */
+    .faq-trace { white-space: pre-wrap; overflow-wrap: anywhere; }
+    /* 分支圖：保留空白對齊，窄螢幕在框內捲動 */
+    .faq-branch { white-space: pre; }
+    /* 錯誤類型表：錯誤名稱可以在框內折行，不撐寬表格 */
+    .faq-err code { overflow-wrap: anywhere; }
+  </style>
 </head>
 <body>
 
@@ -13,11 +34,11 @@
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
       <a href="/">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/">下指令</a>
-      <a href="/chapter3/">工作流程</a>
-      <a href="/chapter9/">術語字典</a>
-      <a href="/appendix/" class="active">附錄</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,18 +48,26 @@
 
 <nav class="mobile-nav">
   <a href="/">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/">第二章：下指令</a>
-  <a href="/chapter3/">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/">第六章：Claude Code</a>
-  <a href="/chapter7/">第七章：技術棧</a>
-  <a href="/chapter8/">第八章：API</a>
-  <a href="/chapter9/">第九章：術語字典</a>
-  <a href="/chapter10/">第十章：進階問題</a>
-  <a href="/chapter11/">第十一章：工具生態</a>
-  <a href="/appendix/" class="active">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/" class="active">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
@@ -46,35 +75,74 @@
     <div class="page-header">
       <div class="chapter-label">附錄</div>
       <h1>常見問題</h1>
-      <p class="lead">這裡收錄了非工程師最常問的問題：錯誤訊息怎麼讀、密碼為什麼不能寫在程式裡、Git 到底是什麼。看完這些，你跟 AI 的溝通效率會再上一個台階。</p>
+      <p class="lead">正文到第十八章為止。這一頁收的是非工程師動手時常卡住、常問的四件事：錯誤訊息怎麼讀、金鑰為什麼不能寫在程式裡、Git 到底是什麼、Claude 提到的套件是什麼。每一題最後都會回到同一件事：知道邊界在哪。</p>
     </div>
   </section>
 
   <section class="container content">
 
     <!-- ===== A. 錯誤訊息怎麼讀 ===== -->
-    <h2>錯誤訊息怎麼讀：不要看到紅字就慌</h2>
+    <h2 id="faq-error">錯誤訊息怎麼讀：不要看到紅字就慌</h2>
 
-    <p>很多非工程師看到一大片紅色的錯誤訊息就慌了。但其實，你只需要知道怎麼找<strong>三個關鍵資訊</strong>：</p>
+    <p>很多人看到一大片紅字就慌了。其實你只要找<strong>三個資訊</strong>：</p>
 
     <ol>
-      <li><strong>錯誤類型</strong>（通常在第一行或最後一行）</li>
-      <li><strong>錯誤訊息</strong>（告訴你發生了什麼事）</li>
-      <li><strong>出錯位置</strong>（在哪個檔案的第幾行）</li>
+      <li><strong>錯誤類型</strong>：哪一類的錯（通常在第一行或最後一行）</li>
+      <li><strong>錯誤原因</strong>：發生了什麼事</li>
+      <li><strong>出錯位置</strong>：哪個檔案的第幾行</li>
     </ol>
 
-    <p>來看一個實際的錯誤訊息：</p>
+    <p>錯誤會出現在兩個地方。指令出的錯在終端機（打字下指令的那個視窗），Claude 自己跑的指令，錯誤它自己看得到。網頁上的錯在瀏覽器的「主控台」（Console）：在頁面上按右鍵選「檢查」，切到 Console 分頁就看得到。這種要你貼給它，或讓它用 Claude in Chrome 自己去看。</p>
 
-    <div class="code-block">
-<span style="color: var(--text-muted);">Traceback (most recent call last):</span><br>
-<span style="color: var(--text-muted);">  File "/app/routes/user.py", line 42, in get_user</span><br>
-<span style="color: var(--text-muted);">    result = db.query("SELECT * FROM users WHERE id = " + user_id)</span><br>
-<span style="color: var(--text-muted);">  File "/app/database.py", line 15, in query</span><br>
-<span style="color: var(--text-muted);">    cursor.execute(sql)</span><br>
-<span style="color: var(--red);"><strong>TypeError: can only concatenate str (not "int") to str</strong></span>
+    <h3>例一：網頁上的錯（JavaScript）</h3>
+
+    <p>報價單按下「計算」沒反應，主控台出現這段：</p>
+
+    <div class="code-block faq-trace"><span style="color: var(--red);"><strong>Uncaught TypeError: Cannot read properties of undefined (reading 'price')</strong></span>
+<span style="color: var(--text-muted);">    at calcTotal (quote.js:42:25)</span>
+<span style="color: var(--text-muted);">    at HTMLButtonElement.handleSubmit (quote.js:18:5)</span></div>
+
+    <p>拆開來看：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>部分</th>
+            <th>告訴你什麼</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="color: var(--red);"><strong>TypeError</strong></td>
+            <td>錯誤類型：類型錯誤，拿一個東西去做它做不到的事</td>
+          </tr>
+          <tr>
+            <td style="color: var(--red);"><strong>Cannot read properties of undefined (reading 'price')</strong></td>
+            <td>錯誤原因：程式要讀某個東西的 price（價格），但那個東西是空的（undefined）。常見是品項沒選到，或資料還沒載進來</td>
+          </tr>
+          <tr>
+            <td style="color: var(--yellow);"><strong>quote.js:42:25</strong></td>
+            <td>出錯位置：<code>quote.js</code> 這個檔案的第 42 行</td>
+          </tr>
+          <tr>
+            <td style="color: var(--text-muted);">下面那幾行 at</td>
+            <td>一路怎麼走到這裡：按鈕被按下 → <code>handleSubmit</code> → <code>calcTotal</code> 出事。這一串叫 stack trace</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <p>拆解一下：</p>
+    <h3>例二：後端的錯（Python）</h3>
+
+    <p>後端程式常用的 Python，錯誤長得不太一樣：</p>
+
+    <div class="code-block faq-trace"><span style="color: var(--text-muted);">Traceback (most recent call last):</span>
+<span style="color: var(--text-muted);">  File "/app/routes/user.py", line 42, in get_user</span>
+<span style="color: var(--text-muted);">    result = db.query("SELECT * FROM users WHERE id = " + user_id)</span>
+<span style="color: var(--text-muted);">  File "/app/database.py", line 15, in query</span>
+<span style="color: var(--text-muted);">    cursor.execute(sql)</span>
+<span style="color: var(--red);"><strong>TypeError: can only concatenate str (not "int") to str</strong></span></div>
 
     <div class="table-wrapper">
       <table>
@@ -89,39 +157,42 @@
           <tr>
             <td style="color: var(--red);"><strong>TypeError</strong></td>
             <td>最後一行的開頭</td>
-            <td>錯誤類型：類型錯誤（數字和文字不能直接相加）</td>
+            <td>錯誤類型：類型錯誤（文字和數字不能直接接在一起）</td>
           </tr>
           <tr>
             <td style="color: var(--red);"><strong>can only concatenate str...</strong></td>
             <td>最後一行的說明</td>
-            <td>錯誤原因：你想把「字串」和「整數」接在一起</td>
+            <td>錯誤原因：程式想把「文字」（str）和「整數」（int）接在一起</td>
           </tr>
           <tr>
             <td style="color: var(--yellow);"><strong>user.py, line 42</strong></td>
             <td>中間的 Traceback</td>
-            <td>出錯位置：user.py 檔案的第 42 行</td>
+            <td>出錯位置：<code>user.py</code> 這個檔案的第 42 行</td>
           </tr>
           <tr>
-            <td style="color: var(--text-muted);">Traceback 中間部分</td>
-            <td>第 2-5 行</td>
-            <td>Stack trace：從哪裡開始、經過哪裡、在哪裡爆掉</td>
+            <td style="color: var(--text-muted);">Traceback 中間那幾行</td>
+            <td>第 2 到 5 行</td>
+            <td>Stack trace：從哪裡開始、經過哪裡、在哪裡出事</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <h3>Stack Trace = 麵包屑</h3>
+    <p>順帶一提：這個例子把使用者給的編號直接接進 SQL 句子裡，就算不報錯也是危險的寫法（別人可以在編號裡夾帶指令）。Claude 修這種錯時，請它改成「帶參數的查詢」，不要只是把數字轉成文字了事。</p>
+
+    <h3>Stack trace＝麵包屑</h3>
 
     <div class="analogy">
-      <strong>比喻：追蹤犯罪現場。</strong><br><br>
-      Stack trace 就像犯罪現場的監視器畫面。它告訴你：<br><br>
-      「嫌犯從 A 房間出發 → 經過 B 走廊 → 在 C 房間犯案」<br><br>
-      最上面是起點，最下面是出事的地方。通常你只需要看<strong>最下面幾行</strong>就夠了。
+      <strong>比喻：追監視器畫面。</strong><br><br>
+      Stack trace 像一串監視器畫面，告訴你「從 A 房間出發 → 經過 B 走廊 → 在 C 房間出事」。<br><br>
+      先找「在哪裡出事」，再往回看「怎麼走到那裡」。大部分時候，只看出事的那幾行就夠了。
     </div>
+
+    <p>要注意方向。瀏覽器的 JavaScript 錯誤（例一），錯誤寫在最上面，往下是一路怎麼走到那裡的。Python（例二）剛好反過來：開頭寫著 <code>Traceback (most recent call last)</code>，意思是「最後發生的寫在最下面」，錯誤在最後一行，上面是路徑。分不清的時候，整段貼給 Claude，它分得出來。</p>
 
     <h3>常見錯誤類型速查</h3>
 
-    <div class="table-wrapper">
+    <div class="table-wrapper faq-err">
       <table>
         <thead>
           <tr>
@@ -134,135 +205,184 @@
           <tr>
             <td><code>TypeError</code></td>
             <td>類型搞錯了</td>
-            <td>把數字當文字用、把空值當物件用</td>
+            <td>把數字當文字用、對空的東西讀資料</td>
           </tr>
           <tr>
             <td><code>SyntaxError</code></td>
             <td>語法寫錯了</td>
-            <td>少了括號、多了逗號、拼錯字</td>
+            <td>少了括號、多了逗號、引號沒成對、關鍵字拼錯</td>
           </tr>
           <tr>
             <td><code>ReferenceError</code></td>
-            <td>找不到這個東西</td>
-            <td>變數名字打錯、忘了引入模組</td>
+            <td>找不到這個名字</td>
+            <td>名字打錯、該先載入的 JS 檔或模組沒載到</td>
           </tr>
           <tr>
-            <td><code>404 Not Found</code></td>
-            <td>頁面不存在</td>
-            <td>網址打錯、檔案被刪了、路由沒設定</td>
-          </tr>
-          <tr>
-            <td><code>500 Internal Server Error</code></td>
-            <td>伺服器炸了</td>
-            <td>後端程式有 bug、資料庫連不上</td>
+            <td><code>401 Unauthorized</code></td>
+            <td>不知道你是誰</td>
+            <td>沒登入、金鑰填錯或過期</td>
           </tr>
           <tr>
             <td><code>403 Forbidden</code></td>
-            <td>你沒有權限</td>
-            <td>沒登入、API key 過期、IP 被擋</td>
+            <td>知道你是誰，但你沒有權限</td>
+            <td>帳號權限不夠、存取規則擋下來、IP 被擋</td>
           </tr>
           <tr>
-            <td><code>CORS Error</code></td>
+            <td><code>404 Not Found</code></td>
+            <td>找不到</td>
+            <td>網址打錯、檔案被刪了或放錯資料夾、路由沒設定</td>
+          </tr>
+          <tr>
+            <td><code>429 Too Many Requests</code></td>
+            <td>太頻繁，被擋了</td>
+            <td>短時間內呼叫同一個服務太多次</td>
+          </tr>
+          <tr>
+            <td><code>500 Internal Server Error</code></td>
+            <td>伺服器那邊出錯</td>
+            <td>後端程式有 bug、資料庫連不上</td>
+          </tr>
+          <tr>
+            <td><code>CORS</code> 錯誤</td>
             <td>跨網域被擋</td>
-            <td>前端和後端網域不同，後端沒開放</td>
+            <td>網頁和後端不在同一個網域，後端沒開放這個網域來呼叫</td>
           </tr>
           <tr>
-            <td><code>ECONNREFUSED</code></td>
+            <td><code>ERR_CONNECTION_REFUSED</code>、<code>ECONNREFUSED</code></td>
             <td>連線被拒絕</td>
-            <td>服務沒啟動、port 錯誤</td>
+            <td>要連的服務沒開，或 port（連接埠號碼）打錯。常見於在自己電腦上預覽時，預覽伺服器沒開</td>
+          </tr>
+          <tr>
+            <td><code>EADDRINUSE</code>、<code>address already in use</code></td>
+            <td>這個 port 已經有人在用</td>
+            <td>預覽伺服器已經開著一個，又開了第二個。關掉舊的，或換一個 port</td>
+          </tr>
+          <tr>
+            <td><code>command not found</code></td>
+            <td>終端機找不到這個指令</td>
+            <td>這個工具還沒裝、名字打錯，或剛裝好但終端機還沒重開</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div class="box box-tip">
-      <div class="box-label">最有效的求助方式</div>
-      看到錯誤訊息？<strong>整段複製貼給 Claude。</strong>不要只說「它壞了」或「跑不動」。<br><br>
-      完整的錯誤訊息包含了 Claude 需要的所有線索：錯誤類型、出錯位置、呼叫堆疊。<br>
-      你甚至不需要看懂它——直接複製貼上就是最好的溝通方式。
+      <div class="box-label">怎麼跟 Claude 求助</div>
+      看到錯誤訊息，<strong>整段複製貼給 Claude</strong>，再補一句你剛剛做了什麼（「按下計算之後」「部署完打開首頁」）。不要只說「它壞了」或「跑不動」。<br><br>
+      錯誤類型、出錯位置、一路怎麼走到那裡，它要的線索都在那段字裡。你不用看懂，貼完整就好。
+    </div>
+
+    <div class="box box-warning">
+      <div class="box-label">修錯的時候，邊界也要講</div>
+      錯誤訊息消失，不等於問題修好了。AI 修錯有幾種做法會留後患，先講好不准這樣做：<br>
+      - <strong>把錯誤藏起來</strong>：整段包起來、出錯就不吭聲。紅字不見了，東西照樣是壞的<br>
+      - <strong>把檢查拿掉</strong>：「欄位不能空白」的檢查報錯，就把檢查刪了<br>
+      - <strong>順手改一大片</strong>：修一個按鈕，連帶改了三個檔案、加了一個欄位<br><br>
+      所以先叫它講原因、講要改哪幾個檔，你點頭再改。改完再按一次同一個按鈕，確認真的好了。
     </div>
 
     <!-- ===== B. .env ===== -->
-    <h2>.env 環境變數：你的密碼本</h2>
+    <h2 id="faq-env">.env 環境變數：金鑰放哪裡</h2>
 
-    <h3>為什麼密碼不能寫在程式碼裡？</h3>
+    <h3>為什麼金鑰不能寫在程式碼裡</h3>
 
-    <p>想像這個場景：你寫了一個程式，裡面直接寫了你的資料庫密碼。然後你把程式碼上傳到 GitHub（一個公開的程式碼平台）。</p>
+    <p>金鑰（API key）是你的程式登入別的服務用的那串字，等於密碼。想像一下：你的程式裡直接寫著資料庫密碼，然後你把程式推上 GitHub 的公開 repo（放程式碼的地方）。這下<strong>誰都看得到</strong>，包括專門在網路上找金鑰的自動程式。</p>
 
-    <p>恭喜，<strong>全世界都看到你的密碼了</strong>。</p>
-
-    <p>這不是開玩笑。每天都有人因為把密碼上傳到 GitHub 而被駭客入侵。GitHub 上有專門的爬蟲，24 小時在掃描新上傳的 API 金鑰。</p>
+    <p>私人 repo 也不要放。分享給外包、換一台電腦、哪天改成公開，金鑰就跟著出去了。GitHub 對推到公開 repo 的內容，預設會擋下看起來像金鑰的東西（push protection），但那是最後一道網，不能靠它。</p>
 
     <div class="analogy">
       <strong>比喻：把保險箱密碼寫在大門上。</strong><br><br>
-      你不會把家裡保險箱的密碼寫在大門上對吧？<br><br>
-      把密碼寫在程式碼裡再上傳到 GitHub，就是在做這件事。<br>
-      程式碼是公開的 = 大門是透明的 = 所有人都看得到你的密碼。
+      你不會把家裡保險箱的密碼寫在大門上。把金鑰寫在程式碼裡再上傳，就是在做這件事。門是透明的，路過的人都看得到。
     </div>
 
-    <h3>.env 是什麼？</h3>
+    <h3>.env 是什麼</h3>
 
-    <p><code>.env</code> 就是「環境變數檔案」，白話說就是<strong>密碼本</strong>。它是一個純文字檔，裡面存放所有敏感資訊：</p>
+    <p><code>.env</code> 是「環境變數檔」，白話說就是<strong>密碼本</strong>。它是一個純文字檔，把金鑰集中放在這裡，程式要用的時候來這裡讀：</p>
 
     <div class="code-block">
 <span style="color: var(--text-muted);"># .env 檔案的內容長這樣：</span><br>
 <br>
-<span style="color: var(--blue);">DATABASE_URL</span>=postgresql://user:password123@localhost:5432/mydb<br>
-<span style="color: var(--blue);">STRIPE_SECRET_KEY</span>=sk_live_abc123def456<br>
-<span style="color: var(--blue);">LINE_CHANNEL_SECRET</span>=your_channel_secret_here<br>
-<span style="color: var(--blue);">OPENAI_API_KEY</span>=sk-proj-xxxxxxxxxxx
+<span style="color: var(--blue);">SUPABASE_URL</span>=https://你的專案.supabase.co<br>
+<span style="color: var(--blue);">SUPABASE_SECRET_KEY</span>=這裡填真的金鑰<br>
+<span style="color: var(--blue);">STRIPE_SECRET_KEY</span>=這裡填真的金鑰<br>
+<span style="color: var(--blue);">LINE_CHANNEL_SECRET</span>=這裡填真的金鑰
     </div>
 
-    <p>重點來了：<code>.env</code> 這個檔案<strong>只放在你的電腦上，絕對不上傳到 GitHub</strong>。</p>
+    <p>重點：<code>.env</code> <strong>只放在你的電腦上，不上傳到 GitHub</strong>。做法是在 <code>.gitignore</code>（Git 的「不要管這些檔案」清單）裡加上 <code>.env</code>，Git 就不會把它收進去。</p>
 
-    <p>怎麼確保不上傳？在 <code>.gitignore</code>（Git 的「忽略清單」）裡加上 <code>.env</code>，Git 就會自動忽略這個檔案。</p>
+    <p>放在 Cloudflare 上跑的後端程式（Workers）也一樣：在自己電腦上測試時，金鑰放 <code>.dev.vars</code> 或 <code>.env</code>，兩個都不進 Git；上線用 <code>wrangler secret put 金鑰名字</code> 存到 Cloudflare 那邊。</p>
 
-    <h3>.env.example 是什麼？</h3>
+    <h3>.env.example 是什麼</h3>
 
-    <p><code>.env.example</code> 是「密碼本的模板」。它告訴其他人「你需要填哪些密碼」，但不包含真實的值。</p>
+    <p><code>.env.example</code> 是「密碼本的模板」：告訴別人要填哪些金鑰，但不放真的值。</p>
 
-    <div class="compare">
+    <div class="compare faq-env">
       <div class="compare-bad">
-        <div class="compare-label">.env（真正的密碼本 — 不上傳）</div>
+        <div class="compare-label">.env（真的密碼本，不上傳）</div>
         <div class="code-block">
-DATABASE_URL=postgresql://admin:<br>
-　realpassword@db.example.com<br>
-STRIPE_KEY=sk_live_real_key_123<br>
-API_SECRET=my_actual_secret
+SUPABASE_URL=https://abcd.supabase.co<br>
+SUPABASE_SECRET_KEY=（真的金鑰）<br>
+STRIPE_SECRET_KEY=（真的金鑰）<br>
+LINE_CHANNEL_SECRET=（真的金鑰）
         </div>
       </div>
       <div class="compare-good">
-        <div class="compare-label">.env.example（模板 — 可以上傳）</div>
+        <div class="compare-label">.env.example（模板，可以上傳）</div>
         <div class="code-block">
-DATABASE_URL=your_database_url_here<br>
-STRIPE_KEY=your_stripe_key_here<br>
-API_SECRET=your_api_secret_here<br>
+SUPABASE_URL=<br>
+SUPABASE_SECRET_KEY=<br>
+STRIPE_SECRET_KEY=<br>
+LINE_CHANNEL_SECRET=<br>
 <br>
-<span style="color: var(--green);"># 只有欄位名稱，沒有真實值</span>
+<span style="color: var(--green);"># 只有名稱，沒有值</span>
         </div>
       </div>
     </div>
 
+    <h3>頁面上的金鑰：前後端的線畫在這裡</h3>
+
+    <p>純靜態頁面沒有地方藏 <code>.env</code>：頁面上的 JS，打開網頁的人全都看得到。所以金鑰分兩種：</p>
+
+    <ul>
+      <li><strong>可以放在頁面上的：</strong>Supabase 的 publishable key（<code>sb_publishable_</code> 開頭，舊名 anon key）。它本來就設計成給頁面用，資料能不能讀、能不能改，靠每張表的存取規則（RLS）把關。所以每一張表都要開 RLS。</li>
+      <li><strong>只能放後端的：</strong>Supabase 的 secret key（<code>sb_secret_</code> 開頭，舊名 service_role key），它會跳過存取規則；還有其他服務的密鑰（像 Stripe 的 secret key）。這些只能存在 Cloudflare Workers 或 Supabase Edge Functions 的 secret 裡，不能出現在頁面上。Supabase 的新版 secret key 放在瀏覽器裡本來就用不了，會被擋下來。</li>
+    </ul>
+
+    <p>Supabase 官方文件寫明，舊名的 anon、service_role key 預計在 2026 年底前淘汰。Claude 寫的程式如果還在用舊名字，請它換成新的。這條線怎麼畫，<a href="/chapter16/">第十六章 前後端邊界</a>有完整的講法。</p>
+
     <div class="box box-danger">
       <div class="box-label">必記原則</div>
-      <strong>.env = 密碼本</strong>，只存在你的電腦上，絕不上傳。<br>
-      <strong>.env.example = 密碼本模板</strong>，告訴別人需要填什麼，可以上傳。<br><br>
-      如果 Claude 幫你寫的程式碼裡出現了 <code>sk_live_</code>、<code>password123</code> 之類的真實密碼，<strong>馬上叫它改成環境變數</strong>。
+      <strong>.env＝密碼本</strong>，只存在你的電腦上，不上傳。<br>
+      <strong>.env.example＝密碼本模板</strong>，告訴別人要填什麼，可以上傳。<br>
+      <strong>頁面上只能放 publishable key</strong>，其他金鑰一律放後端。<br><br>
+      Claude 寫的程式裡如果直接出現一串真的金鑰（像是 <code>sb_secret_</code>、<code>sk_live_</code> 開頭的字串，或是網址裡夾著密碼），或是把 secret key 寫進頁面的 JS，<strong>馬上叫它移到後端的 secret</strong>。
     </div>
+
+    <h3>金鑰已經外流了怎麼辦</h3>
+
+    <p>發現金鑰已經推上 GitHub，或出現在頁面上，順序是這樣：</p>
+
+    <ol>
+      <li><strong>先到那個服務的後台，把這把金鑰作廢、換一把新的。</strong>這一步最急，因為別人可能已經抄走了。</li>
+      <li>再把程式裡的金鑰拿掉，改成讀 <code>.env</code> 或後端的 secret，新金鑰放進去。</li>
+      <li>只刪掉那一行不夠。Git 會留下每一次修改的紀錄，舊的紀錄裡還找得到。所以第一步的作廢不能省。</li>
+    </ol>
 
     <!-- ===== C. Git 基礎 ===== -->
-    <h2>Git 基礎：程式碼的「追蹤修訂」</h2>
+    <h2 id="faq-git">Git 基礎：程式碼的「追蹤修訂」</h2>
 
-    <p>如果你用過 Word 的「追蹤修訂」功能，你就已經理解 Git 的核心概念了。</p>
+    <p>用過 Word 的「追蹤修訂」，你就懂 Git 在做什麼了。</p>
 
     <div class="analogy">
-      <strong>Git = 程式碼的追蹤修訂功能。</strong><br><br>
-      想像你在寫一篇論文。每隔一段時間你就「另存新檔」：論文v1、論文v2、論文v3...。這樣如果改壞了，還可以回到之前的版本。<br><br>
-      Git 做的就是這件事，但比「另存新檔」高級一百倍：<br>
-      - 它記錄每一次修改了什麼（不是整份文件的副本）<br>
-      - 它可以讓多人同時編輯同一個專案<br>
-      - 它可以把修改上傳到雲端（GitHub）備份
+      <strong>Git＝程式碼的追蹤修訂。</strong><br><br>
+      寫一份企劃，每隔一段時間就「另存新檔」：企劃 v1、企劃 v2、企劃 v3。改壞了，還能回到之前的版本。<br><br>
+      Git 做的就是這件事，而且比「另存新檔」多做了三件：<br>
+      - 記下每一次改了哪幾行，不用存一整份副本<br>
+      - 讓好幾個人同時改同一個專案<br>
+      - 把紀錄放到雲端（GitHub）備份
     </div>
+
+    <p><strong>Git 和 GitHub 差在哪：</strong>Git 是裝在你電腦上、負責記紀錄的工具；GitHub 是放這些紀錄的網站，像雲端硬碟，另外多了討論、審核修改、找別人做好的專案這些功能。Git 不用 GitHub 也能用，只是紀錄只存在你自己的電腦上。</p>
 
     <h3>核心概念對照表</h3>
 
@@ -279,12 +399,12 @@ API_SECRET=your_api_secret_here<br>
           <tr>
             <td><strong>commit</strong></td>
             <td>存一個紀錄點</td>
-            <td>遊戲的存檔點。隨時可以回到這裡</td>
+            <td>遊戲的存檔點，隨時可以回到這裡</td>
           </tr>
           <tr>
             <td><strong>push</strong></td>
             <td>上傳到雲端</td>
-            <td>把存檔上傳到雲端備份（GitHub）</td>
+            <td>把存檔上傳到 GitHub 備份</td>
           </tr>
           <tr>
             <td><strong>pull</strong></td>
@@ -293,40 +413,40 @@ API_SECRET=your_api_secret_here<br>
           </tr>
           <tr>
             <td><strong>branch</strong></td>
-            <td>分支 / 平行宇宙</td>
-            <td>在分支上改東西，不影響主線。安全地實驗</td>
+            <td>分支，一個平行宇宙</td>
+            <td>開一條平行的路改東西，不影響主線，可以放心實驗</td>
           </tr>
           <tr>
             <td><strong>merge</strong></td>
             <td>合併</td>
-            <td>把平行宇宙合併回主線。實驗成功了就併入</td>
+            <td>平行宇宙裡實驗成功了，併回主線</td>
           </tr>
           <tr>
             <td><strong>clone</strong></td>
             <td>複製整個專案</td>
-            <td>把別人的專案整份複製到你的電腦上</td>
+            <td>把別人的專案整份抓到你的電腦上</td>
           </tr>
           <tr>
             <td><strong>staging</strong></td>
             <td>準備區</td>
-            <td>把要存檔的東西先放到「待存清單」</td>
+            <td>要存檔的東西先放進「待存清單」</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <h3>最常用的 5 個 Git 指令</h3>
+    <h3>常用的 5 個 Git 指令</h3>
 
     <div class="code-block">
-<span style="color: var(--accent-light);"># 1. 查看現在的狀態（有什麼檔案被改了？）</span><br>
+<span style="color: var(--accent-light);"># 1. 看現在的狀態（哪些檔案被改了？）</span><br>
 <span style="color: var(--green);">git status</span><br>
 <br>
-<span style="color: var(--accent-light);"># 2. 把修改的檔案加到「待存清單」</span><br>
-<span style="color: var(--green);">git add .</span>　　　　　<span style="color: var(--text-muted);"># 加全部</span><br>
-<span style="color: var(--green);">git add index.html</span>　<span style="color: var(--text-muted);"># 只加指定檔案</span><br>
+<span style="color: var(--accent-light);"># 2. 把改過的檔案放進「待存清單」</span><br>
+<span style="color: var(--green);">git add .</span>　　　　　<span style="color: var(--text-muted);"># 全部放進去</span><br>
+<span style="color: var(--green);">git add index.html</span>　<span style="color: var(--text-muted);"># 只放指定的檔案</span><br>
 <br>
-<span style="color: var(--accent-light);"># 3. 存檔（建立一個存檔點）</span><br>
-<span style="color: var(--green);">git commit -m "修好了登入頁面的 bug"</span><br>
+<span style="color: var(--accent-light);"># 3. 存檔（建立一個紀錄點）</span><br>
+<span style="color: var(--green);">git commit -m "修好報價單的計算按鈕"</span><br>
 <br>
 <span style="color: var(--accent-light);"># 4. 上傳到 GitHub</span><br>
 <span style="color: var(--green);">git push</span><br>
@@ -335,117 +455,166 @@ API_SECRET=your_api_secret_here<br>
 <span style="color: var(--green);">git pull</span>
     </div>
 
-    <h3>Branch 的概念：平行宇宙</h3>
+    <h3>Branch：開一條平行的路</h3>
 
-    <div class="code-block">
-<strong style="color: var(--accent-light);">Branch 的運作方式</strong><br>
-<br>
-main（主線）：　A ── B ── C ── D ── E（穩定版本）<br>
-　　　　　　　　　　　　 \　　　　 /<br>
-feature/login：　　　　　 X ── Y ──（實驗新功能）<br>
-<br>
-<span style="color: var(--text-muted);">在 C 的時候，你開了一個新分支叫 feature/login</span><br>
-<span style="color: var(--text-muted);">在分支上做了 X 和 Y 兩次修改</span><br>
-<span style="color: var(--text-muted);">測試沒問題後，在 E 的位置合併回 main</span><br>
-<span style="color: var(--text-muted);">如果實驗失敗？直接刪掉分支，main 完全不受影響</span>
+    <div class="code-block faq-branch"><strong style="color: var(--accent-light);">Branch 的運作方式</strong>
+
+main（主線）：  A ── B ── C ── D ── E（穩定版本）
+                          \         /
+feature/login：            X ── Y ──（試新功能）
+
+<span style="color: var(--text-muted);">在 C 的時候，開了一個新分支叫 feature/login</span>
+<span style="color: var(--text-muted);">在分支上改了 X 和 Y 兩次</span>
+<span style="color: var(--text-muted);">測試沒問題，在 E 的位置併回 main</span>
+<span style="color: var(--text-muted);">試失敗了？刪掉分支，main 完全不受影響</span></div>
+
+    <h3>改壞了，怎麼回到上一個存檔點</h3>
+
+    <p>這是 Git 真正值錢的地方，也是為什麼要常 commit。回去有兩種做法，差很多：</p>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>做法</th>
+            <th>做了什麼</th>
+            <th>什麼時候用</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>git revert</code></td>
+            <td>新增一筆紀錄，把某次修改「反著做一遍」。舊紀錄都還在</td>
+            <td>已經 push 上去、別人可能拉過了。大部分情況用這個</td>
+          </tr>
+          <tr>
+            <td><code>git reset --hard</code></td>
+            <td>整個退回某個存檔點，之後的修改和還沒存檔的東西直接丟掉</td>
+            <td>只在自己電腦上、確定後面的都不要了才用。丟掉的找不太回來</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
+
+    <p>Claude Code 自己也有倒回的功能（<code>/rewind</code>，<a href="/chapter10/">第十章</a>有講），可以把它剛剛改的檔案退回去，但只限它用內建編輯功能改過的檔案。改動大、跨很多次對話的，還是靠 Git 的存檔點。</p>
 
     <div class="box box-info">
-      <div class="box-label">你不需要手動打這些指令</div>
-      大部分時候，Claude Code 會幫你處理 Git 操作。但你需要<strong>知道這些概念</strong>，這樣當 Claude 說「我幫你建了一個 branch」或「要不要 commit 這些修改」時，你才知道它在說什麼。
+      <div class="box-label">這些指令不用你自己打</div>
+      大部分時候，Git 的操作 Claude Code 會幫你做。你要懂的是概念，這樣它說「我開了一個 branch」「要不要 commit 這些修改」的時候，你知道它在做什麼，也知道什麼時候該說「先 commit 一次再改」：改壞了，才有地方回去。<br><br>
+      還有一條邊界：它要用 <code>reset --hard</code>、<code>push --force</code> 這類會把紀錄丟掉或蓋掉的指令時，先叫它停下來講清楚會丟掉什麼。
     </div>
 
-    <!-- ===== D. 常用套件速覽 ===== -->
-    <h2>常用套件速覽</h2>
+    <!-- ===== D. 常見套件 ===== -->
+    <h2 id="faq-packages">Claude 常提的套件：先認臉</h2>
 
-    <p>「套件」（Package）就是別人寫好的工具，你可以直接拿來用，不需要自己從頭寫。就像蓋房子不需要自己燒磚——去建材行買就好。</p>
+    <p>「套件」（package）是別人寫好的工具，拿來就能用，不用自己從頭寫。像蓋房子不用自己燒磚，去建材行買就好。</p>
 
-    <h3>i18n（國際化 / 多語言支持）</h3>
-
-    <div class="box box-warning">
-      <div class="box-label">超重要：一開始就要規劃！</div>
-      i18n 是 <strong>internationalization</strong> 的縮寫（i 和 n 之間有 18 個字母）。它讓你的網站支援多國語言。<br><br>
-      <strong>為什麼一開始就要規劃？</strong>因為如果你的網站寫了 200 頁之後才要加多語言，你得把 200 頁的文字一個一個抽出來。這是噩夢等級的工程。<br><br>
-      一開始就規劃 i18n，就是把文字全部放在翻譯檔裡面（而不是寫死在程式碼裡）。之後要加新語言，只需要新增一個翻譯檔就好。
-    </div>
-
-    <h3>常見套件列表</h3>
+    <p>Claude 很愛順手加套件。下面這張表給你認臉用，第三欄是放在本書這套組合（純靜態頁面放 Cloudflare、資料放 Supabase 或 D1）裡怎麼看：</p>
 
     <div class="table-wrapper">
       <table>
         <thead>
           <tr>
             <th>套件</th>
-            <th>功能</th>
-            <th>白話說</th>
+            <th>做什麼</th>
+            <th>在本書的組合裡</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>Tailwind CSS</strong></td>
-            <td>用 class 寫樣式</td>
-            <td>不用另外寫 CSS 檔，直接在 HTML 上寫 class 就有樣式。像是「預製傢俱」</td>
-          </tr>
-          <tr>
-            <td><strong>React</strong></td>
-            <td>前端 UI 框架</td>
-            <td>把網頁拆成一塊一塊的「元件」，重複使用。蓋積木式的網頁</td>
+            <td><strong>React、Vue</strong></td>
+            <td>把網頁拆成一塊一塊的元件，重複使用，像蓋積木</td>
+            <td>要打包。做網站不從這裡開始（<a href="/chapter11/">第十一章</a>）</td>
           </tr>
           <tr>
             <td><strong>Next.js</strong></td>
-            <td>React 的加強版</td>
-            <td>React + 路由 + SSR + API，一個框架搞定全部</td>
+            <td>React 加上換頁、伺服器那一半</td>
+            <td>要打包。手上已經有 Next.js 專案才會碰到，新專案不從這裡開始</td>
+          </tr>
+          <tr>
+            <td><strong>Tailwind CSS</strong></td>
+            <td>不用另外寫 CSS 檔，直接在 HTML 上寫 class 就有樣式，像預製傢俱</td>
+            <td>正式上線的用法要打包；官方免打包的版本（Play CDN）寫明只給開發試用</td>
           </tr>
           <tr>
             <td><strong>Express</strong></td>
-            <td>Node.js 後端框架</td>
-            <td>用 JavaScript 寫後端 API 最常用的工具</td>
+            <td>用 JavaScript 寫後端</td>
+            <td>要一台一直開著的機器。先看 Cloudflare Workers 或 Supabase Edge Functions 夠不夠（<a href="/chapter7/">第七章</a>）</td>
           </tr>
           <tr>
             <td><strong>Prisma</strong></td>
-            <td>資料庫工具（ORM）</td>
-            <td>用 JavaScript 操作資料庫，不用寫 SQL。像是「資料庫翻譯機」</td>
+            <td>用程式操作資料庫，少寫 SQL，像資料庫翻譯機</td>
+            <td>用 Supabase 的話通常用不到，它直接給你讀寫資料的 API</td>
           </tr>
           <tr>
             <td><strong>Zod</strong></td>
-            <td>資料驗證</td>
-            <td>確保收到的資料格式正確。像是「品管員」</td>
+            <td>檢查收到的資料格式對不對，像品管員</td>
+            <td>可以用。但檢查一定要在後端做一次，頁面上的檢查只是方便填表的人（<a href="/chapter16/">第十六章</a>）</td>
           </tr>
           <tr>
-            <td><strong>next-intl / i18next</strong></td>
-            <td>多語言支持</td>
-            <td>讓你的網站支援中文、英文、日文等多國語言</td>
+            <td><strong>i18next、next-intl</strong></td>
+            <td>讓網站支援中文、英文、日文等多國語言</td>
+            <td>要做多語言才需要。next-intl 是給 Next.js 用的。要不要做，一開始就決定（見下面的框）</td>
           </tr>
           <tr>
             <td><strong>Stripe</strong></td>
-            <td>金流服務</td>
-            <td>讓你的網站能收信用卡。不用自己處理刷卡的複雜流程</td>
+            <td>讓網站能收信用卡，不用自己處理刷卡的流程</td>
+            <td>金額一定在後端算，不能信頁面上傳來的數字（<a href="/chapter16/">第十六章</a>）</td>
           </tr>
           <tr>
-            <td><strong>Resend / Nodemailer</strong></td>
-            <td>寄信服務</td>
-            <td>程式自動寄 email（驗證信、通知信、電子報）</td>
+            <td><strong>Resend、Nodemailer</strong></td>
+            <td>程式自動寄信（驗證信、通知信、電子報）</td>
+            <td>寄信用的金鑰放後端，不放頁面上。Nodemailer 要在 Node.js 的後端上跑；本書的組合先看 Resend 這種用 API 寄信的服務</td>
           </tr>
           <tr>
             <td><strong>Sharp</strong></td>
-            <td>圖片處理</td>
-            <td>壓縮、裁切、轉檔圖片。讓網站載入更快</td>
+            <td>壓縮、裁切、轉檔圖片，讓網站載入更快</td>
+            <td>要在 Node.js 上跑，瀏覽器裡不能用。純靜態網站的話，請 Claude 在你電腦上用它把圖片先壓好再上傳就好</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="box box-tip">
-      <div class="box-label">你不需要記住這些套件</div>
-      這張表是給你「認臉」用的。當 Claude 說「我用 Prisma 幫你寫 DB 查詢」或「要不要加 Zod 做 input validation」的時候，你至少知道它在說什麼。<br><br>
-      需要什麼套件？直接問 Claude：「我想做 XXX 功能，該用什麼套件？」
+    <div class="box box-warning">
+      <div class="box-label">多語言：一開始就要決定</div>
+      i18n 是 internationalization（國際化）的縮寫，i 和 n 中間有 18 個字母，意思是讓網站支援多國語言。<br><br>
+      要做的話，一開始就把畫面上的文字集中放在翻譯檔，不要寫死在每一頁裡。之後要加新語言，多一份翻譯檔就好。等做了幾十頁才要加英文版，就得把每一頁的文字一個一個抽出來，工程很大。確定不做，也講清楚，Claude 就不會自作主張先裝。
     </div>
 
-    <!-- Chapter Nav -->
+    <div class="box box-tip">
+      <div class="box-label">不用背，要會問</div>
+      這張表不用記，是給你「認臉」用的。Claude 說「我用 Prisma 幫你寫查詢」「要不要加 Zod 做檢查」的時候，你至少知道它在說什麼。<br><br>
+      它說要裝一個新套件時，問它三句：「這個要不要打包？」「要不要一台一直開著的機器？」「不裝的話，有沒有更簡單的做法？」三句都答得出來，你就知道這個套件會不會把東西越弄越重。<br><br>
+      反過來，你想做一個功能、不知道該用什麼，就直接問：「我想做線上預約，有沒有現成的套件或專案？先上 GitHub 找，找到能用的就不要從零做。」
+    </div>
+
+    <!-- ===== 收尾 ===== -->
+    <h2>這頁帶走什麼</h2>
+
+    <ul>
+      <li>錯誤訊息找三樣：類型、原因、位置。看不懂就整段貼給 Claude，加一句你剛剛做了什麼。修錯時不准它把錯誤藏起來、把檢查拿掉。</li>
+      <li>金鑰放 <code>.env</code>，不進 Git；上線放平台的 secret。頁面上只能放 publishable key。外流了先作廢、換新的。</li>
+      <li>Git 是存檔點。改大東西之前先 commit 一次，改壞了才回得去；回去優先用 revert。</li>
+      <li>Claude 要加套件時，先問它要不要打包、要不要一台一直開著的機器。</li>
+    </ul>
+
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這是主控台的錯誤訊息，我是按下計算之後出現的。先告訴我錯在哪個檔案、為什麼、要改哪幾個檔，我說好再改。不要用把錯誤藏起來的方式修。」<br>
+      「檢查這個專案有沒有金鑰寫死在程式裡，或是出現在頁面的 JS 裡。有的話列給我看，移到後端的 secret。」<br>
+      「改之前先 commit 一次，訊息寫清楚這次要改什麼。」<br>
+      「剛剛那次修改不要了，用 revert 退回去，不要用 reset --hard。」<br>
+      「你要加的這個套件，要不要打包？不裝的話有沒有別的做法？」
+    </div>
+
     <div class="chapter-nav">
-      <a href="/chapter11/" class="prev">
+      <a href="/chapter18/" class="prev">
         <span class="nav-label">上一章</span>
-        <span class="nav-title">工具生態</span>
+        <span class="nav-title">其他工具</span>
+      </a>
+      <a href="/glossary/" class="next">
+        <span class="nav-label">下一頁</span>
+        <span class="nav-title">術語字典</span>
       </a>
     </div>
 

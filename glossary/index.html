@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>附錄：術語字典 — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ===== 附錄：術語字典專用樣式（一律 gl- 前綴）===== */
+    .gl-toc {
+      margin: 24px 0 8px;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+    }
+    .gl-toc-title { font-weight: 700; margin-bottom: 8px; }
+    .gl-toc ol {
+      margin: 0;
+      padding-left: 1.6em;
+      columns: 2;
+      column-gap: 28px;
+    }
+    .gl-toc li { margin: 4px 0; break-inside: avoid; }
+    .gl-toc-meta { display: block; font-size: 13px; color: var(--text-muted); }
+    .gl-blurb { color: var(--text-muted); margin-top: -4px; }
+    .gl-back { font-size: 14px; text-align: right; margin-top: -8px; }
+    .gl-table .gl-term { white-space: nowrap; }
+    .gl-table .gl-term strong { display: block; }
+    .gl-en { display: block; font-size: 13px; color: var(--text-muted); white-space: normal; }
+    .gl-see { display: block; margin-top: 4px; font-size: 13px; color: var(--text-muted); }
+    .gl-table th:first-child { width: 22%; }
+    .gl-table th:last-child { width: 30%; }
+    .gl-table td { overflow-wrap: anywhere; }
+    .content h2[id], .gl-table tr[id], .gl-toc { scroll-margin-top: 80px; }
+    .gl-table tr:target { background: rgba(96, 165, 250, 0.12); }
+
+    @media (max-width: 640px) {
+      .gl-toc ol { columns: 1; }
+      .gl-table thead { display: none; }
+      .gl-table, .gl-table tbody, .gl-table tr, .gl-table td { display: block; width: 100%; }
+      .gl-table tr { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+      .gl-table tr:last-child { border-bottom: none; }
+      .gl-table td { padding: 2px 0; border-bottom: none; }
+      .gl-table .gl-term { white-space: normal; margin-bottom: 4px; }
+      .gl-table .gl-term strong, .gl-table .gl-en { display: inline; }
+      .gl-table .gl-en::before { content: "　"; }
+      .gl-table .gl-ana { margin-top: 4px; color: var(--text-muted); }
+      .gl-table .gl-ana::before { content: "比喻："; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="/">首頁</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="/">首頁</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/" class="active">附錄：術語字典</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">附錄</div>
+      <h1>術語字典</h1>
+      <p class="lead">上一頁的常見問題，是動手時卡住會問的事；這一頁收的是更前面一步：看不懂的詞。全書出現過的術語，加上幾個 Claude 常講、正文沒細講的詞，都在這裡。每一條一句白話、一個比喻，後面標著在哪一章講；那一章換了說法的，括號裡註明那裡怎麼叫。</p>
+    </div>
+  </section>
+
+  <section class="container content">
+
+    <p>這頁不用從頭讀，遇到不懂的詞再來查。看得懂術語是入門，<a href="/chapter2/">第二章</a>到<a href="/chapter6/">第六章</a>講的就是這一層；這本書真正要練的，是聽到 Claude 說「我在後端加一個欄位」時，你知道它動到哪一塊、有沒有越過邊界。查字典是為了聽得懂這種話。</p>
+
+    <div class="box box-info">
+      <div class="box-label">怎麼查</div>
+      電腦按 <code>Ctrl</code> + <code>F</code>（Mac 是 <code>Cmd</code> + <code>F</code>），手機用瀏覽器選單裡的「在網頁中尋找」，打中文或英文都找得到。不知道該搜什麼，就從下面的分類點進去。分類大致照全書章節的順序排。
+    </div>
+
+    <nav class="gl-toc" id="gl-toc" aria-label="術語分類">
+      <div class="gl-toc-title">分類目錄（共 189 個詞）</div>
+      <ol>
+        <li><a href="#gl-ai">AI 與下指令</a><span class="gl-toc-meta">第二章到第四章・11 個</span></li>
+        <li><a href="#gl-web">網址與網頁</a><span class="gl-toc-meta">第五章、第六章・13 個</span></li>
+        <li><a href="#gl-deploy">部署</a><span class="gl-toc-meta">第七章・9 個</span></li>
+        <li><a href="#gl-domain">網域</a><span class="gl-toc-meta">第八章・13 個</span></li>
+        <li><a href="#gl-dbsetup">資料庫</a><span class="gl-toc-meta">第九章・10 個</span></li>
+        <li><a href="#gl-cc">Claude Code 與工具</a><span class="gl-toc-meta">第十章、第十八章・22 個</span></li>
+        <li><a href="#gl-stack">技術棧</a><span class="gl-toc-meta">第十一章・11 個</span></li>
+        <li><a href="#gl-git">版本控制與 GitHub</a><span class="gl-toc-meta">第七章、第十一章、常見問題・14 個</span></li>
+        <li><a href="#gl-build">會聽到、但不從它開始的</a><span class="gl-toc-meta">第十一章、常見問題・13 個</span></li>
+        <li><a href="#gl-api">API</a><span class="gl-toc-meta">第十二章・6 個</span></li>
+        <li><a href="#gl-topo">架構拓樸</a><span class="gl-toc-meta">第一章、第十三章・9 個</span></li>
+        <li><a href="#gl-fn">功能怎麼切</a><span class="gl-toc-meta">第十四章・10 個</span></li>
+        <li><a href="#gl-db">資料表與欄位</a><span class="gl-toc-meta">第十五章・23 個</span></li>
+        <li><a href="#gl-fb">前後端邊界與安全</a><span class="gl-toc-meta">第十六章・12 個</span></li>
+        <li><a href="#gl-risk">會出事的地方</a><span class="gl-toc-meta">第十七章・6 個</span></li>
+        <li><a href="#gl-ops">機器與維運</a><span class="gl-toc-meta">第七章，多半正文沒細講・7 個</span></li>
+      </ol>
+    </nav>
+
+    <h2 id="gl-ai">AI 與下指令</h2>
+    <p class="gl-blurb">AI 是什麼東西、怎麼跟它講話、怎麼開工。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-llm">
+            <td class="gl-term"><strong>大型語言模型</strong><span class="gl-en">LLM</span></td>
+            <td class="gl-plain">Claude、ChatGPT 這類 AI。做的事是根據前面的字，猜下一個字最可能是什麼。<span class="gl-see">見<a href="/chapter2/" title="第二章 LLM 本質">第二章</a></span></td>
+            <td class="gl-ana">讀過整座圖書館的鸚鵡，很會接話，不保證對</td>
+          </tr>
+          <tr id="t-prompt">
+            <td class="gl-term"><strong>指令</strong><span class="gl-en">Prompt</span></td>
+            <td class="gl-plain">你交給 AI 的那段話。講清楚目標、邊界、情境，結果才會對。把指令寫好的功夫，叫 Prompt Engineering。<span class="gl-see">見<a href="/chapter3/" title="第三章 下指令">第三章</a></span></td>
+            <td class="gl-ana">工作交辦單</td>
+          </tr>
+          <tr id="t-token-ai">
+            <td class="gl-term"><strong>Token（AI 計費單位）</strong></td>
+            <td class="gl-plain">AI 切文字的小塊，不是一個字也不是一個詞。大部分 AI 服務照它算錢，你送出去的、它回你的都算。<span class="gl-see">見<a href="/chapter2/" title="第二章 LLM 本質">第二章</a></span></td>
+            <td class="gl-ana">計程車跳表，講越多跳越多</td>
+          </tr>
+          <tr id="t-context-window">
+            <td class="gl-term"><strong>上下文視窗</strong><span class="gl-en">Context Window</span></td>
+            <td class="gl-plain">一次對話能同時攤開多少東西：你說的、它回的、它讀過的檔案都在上面。每一輪它都重讀一次，對話越長，品質越容易往下掉。<span class="gl-see">見<a href="/chapter2/" title="第二章 LLM 本質">第二章</a></span></td>
+            <td class="gl-ana">辦公桌，桌子大也別亂堆</td>
+          </tr>
+          <tr id="t-hallucination">
+            <td class="gl-term"><strong>幻覺</strong><span class="gl-en">Hallucination</span></td>
+            <td class="gl-plain">AI 一本正經地講錯，講錯的口氣跟講對的一樣有自信。<span class="gl-see">見<a href="/chapter2/" title="第二章 LLM 本質">第二章</a></span></td>
+            <td class="gl-ana">考生不會寫，硬掰一個看起來很像的答案</td>
+          </tr>
+          <tr id="t-training-data">
+            <td class="gl-term"><strong>訓練資料</strong><span class="gl-en">Training data</span></td>
+            <td class="gl-plain">模型讀過的東西。有截止日，也不會有你公司的客戶和規矩。<span class="gl-see">見<a href="/chapter2/" title="第二章 LLM 本質">第二章</a></span></td>
+            <td class="gl-ana">鸚鵡讀過的那座圖書館</td>
+          </tr>
+          <tr id="t-rag">
+            <td class="gl-term"><strong>先查再答</strong><span class="gl-en">RAG</span></td>
+            <td class="gl-plain">先把你的資料給它、再叫它回答，不是只靠它讀過的東西。可以減少幻覺，前提是給它的資料是對的。<span class="gl-see">見<a href="/chapter2/" title="第二章 LLM 本質">第二章</a></span></td>
+            <td class="gl-ana">從閉卷考變開書考：給它一本公司手冊，讓它翻書回答</td>
+          </tr>
+          <tr id="t-embedding">
+            <td class="gl-term"><strong>向量化</strong><span class="gl-en">Embedding</span></td>
+            <td class="gl-plain">把一段文字換成一串數字，意思相近的文字，數字也相近。RAG 常用它找出相關段落。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">把每段內容標成地圖上的座標，意思相近的擺得近</td>
+          </tr>
+          <tr id="t-fine-tuning">
+            <td class="gl-term"><strong>微調</strong><span class="gl-en">Fine-tuning</span></td>
+            <td class="gl-plain">拿自己的資料再訓練模型一次，讓它更像你要的樣子。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">新人職前訓練</td>
+          </tr>
+          <tr id="t-agent">
+            <td class="gl-term"><strong>代理</strong><span class="gl-en">Agent</span></td>
+            <td class="gl-plain">能自己拆步驟、用工具、做完再檢查的 AI。Claude Code 就是一種。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">不只回答問題，還會自己動手的助理</td>
+          </tr>
+          <tr id="t-demo">
+            <td class="gl-term"><strong>樣品屋</strong><span class="gl-en">Demo</span></td>
+            <td class="gl-plain">先做一個最簡單、用假資料的版本，看過樣子再談細節。<span class="gl-see">見<a href="/chapter4/" title="第四章 工作流程">第四章</a></span></td>
+            <td class="gl-ana">賣房子先蓋樣品屋</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <div class="box box-warning">
+      <div class="box-label">Token 有兩個意思</div>
+      講 AI 的時候，Token 是切文字、算錢的單位（這一節）。講登入的時候，Token 是登入後拿到的通行證（見<a href="#t-token-auth">前後端邊界與安全</a>那一節）。看到這個詞，看上下文判斷是哪一個。
+    </div>
+
+    <h2 id="gl-web">網址與網頁</h2>
+    <p class="gl-blurb">說得出檔案在哪、網址哪一段、畫面哪一塊。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-root">
+            <td class="gl-term"><strong>根目錄</strong><span class="gl-en">Root directory</span></td>
+            <td class="gl-plain">專案資料夾，所有東西都住在裡面。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a></span></td>
+            <td class="gl-ana">你家大門</td>
+          </tr>
+          <tr id="t-path">
+            <td class="gl-term"><strong>路徑</strong><span class="gl-en">Path</span></td>
+            <td class="gl-plain">檔案在哪裡、怎麼走。絕對路徑從最上層講起；相對路徑從現在的位置走，./ 是這裡、../ 是往上一層。放上網的頁面，圖片要用相對路徑。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">外送地址：完整地址，或「三樓左轉第二間」</td>
+          </tr>
+          <tr id="t-route">
+            <td class="gl-term"><strong>路由</strong><span class="gl-en">Route</span></td>
+            <td class="gl-plain">網址後半段，說進了網站之後走到哪，例如 /products/123。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a></span></td>
+            <td class="gl-ana">進大樓之後走到哪一間</td>
+          </tr>
+          <tr id="t-query-string">
+            <td class="gl-term"><strong>查詢參數</strong><span class="gl-en">Query parameter</span></td>
+            <td class="gl-plain">網址 ? 後面的條件，例如 ?color=red。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a></span></td>
+            <td class="gl-ana">跟櫃檯說「只要紅色的」</td>
+          </tr>
+          <tr id="t-extension">
+            <td class="gl-term"><strong>副檔名</strong><span class="gl-en">File extension</span></td>
+            <td class="gl-plain">檔名最後的 .html、.css、.js，告訴你這是哪一種檔。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>（那裡也叫「後綴」）</span></td>
+            <td class="gl-ana">檔案夾上的分類貼紙</td>
+          </tr>
+          <tr id="t-html">
+            <td class="gl-term"><strong>HTML</strong></td>
+            <td class="gl-plain">網頁的骨架和文字。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter6/" title="第六章 描述力">第六章</a></span></td>
+            <td class="gl-ana">Word 文件</td>
+          </tr>
+          <tr id="t-css">
+            <td class="gl-term"><strong>CSS</strong></td>
+            <td class="gl-plain">網頁的外觀：顏色、大小、間距、排版、動畫。<span class="gl-see">見<a href="/chapter6/" title="第六章 描述力">第六章</a></span></td>
+            <td class="gl-ana">簡報的佈景主題</td>
+          </tr>
+          <tr id="t-js">
+            <td class="gl-term"><strong>JavaScript</strong><span class="gl-en">JS</span></td>
+            <td class="gl-plain">網頁的動作：按了會怎樣。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter6/" title="第六章 描述力">第六章</a></span></td>
+            <td class="gl-ana">Excel 的巨集</td>
+          </tr>
+          <tr id="t-page-parts">
+            <td class="gl-term"><strong>頁面部位</strong><span class="gl-en">Header、Navbar、Hero、Footer</span></td>
+            <td class="gl-plain">頁首、導覽列、首頁第一眼的大圖大標題、頁尾。叫得出名字，才指得到要改哪裡。<span class="gl-see">見<a href="/chapter6/" title="第六章 描述力">第六章</a></span></td>
+            <td class="gl-ana">房子的天花板、門口、客廳、地板</td>
+          </tr>
+          <tr id="t-component">
+            <td class="gl-term"><strong>元件</strong><span class="gl-en">Component</span></td>
+            <td class="gl-plain">可以重複用的畫面零件：按鈕、卡片、下拉選單、跳出來的框。<span class="gl-see">見<a href="/chapter6/" title="第六章 描述力">第六章</a>（元件圖鑑那段）</span></td>
+            <td class="gl-ana">樂高積木塊</td>
+          </tr>
+          <tr id="t-rwd">
+            <td class="gl-term"><strong>響應式設計</strong><span class="gl-en">RWD</span></td>
+            <td class="gl-plain">同一個網頁，在手機和電腦上自動換一種排法。<span class="gl-see">見<a href="/chapter6/" title="第六章 描述力">第六章</a></span></td>
+            <td class="gl-ana">同一份菜單，印成大海報和小卡兩種版</td>
+          </tr>
+          <tr id="t-devtools">
+            <td class="gl-term"><strong>開發者工具</strong><span class="gl-en">DevTools</span></td>
+            <td class="gl-plain">網頁上按右鍵選「檢查」，或按 F12 打開，看某一塊叫什麼名字、套了哪些樣式、有沒有紅字錯誤。<span class="gl-see">見<a href="/chapter6/" title="第六章 描述力">第六章</a>、<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">牆打開看得到的管線圖</td>
+          </tr>
+          <tr id="t-i18n">
+            <td class="gl-term"><strong>多國語言</strong><span class="gl-en">i18n</span></td>
+            <td class="gl-plain">internationalization 的縮寫（i 和 n 中間有 18 個字母），讓同一個網站能切換不同語言。<span class="gl-see">見<a href="/chapter3/" title="第三章 下指令">第三章</a></span></td>
+            <td class="gl-ana">同一本菜單印中、英、日三種版</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-deploy">部署</h2>
+    <p class="gl-blurb">把做好的頁面放上網，改了怎麼重新上線，改壞了怎麼退。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-deploy">
+            <td class="gl-term"><strong>部署</strong><span class="gl-en">Deploy</span></td>
+            <td class="gl-plain">把做好的檔案，放到一台一直開著、大家都連得到的機器上，再配一個網址。在你電腦上打得開，不等於別人打得開。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">把傳單從書桌放到街口的架子上，誰經過都能拿</td>
+          </tr>
+          <tr id="t-static">
+            <td class="gl-term"><strong>純靜態頁面</strong><span class="gl-en">Static site</span></td>
+            <td class="gl-plain">只有 HTML、CSS、JS 檔案的網站。做好就放著，每個打開的人拿到的都是同一份；改完直接上傳，不用打包。這本書推薦從這裡開始。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">印好放在架上的傳單，不用有人顧</td>
+          </tr>
+          <tr id="t-localhost">
+            <td class="gl-term"><strong>本機網址</strong><span class="gl-en">localhost</span></td>
+            <td class="gl-plain">意思是「這台電腦自己」。Claude 做好給你看的網址如果是 localhost 或 file:// 開頭，只有你的電腦打得開，傳給別人沒用。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">還躺在你書桌上的傳單</td>
+          </tr>
+          <tr id="t-workers-pages">
+            <td class="gl-term"><strong>Cloudflare Workers／Pages</strong></td>
+            <td class="gl-plain">Cloudflare 放網站的兩個服務。新專案用 Workers，舊專案留在 Pages 也行。沒接自己的網域前，網址分別長得像 名字.你的子網域.workers.dev 和 專案名.pages.dev。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">租現成的店面，檔案搬進去就開張</td>
+          </tr>
+          <tr id="t-wrangler">
+            <td class="gl-term"><strong>wrangler</strong></td>
+            <td class="gl-plain">Cloudflare 的官方 CLI，負責登入、上傳、退版。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">專管 Cloudflare 的那位師傅</td>
+          </tr>
+          <tr id="t-wrangler-config">
+            <td class="gl-term"><strong>設定檔</strong><span class="gl-en">wrangler.jsonc</span></td>
+            <td class="gl-plain">放在專案最外層，告訴 Cloudflare 網站叫什麼、哪個資料夾要放上網。只指定要上網的那個資料夾，筆記和金鑰就不會被一起送出去。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">交給架子管理員的上架清單</td>
+          </tr>
+          <tr id="t-auto-deploy">
+            <td class="gl-term"><strong>自動部署</strong><span class="gl-en">Workers Builds</span></td>
+            <td class="gl-plain">讓 Cloudflare 盯著 GitHub 上的專案，main 有新版本推上去，就照設定檔自動再部署一次。接上之後，就不要再從自己電腦直接上傳。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">訂報紙：新的一期出刊，就自動送到門口</td>
+          </tr>
+          <tr id="t-cicd">
+            <td class="gl-term"><strong>自動測試與部署</strong><span class="gl-en">CI/CD</span></td>
+            <td class="gl-plain">程式碼推上去之後，自動跑測試、自動上線。上面那個自動部署，就是很陽春的一種。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">工廠的自動化產線</td>
+          </tr>
+          <tr id="t-rollback">
+            <td class="gl-term"><strong>退版</strong><span class="gl-en">Rollback</span></td>
+            <td class="gl-plain">新版有問題，把網站換回之前的某一版。退的是頁面和程式，資料不會跟著退；GitHub 那邊也要另外 revert，不然下次推上去壞的又回來。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">架上的傳單印錯了，先把上一版放回去止血</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-domain">網域</h2>
+    <p class="gl-blurb">網址的門牌怎麼買、怎麼接，順便收信。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-domain">
+            <td class="gl-term"><strong>網域</strong><span class="gl-en">Domain</span></td>
+            <td class="gl-plain">網站的門牌，例如 example.com。門牌和放網站的地方分開買，再接起來。網域是按年租的，到期要續約，忘了續會被收回。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">門牌，不是房子：可以換房子掛，房子也能掛好幾塊</td>
+          </tr>
+          <tr id="t-tld">
+            <td class="gl-term"><strong>頂級網域</strong><span class="gl-en">TLD</span></td>
+            <td class="gl-plain">網址最後面那一段，例如 .com、.tw。它決定你能不能買、去哪裡買。.com.tw 嚴格說是 .tw 底下再分出來的一層，買的時候當成一種結尾看就好，要有公司、行號這類登記才能買。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">門牌最後面的縣市名</td>
+          </tr>
+          <tr id="t-registrar">
+            <td class="gl-term"><strong>網域註冊商</strong><span class="gl-en">Registrar</span></td>
+            <td class="gl-plain">賣網域的店。同一個網址在哪一家買都一樣，差在價錢、續約價、介面、能買哪些結尾。.tw 系列要找 TWNIC 名單上的台灣註冊商。<span class="gl-see">見<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">代辦門牌的櫃台</td>
+          </tr>
+          <tr id="t-ip">
+            <td class="gl-term"><strong>IP 位址</strong><span class="gl-en">IP address</span></td>
+            <td class="gl-plain">網路上每台機器的號碼。人記網域，電腦靠 IP 找到機器。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">大樓的座標</td>
+          </tr>
+          <tr id="t-dns">
+            <td class="gl-term"><strong>網域解析</strong><span class="gl-en">DNS</span></td>
+            <td class="gl-plain">把網域翻成 IP 位址的系統。買了網域，就在這本電話簿裡有一頁自己的格子。改了不會馬上全世界生效，要等，不要一直改。<span class="gl-see">見<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">電話簿：查名字找到號碼</td>
+          </tr>
+          <tr id="t-dns-record">
+            <td class="gl-term"><strong>DNS 紀錄</strong><span class="gl-en">DNS record</span></td>
+            <td class="gl-plain">DNS 電話簿裡的一行，寫著這個名字要去哪裡。常見的有 A、CNAME、MX、TXT 四種。<span class="gl-see">見<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">電話簿上的一行</td>
+          </tr>
+          <tr id="t-a-record">
+            <td class="gl-term"><strong>A 紀錄</strong><span class="gl-en">A record</span></td>
+            <td class="gl-plain">這個名字對到哪個 IP 位址。AAAA 是同一件事的新版（IPv6）號碼。用 Cloudflare 的話，多半它自己會處理。<span class="gl-see">見<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">電話簿上直接寫號碼</td>
+          </tr>
+          <tr id="t-cname">
+            <td class="gl-term"><strong>CNAME 紀錄</strong><span class="gl-en">CNAME</span></td>
+            <td class="gl-plain">這個名字是另一個名字的別名：「查我，請去查它」。<span class="gl-see">見<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">「找我，請打總機」</td>
+          </tr>
+          <tr id="t-mx">
+            <td class="gl-term"><strong>MX 紀錄</strong><span class="gl-en">MX record</span></td>
+            <td class="gl-plain">寄到這個網域的信，要送到哪個郵件伺服器。被蓋掉或刪掉，網站照樣打得開，只是信寄不進來，常常好幾天才有人發現。<span class="gl-see">見<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">郵局登記的收件地址</td>
+          </tr>
+          <tr id="t-txt">
+            <td class="gl-term"><strong>TXT 紀錄</strong><span class="gl-en">TXT record</span></td>
+            <td class="gl-plain">一段文字，多半是給別的服務驗證「這個網域真的是你的」。信箱服務要你加的 SPF、DKIM、DMARC 也是 TXT，用來證明信真的是從這個網域寄出的，少了容易被丟進垃圾信匣。<span class="gl-see">見<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">門口貼的「本店負責人」證明</td>
+          </tr>
+          <tr id="t-nameserver">
+            <td class="gl-term"><strong>名稱伺服器</strong><span class="gl-en">Nameserver</span></td>
+            <td class="gl-plain">這本 DNS 電話簿放在誰家。網域在台灣註冊商買、要交給 Cloudflare 管，就是到註冊商那邊把它改成 Cloudflare 給的那兩個。<span class="gl-see">見<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">電話簿放在哪一個管理處</td>
+          </tr>
+          <tr id="t-subdomain">
+            <td class="gl-term"><strong>子網域</strong><span class="gl-en">Subdomain</span></td>
+            <td class="gl-plain">網域前面多加的一段，例如 book.example.com 的 book。買了一個網域，前面加什麼都不用再付錢，拿來把功能分開：預約一個門、後台一個門。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">大樓裡的哪個部門</td>
+          </tr>
+          <tr id="t-https">
+            <td class="gl-term"><strong>加密連線與憑證</strong><span class="gl-en">HTTPS、SSL／TLS 憑證</span></td>
+            <td class="gl-plain">網址開頭是 https:// 的連線，傳的東西路上別人看不到，網址列有小鎖頭。網站要拿出一張憑證，證明自己就是這個網址；放在 Cloudflare 上會自動發、自動續。小鎖頭只管連線，不管頁面裡放了什麼。<span class="gl-see">見<a href="/chapter8/" title="第八章 網域">第八章</a></span></td>
+            <td class="gl-ana">密封的信封，加上店門口掛的營業登記證</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-dbsetup">資料庫</h2>
+    <p class="gl-blurb">開一個資料庫接到頁面，誰能做什麼、怎麼備份。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-database">
+            <td class="gl-term"><strong>資料庫</strong><span class="gl-en">Database</span></td>
+            <td class="gl-plain">存資料的地方，裡面分好幾張表。跟試算表不同：它會擋錯、會看人、不怕擠。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">有管理員的登記處：單子遞進去，他先看格式和資格才歸檔</td>
+          </tr>
+          <tr id="t-supabase">
+            <td class="gl-term"><strong>Supabase</strong></td>
+            <td class="gl-plain">現成的後端服務，底層是 PostgreSQL：資料庫、會員登入、檔案存放都有。免費版同時最多 2 個專案、沒有自動備份，一週沒動靜會被暫停。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">自帶管理員的檔案櫃，不用自己架伺服器</td>
+          </tr>
+          <tr id="t-d1">
+            <td class="gl-term"><strong>Cloudflare D1</strong></td>
+            <td class="gl-plain">Cloudflare 自己的資料庫。免費版每個資料庫 500 MB、整個帳號合計 5 GB、每天 500 萬列讀取。不能從頁面直接連，要經過一支 Worker 小函式。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">跟店面同一個房東租的檔案櫃，少管一個帳號</td>
+          </tr>
+          <tr id="t-grant">
+            <td class="gl-term"><strong>授權（資料表）</strong><span class="gl-en">Grant</span></td>
+            <td class="gl-plain">決定從頁面來的人，能對一張表做哪幾種動作：讀、新增、修改、刪除。沒授權的動作，門根本不開。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter12/" title="第十二章 API">第十二章</a></span></td>
+            <td class="gl-ana">店門口的告示：「本店只收預約單」</td>
+          </tr>
+          <tr id="t-anon">
+            <td class="gl-term"><strong>訪客身分</strong><span class="gl-en">anon</span></td>
+            <td class="gl-plain">Supabase 對「沒登入的人」的叫法。打開頁面的客人，都是這個身分。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a></span></td>
+            <td class="gl-ana">沒報名字的路人</td>
+          </tr>
+          <tr id="t-rls">
+            <td class="gl-term"><strong>存取規則</strong><span class="gl-en">Row Level Security（RLS）</span></td>
+            <td class="gl-plain">設在資料庫上的規則，一筆一筆決定這個人准不准。打開之後，沒寫規則的動作一律擋掉；用 SQL 開表時要記得自己打開。頁面直接連 Supabase，就靠它把關。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a>、<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a></span></td>
+            <td class="gl-ana">櫃檯店員手上的檢查表，倉庫每一格的門禁</td>
+          </tr>
+          <tr id="t-publishable-key">
+            <td class="gl-term"><strong>可公開金鑰</strong><span class="gl-en">Publishable key</span></td>
+            <td class="gl-plain">Supabase 給頁面用的金鑰，開頭是 sb_publishable_。放在頁面上沒關係，反正誰都看得到；拿著它能做什麼，全看授權和存取規則。舊專案叫 anon key。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a></span></td>
+            <td class="gl-ana">店門口的門鈴：誰都能按，開不開門看規則</td>
+          </tr>
+          <tr id="t-secret-key">
+            <td class="gl-term"><strong>最高權限金鑰</strong><span class="gl-en">Secret key</span></td>
+            <td class="gl-plain">Supabase 的管理用金鑰，開頭是 sb_secret_，存取規則擋不住它。只能放在後端，不放頁面、不進 GitHub；外流了先到後台作廢、換一把新的。舊專案叫 service_role key。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a></span></td>
+            <td class="gl-ana">店裡的萬用鑰匙，拿到就能開每一個抽屜</td>
+          </tr>
+          <tr id="t-backup">
+            <td class="gl-term"><strong>備份</strong><span class="gl-en">Backup</span></td>
+            <td class="gl-plain">把資料庫匯出一份，存到別的地方。Supabase 免費版沒有自動備份，要自己定期做。沒試過還原的備份，不算備份。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a></span></td>
+            <td class="gl-ana">帳本影印一份，放進別處的保險箱</td>
+          </tr>
+          <tr id="t-pause">
+            <td class="gl-term"><strong>專案暫停</strong><span class="gl-en">Pause</span></td>
+            <td class="gl-plain">Supabase 免費專案一週沒動靜會被暫停，客人按送出會失敗。到後台按 Resume project 恢復；正式給客人用的，就考慮付費。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a></span></td>
+            <td class="gl-ana">太久沒人來的攤位，管理處先拉下鐵門</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <div class="box box-info">
+      <div class="box-label">兩把金鑰，一句話分清楚</div>
+      publishable key 可以放頁面，因為把關靠的是存取規則，不是把金鑰藏好；secret key 存取規則擋不住，只能放後端。Claude 說「用 secret key 比較簡單」，就是它要越過邊界了。細節在<a href="/chapter9/">第九章 資料庫</a>和<a href="/chapter16/">第十六章 前後端邊界</a>。
+    </div>
+
+    <div class="box box-warning">
+      <div class="box-label">同一個「授權」，三種意思</div>
+      這本書裡「授權」出現在三個地方，意思不一樣：<br>
+      <strong>授權條款（License）</strong>：別人的程式碼你能怎麼用（<a href="#t-license">版本控制與 GitHub</a>那一節）。<br>
+      <strong>授權（Grant）</strong>：資料表開放哪幾種動作（<a href="#t-grant">資料庫</a>那一節）。<br>
+      <strong>授權登入</strong>：wrangler、gh 第一次用，要你在瀏覽器按同意，讓它用你的帳號做事（<a href="/chapter7/">第七章</a>）。
+    </div>
+
+    <h2 id="gl-cc">Claude Code 與工具</h2>
+    <p class="gl-blurb">它怎麼動手、你怎麼替它畫線，還有做影片、管筆記的工具。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-terminal">
+            <td class="gl-term"><strong>終端機</strong><span class="gl-en">Terminal</span></td>
+            <td class="gl-plain">打字下指令的那個視窗。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">電腦的對講機，不用滑鼠，用打字跟電腦說話</td>
+          </tr>
+          <tr id="t-cli">
+            <td class="gl-term"><strong>命令列工具</strong><span class="gl-en">CLI</span></td>
+            <td class="gl-plain">Command Line Interface，在終端機裡用打字操作的工具。claude、gh、wrangler 都是 CLI。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">對講機另一頭的師傅：喊 gh 找管 GitHub 的，喊 wrangler 找管 Cloudflare 的</td>
+          </tr>
+          <tr id="t-claude-code">
+            <td class="gl-term"><strong>Claude Code</strong></td>
+            <td class="gl-plain">會自己開檔案、改檔案、跑指令、上網查的 AI。在終端機打 claude 叫出來的是它的 CLI 版。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">請來的師傅：你講要什麼，他動手，你驗收</td>
+          </tr>
+          <tr id="t-permission-mode">
+            <td class="gl-term"><strong>權限模式</strong><span class="gl-en">Permission mode</span></td>
+            <td class="gl-plain">決定它動手前要不要先問你。有 Manual、Accept edits、Plan、Auto 幾種，按 Shift + Tab 切換。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">新人每一步先舉手，資深員工放手做、背後有人稽核</td>
+          </tr>
+          <tr id="t-plan-mode">
+            <td class="gl-term"><strong>規劃模式</strong><span class="gl-en">Plan mode</span></td>
+            <td class="gl-plain">只看不改：它讀檔案、查資料、寫出計畫，你同意之前不會改任何檔案。<span class="gl-see">見<a href="/chapter4/" title="第四章 工作流程">第四章</a>、<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">動工前先交企劃書</td>
+          </tr>
+          <tr id="t-claude-md">
+            <td class="gl-term"><strong>CLAUDE.md</strong></td>
+            <td class="gl-plain">放在專案資料夾最上層的純文字檔，它每次開工都先讀。這是交代，不是鎖；真的不准碰的事，要用權限規則或 Hook 擋。<span class="gl-see">見<a href="/chapter3/" title="第三章 下指令">第三章</a>、<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">員工上班先翻一次的 SOP</td>
+          </tr>
+          <tr id="t-auto-memory">
+            <td class="gl-term"><strong>自動記憶</strong><span class="gl-en">Auto memory</span></td>
+            <td class="gl-plain">它自己把你的偏好、你糾正過的事記成筆記，下次開對話先讀進來。打 /memory 看得到。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">助理自己的備忘本</td>
+          </tr>
+          <tr id="t-skill">
+            <td class="gl-term"><strong>技能</strong><span class="gl-en">Skill</span></td>
+            <td class="gl-plain">一個寫好步驟和規範的資料夾，平時只掛一行說明，用到才讀進來。打 /技能名 叫它。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">某件事的作業手冊</td>
+          </tr>
+          <tr id="t-subagent">
+            <td class="gl-term"><strong>子代理</strong><span class="gl-en">Subagent</span></td>
+            <td class="gl-plain">它派出去的幫手，在自己的對話空間做事，做完只把摘要交回來。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">臨時找來分頭做事的助手</td>
+          </tr>
+          <tr id="t-hook">
+            <td class="gl-term"><strong>觸發規則</strong><span class="gl-en">Hook</span></td>
+            <td class="gl-plain">在固定時機一定會跑的小程式，例如改完檔案、跑指令之前。不靠它記得，時間到就跑。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">工地門口「進門先戴安全帽」的告示</td>
+          </tr>
+          <tr id="t-plugin">
+            <td class="gl-term"><strong>外掛包</strong><span class="gl-en">Plugin</span></td>
+            <td class="gl-plain">把 Skill、Subagent、Hook、MCP 打包成一包，一次裝好。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">別人配好的整套工具箱</td>
+          </tr>
+          <tr id="t-mcp">
+            <td class="gl-term"><strong>連接器</strong><span class="gl-en">MCP</span></td>
+            <td class="gl-plain">Model Context Protocol。讓它多接資料庫、信箱、行事曆這類外部服務。沒有 MCP，Claude Code 一樣能讀寫檔案、跑指令、上網查資料。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a>、<a href="/chapter18/" title="第十八章 其他工具">第十八章</a></span></td>
+            <td class="gl-ana">多伸出去的手臂，每一隻握住一個外部服務</td>
+          </tr>
+          <tr id="t-claude-in-chrome">
+            <td class="gl-term"><strong>瀏覽器工具</strong><span class="gl-en">Claude in Chrome</span></td>
+            <td class="gl-plain">讓它操作你自己的 Chrome，沿用你已經登入的網站。網頁上的點按和填寫交給它。<span class="gl-see">見<a href="/chapter6/" title="第六章 描述力">第六章</a>、<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">把你的瀏覽器借給助理，你登入過的地方他都進得去</td>
+          </tr>
+          <tr id="t-computer-use">
+            <td class="gl-term"><strong>電腦操作</strong><span class="gl-en">Computer Use</span></td>
+            <td class="gl-plain">讓它看螢幕截圖、動滑鼠和鍵盤，操作整個桌面。慢，也花 Token，所以排在最後；瀏覽器它只能看、不能點。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">請人坐到你的位子上，看著螢幕幫你點</td>
+          </tr>
+          <tr id="t-slash-command">
+            <td class="gl-term"><strong>斜線指令</strong><span class="gl-en">Slash command</span></td>
+            <td class="gl-plain">輸入框裡打 / 開頭的指令，例如 /clear 開一場新對話、/compact 把前面的對話壓成摘要。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">遙控器上的快捷鍵</td>
+          </tr>
+          <tr id="t-rewind">
+            <td class="gl-term"><strong>倒回</strong><span class="gl-en">Checkpoint／/rewind</span></td>
+            <td class="gl-plain">輸入框空著時按兩下 Esc，或打 /rewind，把對話或檔案倒回先前某一句之前。只限它用內建編輯功能改過的檔案。<span class="gl-see">見<a href="/chapter2/" title="第二章 LLM 本質">第二章</a>、<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">Word 的復原，一次能退好幾步</td>
+          </tr>
+          <tr id="t-diff">
+            <td class="gl-term"><strong>差異對照</strong><span class="gl-en">Diff</span></td>
+            <td class="gl-plain">把改動標成「哪行刪掉、哪行新加」的對照。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">Word 的追蹤修訂</td>
+          </tr>
+          <tr id="t-ide">
+            <td class="gl-term"><strong>程式編輯器</strong><span class="gl-en">IDE</span></td>
+            <td class="gl-plain">寫程式用的編輯器，例如 VS Code、Cursor。Claude Code 也有 VS Code 擴充功能。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">寫程式專用的 Word</td>
+          </tr>
+          <tr id="t-lint">
+            <td class="gl-term"><strong>程式碼檢查</strong><span class="gl-en">Lint</span></td>
+            <td class="gl-plain">自動檢查程式碼有沒有寫錯、格式一不一致的工具。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">校稿，自動抓錯字和格式不一致</td>
+          </tr>
+          <tr id="t-markdown">
+            <td class="gl-term"><strong>Markdown</strong></td>
+            <td class="gl-plain">純文字的文件格式，用 # 標標題、- 標條列。記事本就能寫，人和 AI 都好讀。CLAUDE.md 就是。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a>、<a href="/chapter18/" title="第十八章 其他工具">第十八章</a></span></td>
+            <td class="gl-ana">精簡版 Word</td>
+          </tr>
+          <tr id="t-remotion">
+            <td class="gl-term"><strong>Remotion</strong></td>
+            <td class="gl-plain">用程式寫影片的工具：每一幕都是一段程式，改字、換圖之後重新輸出就好。<span class="gl-see">見<a href="/chapter18/" title="第十八章 其他工具">第十八章</a></span></td>
+            <td class="gl-ana">活字印刷，換幾個字重印，不用重刻整版</td>
+          </tr>
+          <tr id="t-obsidian">
+            <td class="gl-term"><strong>Obsidian</strong></td>
+            <td class="gl-plain">筆記軟體，每一篇筆記就是你電腦裡的一個 Markdown 檔，Claude Code 可以直接讀寫。<span class="gl-see">見<a href="/chapter18/" title="第十八章 其他工具">第十八章</a></span></td>
+            <td class="gl-ana">一櫃子你自己的活頁夾</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <div class="box box-tip">
+      <div class="box-label">CLI、MCP、瀏覽器工具、Computer Use，先用哪個</div>
+      有官方 CLI 的先用 CLI，例如 GitHub 的 <code>gh</code>、Cloudflare 的 <code>wrangler</code>、Supabase 的 <code>supabase</code>。沒有 CLI 才裝 MCP（連接器）。操作網頁交給瀏覽器工具。都不行才用 Computer Use。<br><br>
+      跟 Claude 這樣說就好：「這件事有官方 CLI 就用 CLI 做，沒有再用 MCP。」理由在<a href="/chapter10/">第十章 Claude Code 怎麼用</a>、<a href="/chapter11/">第十一章 技術棧</a>和<a href="/chapter18/">第十八章 其他工具</a>。
+    </div>
+
+    <h2 id="gl-stack">技術棧</h2>
+    <p class="gl-blurb">用什麼材料蓋、什麼要一直跑、什麼不用。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-tech-stack">
+            <td class="gl-term"><strong>技術棧</strong><span class="gl-en">Tech stack</span></td>
+            <td class="gl-plain">做一個東西用了哪些材料：頁面怎麼寫、資料放哪、網站放哪、程式碼放哪。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">蓋房子選的建材</td>
+          </tr>
+          <tr id="t-build">
+            <td class="gl-term"><strong>打包</strong><span class="gl-en">Build</span></td>
+            <td class="gl-plain">上線前把寫好的檔案丟進一套工具，壓成另一批檔案，再把那批放上網。純靜態頁面沒有這一步；React、Next.js 這類要。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">送印刷廠：你改的是版型，要等印好才能寄</td>
+          </tr>
+          <tr id="t-serverless">
+            <td class="gl-term"><strong>函式</strong><span class="gl-en">Serverless function</span></td>
+            <td class="gl-plain">不用自己顧機器的後端小程式，有人用才啟動，沒人用不花錢。這本書也叫它「小函式」。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a>、<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a></span></td>
+            <td class="gl-ana">門鈴：有人按才出來應門</td>
+          </tr>
+          <tr id="t-vm">
+            <td class="gl-term"><strong>虛擬機器</strong><span class="gl-en">VM</span></td>
+            <td class="gl-plain">在雲端租一台 24 小時開著的電腦，可以遠端連上去操作，沒人用也照算錢。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">請一個人 24 小時站櫃檯</td>
+          </tr>
+          <tr id="t-postgresql">
+            <td class="gl-term"><strong>PostgreSQL</strong></td>
+            <td class="gl-plain">常見的資料庫軟體，Supabase 底層用的就是它。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a>、<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">檔案櫃的廠牌</td>
+          </tr>
+          <tr id="t-edge-functions">
+            <td class="gl-term"><strong>Edge Functions</strong></td>
+            <td class="gl-plain">Supabase 的後端小程式，放金鑰、做不能讓客人看到的事。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a>、<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a></span></td>
+            <td class="gl-ana">Supabase 那邊的門鈴</td>
+          </tr>
+          <tr id="t-cron">
+            <td class="gl-term"><strong>排程</strong><span class="gl-en">Cron</span></td>
+            <td class="gl-plain">時間到就自己跑的工作。Cloudflare 有 Cron Triggers、Supabase 有 Supabase Cron，不用為它開一台機器。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a>、<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a></span></td>
+            <td class="gl-ana">牆上的鬧鐘</td>
+          </tr>
+          <tr id="t-package">
+            <td class="gl-term"><strong>套件</strong><span class="gl-en">Package</span></td>
+            <td class="gl-plain">別人寫好的程式，包成一包讓你裝來用。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">預拌粉，不用自己磨麵粉</td>
+          </tr>
+          <tr id="t-dependency">
+            <td class="gl-term"><strong>依賴</strong><span class="gl-en">Dependency</span></td>
+            <td class="gl-plain">你的程式要靠哪些套件才跑得起來。打包那一套靠一大堆套件撐著，放著不管就會冒出安全問題。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a>（「套件要一直跟著升級」那段）</span></td>
+            <td class="gl-ana">食材清單，少一樣就煮不出這道菜</td>
+          </tr>
+          <tr id="t-npm">
+            <td class="gl-term"><strong>npm／pnpm／npx</strong></td>
+            <td class="gl-plain">npm、pnpm 是裝 JavaScript 套件的工具，npx 是直接跑一個工具。純靜態頁面本身用不到，看到 Claude 用它，多半是在裝工具，例如 wrangler。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">五金行，缺什麼工具去拿</td>
+          </tr>
+          <tr id="t-docker">
+            <td class="gl-term"><strong>容器</strong><span class="gl-en">Docker</span></td>
+            <td class="gl-plain">把程式和它需要的環境裝進一個箱子，換到哪台機器都照樣跑。<span class="gl-see">正文沒有細講，<a href="/chapter9/" title="第九章 資料庫">第九章</a>備份那段提到一次</span></td>
+            <td class="gl-ana">標準貨櫃，到哪個港口都卸得下來</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-git">版本控制與 GitHub</h2>
+    <p class="gl-blurb">存檔、退回、找現成的。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-git">
+            <td class="gl-term"><strong>版本控制</strong><span class="gl-en">Git</span></td>
+            <td class="gl-plain">記下每一次改了什麼，改壞了退得回去。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">Word 的追蹤修訂，加上每一版的存檔</td>
+          </tr>
+          <tr id="t-github">
+            <td class="gl-term"><strong>GitHub</strong></td>
+            <td class="gl-plain">放程式碼和修改紀錄的網站，也是自動上線的起點。動手做之前，先上去找有沒有現成的。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">程式碼的 Google 雲端硬碟</td>
+          </tr>
+          <tr id="t-repo">
+            <td class="gl-term"><strong>專案庫</strong><span class="gl-en">Repository（Repo）</span></td>
+            <td class="gl-plain">一個專案的所有檔案，加上全部的修改紀錄。沒有理由公開的，建成私人（Private）。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">一個專案的檔案夾，連同每一版舊稿</td>
+          </tr>
+          <tr id="t-commit">
+            <td class="gl-term"><strong>存版</strong><span class="gl-en">Commit</span></td>
+            <td class="gl-plain">在你電腦上存一個版本紀錄，附一句說明改了什麼。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/appendix/" title="附錄：常見問題">常見問題</a>（Git 基礎那段）</span></td>
+            <td class="gl-ana">遊戲的存檔點</td>
+          </tr>
+          <tr id="t-push">
+            <td class="gl-term"><strong>推上去</strong><span class="gl-en">Push</span></td>
+            <td class="gl-plain">把電腦上存好的版本，送到 GitHub。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">把存檔點備份到雲端</td>
+          </tr>
+          <tr id="t-branch">
+            <td class="gl-term"><strong>分支</strong><span class="gl-en">Branch</span></td>
+            <td class="gl-plain">從主線分出去另外改，不影響主線。main 是正式那一條；推到其他分支，Cloudflare 會另外產生一個預覽版本，不動正式網址。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/appendix/" title="附錄：常見問題">常見問題</a>（Git 基礎那段）</span></td>
+            <td class="gl-ana">平行宇宙，在那邊改不會動到本尊</td>
+          </tr>
+          <tr id="t-merge">
+            <td class="gl-term"><strong>合併</strong><span class="gl-en">Merge</span></td>
+            <td class="gl-plain">把分支的改動併回主線。<span class="gl-see">見<a href="/appendix/" title="附錄：常見問題">常見問題</a>（Git 基礎那段）</span></td>
+            <td class="gl-ana">把平行宇宙的成果搬回本尊</td>
+          </tr>
+          <tr id="t-pr">
+            <td class="gl-term"><strong>合併請求</strong><span class="gl-en">Pull Request（PR）</span></td>
+            <td class="gl-plain">請別人看過，再把你的分支併回主線。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">交作業給老師批改，老師說好才算數</td>
+          </tr>
+          <tr id="t-conflict">
+            <td class="gl-term"><strong>衝突</strong><span class="gl-en">Conflict</span></td>
+            <td class="gl-plain">兩邊改了同一段，Git 不知道留哪個，要人來決定。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">兩個人同時改同一份文件的同一段</td>
+          </tr>
+          <tr id="t-revert">
+            <td class="gl-term"><strong>反向修改</strong><span class="gl-en">Revert</span></td>
+            <td class="gl-plain">在 Git 裡新增一個「把某次修改反過來」的版本。壞掉的修改被抵銷，舊紀錄都還在。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a></span></td>
+            <td class="gl-ana">帳本不撕頁，另寫一筆沖銷</td>
+          </tr>
+          <tr id="t-star-fork">
+            <td class="gl-term"><strong>星星與 Fork</strong><span class="gl-en">Star、Fork</span></td>
+            <td class="gl-plain">星星是多少人收藏，Fork 是多少人複製一份去用。挑現成專案時看它。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">店家門口的排隊人潮</td>
+          </tr>
+          <tr id="t-readme">
+            <td class="gl-term"><strong>說明文件</strong><span class="gl-en">README</span></td>
+            <td class="gl-plain">專案首頁那份說明，寫怎麼安裝、怎麼用。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">家電附的說明書</td>
+          </tr>
+          <tr id="t-license">
+            <td class="gl-term"><strong>授權條款</strong><span class="gl-en">License</span></td>
+            <td class="gl-plain">別人的程式碼你能怎麼用。MIT、Apache-2.0 可以商用；GPL、AGPL 有附帶條件；沒寫授權的，不能拿去複製、改寫。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">租約條款</td>
+          </tr>
+          <tr id="t-issues">
+            <td class="gl-term"><strong>問題回報</strong><span class="gl-en">Issues</span></td>
+            <td class="gl-plain">專案的問題回報區。一堆人回報、好幾個月沒人理，代表沒人在顧。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">客服留言板</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-build">會聽到、但不從它開始的</h2>
+    <p class="gl-blurb">Claude 常順手選這些。認得名字，知道它們多半要打包。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-framework">
+            <td class="gl-term"><strong>框架</strong><span class="gl-en">Framework</span></td>
+            <td class="gl-plain">它規定你怎麼寫、檔案怎麼放，你在它的結構裡填東西。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">蓋房子的鋼骨，隔間只能照著骨架走</td>
+          </tr>
+          <tr id="t-library">
+            <td class="gl-term"><strong>工具庫</strong><span class="gl-en">Library</span></td>
+            <td class="gl-plain">需要什麼拿什麼，主導權在你手上。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">工具箱，扳手還是螺絲起子你自己挑</td>
+          </tr>
+          <tr id="t-react">
+            <td class="gl-term"><strong>React</strong></td>
+            <td class="gl-plain">做網頁畫面的工具庫，用元件組合出畫面，通常要搭打包工具才能上線。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">一套要先送工廠組裝的積木</td>
+          </tr>
+          <tr id="t-vue">
+            <td class="gl-term"><strong>Vue</strong></td>
+            <td class="gl-plain">跟 React 同一類的畫面工具，一樣通常要打包。<span class="gl-see">見<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">另一家牌子的同款積木</td>
+          </tr>
+          <tr id="t-nextjs">
+            <td class="gl-term"><strong>Next.js</strong></td>
+            <td class="gl-plain">以 React 為基礎的全端框架，前後端都能做，要先打包才能上線。我不推薦從它開始。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">全能中央廚房，開伙前要先把整套設備裝好</td>
+          </tr>
+          <tr id="t-vite">
+            <td class="gl-term"><strong>Vite</strong></td>
+            <td class="gl-plain">打包工具，常和 React、Vue 搭配。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">印刷廠裡的那台印刷機</td>
+          </tr>
+          <tr id="t-vercel">
+            <td class="gl-term"><strong>Vercel</strong></td>
+            <td class="gl-plain">部署平台，跟 Next.js 是同一家做的。免費方案只限個人、非商業用途。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/chapter11/" title="第十一章 技術棧">第十一章</a></span></td>
+            <td class="gl-ana">一鍵上架的平台，但免費版不准拿來做生意</td>
+          </tr>
+          <tr id="t-typescript">
+            <td class="gl-term"><strong>TypeScript</strong></td>
+            <td class="gl-plain">加上型別限制的 JavaScript，瀏覽器不能直接跑，要先轉成一般的 JS。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>（副檔名對照表）</span></td>
+            <td class="gl-ana">有格式限制的表格：姓名欄不能填數字</td>
+          </tr>
+          <tr id="t-tailwind">
+            <td class="gl-term"><strong>Tailwind CSS</strong></td>
+            <td class="gl-plain">把樣式寫成一串 class 名稱的 CSS 工具，通常也搭打包。<span class="gl-see">見<a href="/appendix/" title="附錄：常見問題">常見問題</a>（Claude 常提的套件那張表）</span></td>
+            <td class="gl-ana">用小積木拼出畫面</td>
+          </tr>
+          <tr id="t-state-mgmt">
+            <td class="gl-term"><strong>狀態管理工具</strong><span class="gl-en">Zustand、Redux</span></td>
+            <td class="gl-plain">前端用來集中管理畫面狀態的工具，多半搭 React 用。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">中央控制室，所有頁面的資料都從這裡拿</td>
+          </tr>
+          <tr id="t-prisma">
+            <td class="gl-term"><strong>Prisma</strong></td>
+            <td class="gl-plain">給 Node.js、TypeScript 用的 ORM（見資料表那一節）。<span class="gl-see">見<a href="/appendix/" title="附錄：常見問題">常見問題</a>（Claude 常提的套件那張表）</span></td>
+            <td class="gl-ana">翻譯官的 TypeScript 版</td>
+          </tr>
+          <tr id="t-ssr-csr">
+            <td class="gl-term"><strong>伺服器畫／瀏覽器畫</strong><span class="gl-en">SSR、CSR</span></td>
+            <td class="gl-plain">SSR 是伺服器先把頁面畫好再送出；CSR 是送到瀏覽器才畫。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">餐廳端成品，或是食材送來你自己組</td>
+          </tr>
+          <tr id="t-spa">
+            <td class="gl-term"><strong>單頁應用</strong><span class="gl-en">SPA</span></td>
+            <td class="gl-plain">整個網站只有一個 HTML 頁面，換頁時不重新載入。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">像手機 App 一樣在同一個畫面裡切換</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <div class="box box-tip">
+      <div class="box-label">框架和工具庫差在哪</div>
+      <strong>框架</strong>規定你怎麼寫：檔案放哪、網址怎麼走，你在它的骨架裡填東西。Next.js 是框架。<br>
+      <strong>工具庫</strong>是你要用什麼就拿什麼，主導權在你。例如 lodash，要用它的哪一個函式就拿哪一個。<br><br>
+      差別在誰說了算。用框架，邊界有一部分是它替你畫的；換掉它，幾乎等於重蓋。這也是<a href="/chapter11/">第十一章 技術棧</a>建議先從純靜態頁面開始的原因之一：上線的東西你看得懂，邊界才是你畫的。
+    </div>
+
+    <h2 id="gl-api">API</h2>
+    <p class="gl-blurb">程式和程式之間怎麼講話。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-api">
+            <td class="gl-term"><strong>API</strong></td>
+            <td class="gl-plain">程式之間講話的窗口：照規定的格式來要，它照規定的格式回。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter12/" title="第十二章 API">第十二章</a></span></td>
+            <td class="gl-ana">餐廳服務生，幫你把點單送進廚房、把菜端出來</td>
+          </tr>
+          <tr id="t-endpoint">
+            <td class="gl-term"><strong>端點</strong><span class="gl-en">Endpoint</span></td>
+            <td class="gl-plain">API 的地址，例如 /api/customers/123。<span class="gl-see">見<a href="/chapter12/" title="第十二章 API">第十二章</a>（那裡叫「門」）</span></td>
+            <td class="gl-ana">櫃檯上的各個窗口：繳費走一號、取件走二號</td>
+          </tr>
+          <tr id="t-http-method">
+            <td class="gl-term"><strong>HTTP 方法</strong><span class="gl-en">GET、POST、PATCH、DELETE</span></td>
+            <td class="gl-plain">告訴 API 你要拿資料、新增、修改還是刪除。<span class="gl-see">見<a href="/chapter12/" title="第十二章 API">第十二章</a></span></td>
+            <td class="gl-ana">點菜的方式：看菜單、點新菜、改點、退菜</td>
+          </tr>
+          <tr id="t-status-code">
+            <td class="gl-term"><strong>狀態碼</strong><span class="gl-en">Status code</span></td>
+            <td class="gl-plain">API 回的三位數：2 開頭是成功，4 開頭是送去的東西有問題，5 開頭是伺服器出問題。<span class="gl-see">見<a href="/chapter12/" title="第十二章 API">第十二章</a></span></td>
+            <td class="gl-ana">服務生的回覆：「好的」「沒有這道菜」「廚房著火了」</td>
+          </tr>
+          <tr id="t-rest">
+            <td class="gl-term"><strong>RESTful</strong><span class="gl-en">REST</span></td>
+            <td class="gl-plain">API 網址的一種取名慣例：網址寫的是東西，動作交給 HTTP 方法。<span class="gl-see">見<a href="/chapter12/" title="第十二章 API">第十二章</a></span></td>
+            <td class="gl-ana">圖書館的分類編號，照規則就找得到書</td>
+          </tr>
+          <tr id="t-json">
+            <td class="gl-term"><strong>JSON</strong></td>
+            <td class="gl-plain">有結構的資料格式，用大括號和方括號包起來。程式之間傳資料常用它，API 回給你的多半長這樣。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>（副檔名對照表）、<a href="/chapter12/" title="第十二章 API">第十二章</a></span></td>
+            <td class="gl-ana">比 CSV 更有條理的表</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-topo">架構拓樸</h2>
+    <p class="gl-blurb">系統有哪幾塊、誰連到誰。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-topology">
+            <td class="gl-term"><strong>架構拓樸</strong><span class="gl-en">Topology</span></td>
+            <td class="gl-plain">系統有哪幾塊、誰連到誰、資料怎麼流。<span class="gl-see">見<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a></span></td>
+            <td class="gl-ana">店的動線圖</td>
+          </tr>
+          <tr id="t-data-flow">
+            <td class="gl-term"><strong>資料流</strong><span class="gl-en">Data flow</span></td>
+            <td class="gl-plain">一筆資料從哪裡進來、經過誰、存在哪。<span class="gl-see">見<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a></span></td>
+            <td class="gl-ana">一張單子從門口到帳本的路線</td>
+          </tr>
+          <tr id="t-boundary">
+            <td class="gl-term"><strong>邊界</strong><span class="gl-en">Boundary</span></td>
+            <td class="gl-plain">全書的關鍵詞，講兩件事：這件事該放在哪一塊；這次可以動到哪裡為止。放到架構圖上，就是哪兩塊之間可以有線、哪兩塊之間不行。<span class="gl-see">見<a href="/chapter1/" title="第一章 為什麼要懂">第一章</a>、<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a>、<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a></span></td>
+            <td class="gl-ana">裝潢時的承重牆，師傅再想順手敲也不能動</td>
+          </tr>
+          <tr id="t-public">
+            <td class="gl-term"><strong>對外</strong><span class="gl-en">Public</span></td>
+            <td class="gl-plain">任何人都碰得到的部分：頁面整塊攤開，後端只有窗口。<span class="gl-see">見<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a></span></td>
+            <td class="gl-ana">門口到櫃檯前面那一段</td>
+          </tr>
+          <tr id="t-api-key">
+            <td class="gl-term"><strong>金鑰</strong><span class="gl-en">API key、Secret</span></td>
+            <td class="gl-plain">你跟外部服務之間的通行證，不能出現在對外的地方。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a>、<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a></span></td>
+            <td class="gl-ana">掛在廚房裡的鑰匙</td>
+          </tr>
+          <tr id="t-external">
+            <td class="gl-term"><strong>外部服務</strong></td>
+            <td class="gl-plain">別人家的服務，你申請來用：LINE、金流、寄信。<span class="gl-see">見<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a></span></td>
+            <td class="gl-ana">外送平台、刷卡機、快遞</td>
+          </tr>
+          <tr id="t-storage">
+            <td class="gl-term"><strong>檔案存放處</strong><span class="gl-en">Storage</span></td>
+            <td class="gl-plain">放商品照、合約 PDF、客人上傳檔案的地方。<span class="gl-see">見<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a></span></td>
+            <td class="gl-ana">放照片和文件的置物櫃</td>
+          </tr>
+          <tr id="t-webhook">
+            <td class="gl-term"><strong>Webhook</strong></td>
+            <td class="gl-plain">別人家的服務有事的時候，主動送到你後端的一個固定網址，不用你一直去問。<span class="gl-see">見<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a></span></td>
+            <td class="gl-ana">外送平台的接單機</td>
+          </tr>
+          <tr id="t-mermaid">
+            <td class="gl-term"><strong>Mermaid</strong></td>
+            <td class="gl-plain">一種用文字描述圖的格式，GitHub 會把它顯示成圖。<span class="gl-see">見<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a></span></td>
+            <td class="gl-ana">用文字寫的平面圖</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-fn">功能怎麼切</h2>
+    <p class="gl-blurb">一塊只做一件事。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-function">
+            <td class="gl-term"><strong>函式、功能</strong><span class="gl-en">Function</span></td>
+            <td class="gl-plain">一個有名字的工作步驟：收東西、做事、交東西。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a></span></td>
+            <td class="gl-ana">早餐店的一個工作站</td>
+          </tr>
+          <tr id="t-parameter">
+            <td class="gl-term"><strong>參數</strong><span class="gl-en">Parameter</span></td>
+            <td class="gl-plain">交給功能的東西，就是輸入（Input）。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a></span></td>
+            <td class="gl-ana">遞進來的點單</td>
+          </tr>
+          <tr id="t-return-value">
+            <td class="gl-term"><strong>回傳值</strong><span class="gl-en">Return value</span></td>
+            <td class="gl-plain">功能做完交出來的東西，就是輸出（Output）。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a></span></td>
+            <td class="gl-ana">算好的金額、做好的餐</td>
+          </tr>
+          <tr id="t-call">
+            <td class="gl-term"><strong>呼叫</strong><span class="gl-en">Call</span></td>
+            <td class="gl-plain">一個功能請另一個功能做事。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a></span></td>
+            <td class="gl-ana">店長喊：「三號單，交給收銀」</td>
+          </tr>
+          <tr id="t-side-effect">
+            <td class="gl-term"><strong>副作用</strong><span class="gl-en">Side effect</span></td>
+            <td class="gl-plain">交出結果以外，另外動到外面的東西：存資料、寄信、改紀錄。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a></span></td>
+            <td class="gl-ana">點的是中杯，順手換成大杯</td>
+          </tr>
+          <tr id="t-srp">
+            <td class="gl-term"><strong>單一職責</strong><span class="gl-en">Single Responsibility</span></td>
+            <td class="gl-plain">一塊只做一件事。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a></span></td>
+            <td class="gl-ana">煎台只煎，收銀只收</td>
+          </tr>
+          <tr id="t-duplicate">
+            <td class="gl-term"><strong>重複程式碼</strong><span class="gl-en">Duplicate code</span></td>
+            <td class="gl-plain">同一條規則被抄到好幾個地方。反過來的原則叫 DRY（Don't Repeat Yourself）。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a></span></td>
+            <td class="gl-ana">三個人各背一份價目表</td>
+          </tr>
+          <tr id="t-edge-case">
+            <td class="gl-term"><strong>怪情況</strong><span class="gl-en">Edge case</span></td>
+            <td class="gl-plain">平常不太遇到、但遲早會遇到的特殊狀況。也有人翻成「邊界情況」，跟這本書說的「邊界」不是同一件事。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a></span></td>
+            <td class="gl-ana">「蛋餅不要蛋」</td>
+          </tr>
+          <tr id="t-spec">
+            <td class="gl-term"><strong>規格</strong><span class="gl-en">Spec</span></td>
+            <td class="gl-plain">動手之前寫下來的「要做成什麼樣」。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a></span></td>
+            <td class="gl-ana">點單本身</td>
+          </tr>
+          <tr id="t-refactor">
+            <td class="gl-term"><strong>重構</strong><span class="gl-en">Refactor</span></td>
+            <td class="gl-plain">做的事不變，只整理裡面的結構。把一大塊切成五塊就是重構。<span class="gl-see">見<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a>（「送出報價單」切成五塊那段）</span></td>
+            <td class="gl-ana">重排工作站的位置，菜單不變</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-db">資料表與欄位</h2>
+    <p class="gl-blurb">資料的家怎麼蓋。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-table">
+            <td class="gl-term"><strong>資料表</strong><span class="gl-en">Table</span></td>
+            <td class="gl-plain">只放同一種東西的表，例如客戶一張、合約一張。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">檔案櫃的一個抽屜</td>
+          </tr>
+          <tr id="t-column">
+            <td class="gl-term"><strong>欄位</strong><span class="gl-en">Column</span></td>
+            <td class="gl-plain">每一筆資料都有的同一格，例如電話、金額。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">表單上印好的格子</td>
+          </tr>
+          <tr id="t-row">
+            <td class="gl-term"><strong>列</strong><span class="gl-en">Row</span></td>
+            <td class="gl-plain">一筆資料，也叫一筆紀錄。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">一張填好的表單</td>
+          </tr>
+          <tr id="t-primary-key">
+            <td class="gl-term"><strong>主鍵</strong><span class="gl-en">Primary Key</span></td>
+            <td class="gl-plain">每一列不重複、發了就不改的編號，通常叫 id。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">表單右上角的流水號</td>
+          </tr>
+          <tr id="t-relation">
+            <td class="gl-term"><strong>關聯</strong><span class="gl-en">Relation</span></td>
+            <td class="gl-plain">表和表用編號連起來。記著別張表編號的那一欄，叫外鍵。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">拿著合約上的客戶編號，去翻客戶抽屜</td>
+          </tr>
+          <tr id="t-foreign-key">
+            <td class="gl-term"><strong>外鍵</strong><span class="gl-en">Foreign Key</span></td>
+            <td class="gl-plain">記著別張表編號的欄位。表和表就靠它連起來。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">合約上那一格「客戶編號」</td>
+          </tr>
+          <tr id="t-one-to-many">
+            <td class="gl-term"><strong>一對多</strong><span class="gl-en">One-to-many</span></td>
+            <td class="gl-plain">一位客戶對多張合約。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">很多張合約寫著同一個客戶編號</td>
+          </tr>
+          <tr id="t-many-to-many">
+            <td class="gl-term"><strong>多對多</strong><span class="gl-en">Many-to-many</span></td>
+            <td class="gl-plain">兩邊都是多，中間要多一張表。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">多一個抽屜放「哪張合約配哪個項目」</td>
+          </tr>
+          <tr id="t-data-type">
+            <td class="gl-term"><strong>型別</strong><span class="gl-en">Data type</span></td>
+            <td class="gl-plain">這一格只能填哪一種東西：數字、文字、日期。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">格子旁邊印的「請填數字」</td>
+          </tr>
+          <tr id="t-null">
+            <td class="gl-term"><strong>空值</strong><span class="gl-en">NULL</span></td>
+            <td class="gl-plain">還沒填。跟 0、跟空白都不一樣。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">空著的格子</td>
+          </tr>
+          <tr id="t-float">
+            <td class="gl-term"><strong>浮點數</strong><span class="gl-en">float</span></td>
+            <td class="gl-plain">會有小數誤差的數字型別，不要拿來放金額。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">一把刻度不準的尺</td>
+          </tr>
+          <tr id="t-schema">
+            <td class="gl-term"><strong>結構設計</strong><span class="gl-en">Schema</span></td>
+            <td class="gl-plain">有哪些表、哪些欄位、怎麼連的整份設計。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">全部空白表單的樣張</td>
+          </tr>
+          <tr id="t-er-diagram">
+            <td class="gl-term"><strong>關聯圖</strong><span class="gl-en">ER diagram</span></td>
+            <td class="gl-plain">把表和表之間的線畫出來的圖。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">哪個抽屜的編號對到哪個抽屜</td>
+          </tr>
+          <tr id="t-sql">
+            <td class="gl-term"><strong>SQL</strong></td>
+            <td class="gl-plain">跟資料庫講話的語言。你不用自己寫，看得懂它去了哪幾張表、是在看還是在改就好。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">交代管理員「去哪個抽屜拿什麼」的便條</td>
+          </tr>
+          <tr id="t-query">
+            <td class="gl-term"><strong>查詢</strong><span class="gl-en">Query</span></td>
+            <td class="gl-plain">向資料庫問問題的一句指令。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a>（SELECT 那段）</span></td>
+            <td class="gl-ana">請管理員找一份文件</td>
+          </tr>
+          <tr id="t-join">
+            <td class="gl-term"><strong>JOIN</strong></td>
+            <td class="gl-plain">照編號把兩張表的資料對在一起。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">拿合約上的客戶編號，去翻客戶抽屜</td>
+          </tr>
+          <tr id="t-crud">
+            <td class="gl-term"><strong>新增、查詢、修改、刪除</strong><span class="gl-en">CRUD</span></td>
+            <td class="gl-plain">Create、Read、Update、Delete，資料最基本的四個動作。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>（授權那段）、<a href="/chapter12/" title="第十二章 API">第十二章</a>（HTTP 方法那段）</span></td>
+            <td class="gl-ana">檔案櫃前能做的四件事：放進去、找出來、改內容、抽掉</td>
+          </tr>
+          <tr id="t-index">
+            <td class="gl-term"><strong>索引</strong><span class="gl-en">Index</span></td>
+            <td class="gl-plain">替某個欄位建的查找表，讓資料庫查得快。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">書最後面的索引頁，不用一頁一頁翻</td>
+          </tr>
+          <tr id="t-soft-delete">
+            <td class="gl-term"><strong>軟刪除</strong><span class="gl-en">Soft delete</span></td>
+            <td class="gl-plain">標記成不要了，資料還在。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">蓋上「已停用」的章，表單留著</td>
+          </tr>
+          <tr id="t-cascade">
+            <td class="gl-term"><strong>連帶刪除</strong><span class="gl-en">ON DELETE CASCADE</span></td>
+            <td class="gl-plain">刪掉一列，連到它的資料一起刪。<span class="gl-see">見<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">抽掉客戶表單，他的合約和收款單一起進碎紙機</td>
+          </tr>
+          <tr id="t-migration">
+            <td class="gl-term"><strong>結構變更紀錄</strong><span class="gl-en">Migration</span></td>
+            <td class="gl-plain">資料結構的修改紀錄，一次一個檔案，照時間排好。哪天出問題，看得到是哪一次改壞的。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>（那裡叫「施工單」）、<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a></span></td>
+            <td class="gl-ana">照順序收好的改版通知單</td>
+          </tr>
+          <tr id="t-orm">
+            <td class="gl-term"><strong>ORM</strong></td>
+            <td class="gl-plain">用程式語言操作資料庫，不用直接寫 SQL 的工具。<span class="gl-see">見<a href="/appendix/" title="附錄：常見問題">常見問題</a>（套件表裡的 Prisma）</span></td>
+            <td class="gl-ana">翻譯官，你說中文他幫你翻成 SQL</td>
+          </tr>
+          <tr id="t-nosql">
+            <td class="gl-term"><strong>NoSQL</strong></td>
+            <td class="gl-plain">不用固定欄位格式的資料庫。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">百寶箱，什麼形狀都丟得進去</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-fb">前後端邊界與安全</h2>
+    <p class="gl-blurb">什麼放前面，什麼一定要放後面。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-frontend">
+            <td class="gl-term"><strong>前端</strong><span class="gl-en">Frontend</span></td>
+            <td class="gl-plain">跑在使用者瀏覽器裡的部分，這本書也叫「頁面」。裡面的東西任何人都看得到、改得到。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a></span></td>
+            <td class="gl-ana">餐廳的用餐區</td>
+          </tr>
+          <tr id="t-backend">
+            <td class="gl-term"><strong>後端</strong><span class="gl-en">Backend</span></td>
+            <td class="gl-plain">使用者看不到的部分：收單、算錢、決定這件事能不能做。錢、權限、金鑰放這裡。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>、<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a></span></td>
+            <td class="gl-ana">廚房</td>
+          </tr>
+          <tr id="t-full-stack">
+            <td class="gl-term"><strong>全端</strong><span class="gl-en">Full-stack</span></td>
+            <td class="gl-plain">前端、後端都包。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">外場到廚房都能做的員工</td>
+          </tr>
+          <tr id="t-middleware">
+            <td class="gl-term"><strong>中介層</strong><span class="gl-en">Middleware</span></td>
+            <td class="gl-plain">請求到達目的地之前，先經過的關卡。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">機場安檢</td>
+          </tr>
+          <tr id="t-env">
+            <td class="gl-term"><strong>環境變數</strong><span class="gl-en">.env</span></td>
+            <td class="gl-plain">金鑰、密碼和設定值放在程式碼以外的地方。.env 檔不能上傳到 GitHub。<span class="gl-see">見<a href="/chapter5/" title="第五章 基本知識">第五章</a>（副檔名對照表）、<a href="/chapter7/" title="第七章 部署">第七章</a>、<a href="/appendix/" title="附錄：常見問題">常見問題</a></span></td>
+            <td class="gl-ana">保險箱密碼寫在另一張紙上，不刻在門上</td>
+          </tr>
+          <tr id="t-auth">
+            <td class="gl-term"><strong>身分驗證</strong><span class="gl-en">Auth</span></td>
+            <td class="gl-plain">確認「你是誰」。<span class="gl-see">見<a href="/chapter12/" title="第十二章 API">第十二章</a>（每扇門先問「是誰」那段）</span></td>
+            <td class="gl-ana">出示身分證，門口確認你是本人</td>
+          </tr>
+          <tr id="t-oauth">
+            <td class="gl-term"><strong>第三方登入</strong><span class="gl-en">OAuth</span></td>
+            <td class="gl-plain">用 Google 這類帳號登入別的網站，對方不會拿到你的密碼。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">拿公司識別證進合作夥伴的辦公室</td>
+          </tr>
+          <tr id="t-token-auth">
+            <td class="gl-term"><strong>Token（登入通行證）</strong></td>
+            <td class="gl-plain">登入後拿到的通行證，帶著它下次不用再輸入密碼。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">遊樂園手環，戴著就能進出</td>
+          </tr>
+          <tr id="t-jwt">
+            <td class="gl-term"><strong>JWT</strong></td>
+            <td class="gl-plain">一種 Token 格式，裡面裝著你的身分和權限。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">電子會員卡，掃一下就知道你是誰</td>
+          </tr>
+          <tr id="t-cors">
+            <td class="gl-term"><strong>跨網域規則</strong><span class="gl-en">CORS</span></td>
+            <td class="gl-plain">瀏覽器的規定：A 網站的頁面要跟 B 網域要資料，B 要先說可以。<span class="gl-see">見<a href="/chapter3/" title="第三章 下指令">第三章</a>、<a href="/appendix/" title="附錄：常見問題">常見問題</a>（常見錯誤類型速查）</span></td>
+            <td class="gl-ana">別棟大樓的訪客登記，沒登記不讓上樓</td>
+          </tr>
+          <tr id="t-rate-limit">
+            <td class="gl-term"><strong>流量限制</strong><span class="gl-en">Rate limiting</span></td>
+            <td class="gl-plain">限制同一個人一段時間內能送幾次請求。<span class="gl-see">見<a href="/appendix/" title="附錄：常見問題">常見問題</a>（錯誤速查裡的 429）</span></td>
+            <td class="gl-ana">排隊管制，一次只放幾個人進去</td>
+          </tr>
+          <tr id="t-state">
+            <td class="gl-term"><strong>狀態</strong><span class="gl-en">State</span></td>
+            <td class="gl-plain">畫面現在的情況：開關開著還是關著、購物車裡有幾件。<span class="gl-see">見<a href="/chapter16/" title="第十六章 前後端邊界">第十六章</a>（「先顯示，再確認」那段）</span></td>
+            <td class="gl-ana">電燈開關現在的位置</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-risk">會出事的地方</h2>
+    <p class="gl-blurb">異步、單一資料來源、耦合。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-async">
+            <td class="gl-term"><strong>同步／異步</strong><span class="gl-en">Sync、Async</span></td>
+            <td class="gl-plain">同步是一件做完才做下一件；異步是幾件同時開工，誰先好誰先回來。先送出去的，不一定先回來。<span class="gl-see">見<a href="/chapter17/" title="第十七章 會出事的地方">第十七章</a></span></td>
+            <td class="gl-ana">廚房三道菜同時開火，冰淇淋可能比沙拉先上桌</td>
+          </tr>
+          <tr id="t-race-condition">
+            <td class="gl-term"><strong>競爭條件</strong><span class="gl-en">Race Condition</span></td>
+            <td class="gl-plain">兩個人同時搶同一個東西，系統兩邊都說好。<span class="gl-see">見<a href="/chapter9/" title="第九章 資料庫">第九章</a>、<a href="/chapter17/" title="第十七章 會出事的地方">第十七章</a></span></td>
+            <td class="gl-ana">兩個人同時訂到最後一個座位</td>
+          </tr>
+          <tr id="t-lock">
+            <td class="gl-term"><strong>鎖</strong><span class="gl-en">Lock</span></td>
+            <td class="gl-plain">處理一筆資料的時候先鎖住，別人要等它處理完。<span class="gl-see">見<a href="/chapter17/" title="第十七章 會出事的地方">第十七章</a></span></td>
+            <td class="gl-ana">試衣間門上的「使用中」</td>
+          </tr>
+          <tr id="t-ssot">
+            <td class="gl-term"><strong>資料的家</strong><span class="gl-en">SSOT</span></td>
+            <td class="gl-plain">Single Source of Truth，又叫單一資料來源。一種資料只以一個地方為準，別處要用就去那裡查。<span class="gl-see">見<a href="/chapter4/" title="第四章 工作流程">第四章</a>、<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a>、<a href="/chapter15/" title="第十五章 資料表與欄位">第十五章</a>、<a href="/chapter17/" title="第十七章 會出事的地方">第十七章</a></span></td>
+            <td class="gl-ana">唯一的那本帳本；全公司只有一本電話簿</td>
+          </tr>
+          <tr id="t-coupling">
+            <td class="gl-term"><strong>耦合</strong><span class="gl-en">Coupling</span></td>
+            <td class="gl-plain">功能黏在一起的程度。黏得越緊，改一個越容易壞別的。<span class="gl-see">見<a href="/chapter4/" title="第四章 工作流程">第四章</a>、<a href="/chapter14/" title="第十四章 功能怎麼切">第十四章</a>、<a href="/chapter17/" title="第十七章 會出事的地方">第十七章</a></span></td>
+            <td class="gl-ana">積木拆得開，膠水黏死的拆不開</td>
+          </tr>
+          <tr id="t-cache">
+            <td class="gl-term"><strong>快取</strong><span class="gl-en">Cache</span></td>
+            <td class="gl-plain">把常用的結果先存一份，下次不用重算。存的那份可能已經舊了。<span class="gl-see">見<a href="/chapter13/" title="第十三章 架構拓樸">第十三章</a>、<a href="/chapter17/" title="第十七章 會出事的地方">第十七章</a>（那裡叫「抄本」）</span></td>
+            <td class="gl-ana">桌上便利貼抄的電話，本人換號就打不通</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-ops">機器與維運</h2>
+    <p class="gl-blurb">東西上線之後，怎麼知道它還活著。</p>
+    <div class="table-wrapper">
+      <table class="gl-table">
+        <thead>
+          <tr>
+            <th scope="col">術語</th>
+            <th scope="col">一句白話</th>
+            <th scope="col">比喻</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr id="t-cold-start">
+            <td class="gl-term"><strong>冷啟動</strong><span class="gl-en">Cold Start</span></td>
+            <td class="gl-plain">服務閒置一陣子睡著之後，第一次被叫醒要多等一下。純靜態頁面沒有這回事。<span class="gl-see">見<a href="/chapter7/" title="第七章 部署">第七章</a>（Render 免費方案那段）</span></td>
+            <td class="gl-ana">冬天熱車，放太久要等引擎暖起來</td>
+          </tr>
+          <tr id="t-health-check">
+            <td class="gl-term"><strong>健康檢查</strong><span class="gl-en">Health Check</span></td>
+            <td class="gl-plain">定時確認服務還活著、能正常回應。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">定期量血壓</td>
+          </tr>
+          <tr id="t-heartbeat">
+            <td class="gl-term"><strong>心跳</strong><span class="gl-en">Heartbeat</span></td>
+            <td class="gl-plain">服務定時主動回報「我還活著」。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">出門在外每天報平安，哪天沒報就是出事了</td>
+          </tr>
+          <tr id="t-ping">
+            <td class="gl-term"><strong>Ping</strong></td>
+            <td class="gl-plain">敲一下對方，看有沒有回應。<span class="gl-see">正文沒有細講，<a href="/chapter7/" title="第七章 部署">第七章</a> Render 那段提到一次</span></td>
+            <td class="gl-ana">打電話問「你在嗎？」</td>
+          </tr>
+          <tr id="t-uptime">
+            <td class="gl-term"><strong>正常運作時間</strong><span class="gl-en">Uptime</span></td>
+            <td class="gl-plain">服務沒中斷、一直在跑的時間。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">連續營業天數</td>
+          </tr>
+          <tr id="t-log">
+            <td class="gl-term"><strong>紀錄檔</strong><span class="gl-en">Log</span></td>
+            <td class="gl-plain">程式跑的時候留下的流水帳，出錯時先看它。<span class="gl-see">見<a href="/chapter10/" title="第十章 Claude Code 怎麼用">第十章</a></span></td>
+            <td class="gl-ana">店裡的監視器錄影</td>
+          </tr>
+          <tr id="t-firewall">
+            <td class="gl-term"><strong>防火牆</strong><span class="gl-en">Firewall</span></td>
+            <td class="gl-plain">擋掉不該進來的連線。<span class="gl-see">正文沒有細講</span></td>
+            <td class="gl-ana">社區警衛室</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="gl-back"><a href="#gl-toc">回到分類目錄</a></p>
+
+    <h2 id="gl-takeaway">這頁帶走什麼</h2>
+    <ul>
+      <li>不用背。看到不懂的詞，回來查一句白話、一個比喻就夠。</li>
+      <li>知道那個詞是什麼意思，跟 Claude 就少繞好幾輪，也省 Token。</li>
+      <li>每個詞後面的章節，是它真正派上用場的地方。查完想知道「這跟我有什麼關係」，就點過去。標著「正文沒有細講」的，認得名字就夠，Claude 提到時請它用白話講。</li>
+      <li>詞是入門。聽得懂之後，要問的是：這一步動到哪一塊、那一塊能不能動。</li>
+    </ul>
+
+    <h2 id="gl-say">跟 Claude 怎麼說</h2>
+    <ul>
+      <li>「你剛剛用到的這幾個詞，各用一句白話加一個比喻講給我聽。」</li>
+      <li>「這次的改動，用『頁面、後端、資料庫、外部服務』這四塊說明你動到哪幾塊。」</li>
+      <li>「回覆我的時候，第一次出現的英文術語後面加上中文。」</li>
+    </ul>
+
+    <div class="chapter-nav">
+      <a href="/appendix/" class="prev">
+        <span class="nav-label">上一頁</span>
+        <span class="nav-title">常見問題</span>
+      </a>
+    </div>
+
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/main.js"></script>
+</body>
+</html>

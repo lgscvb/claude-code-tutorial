@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>第十二章：API — Claude Code 非工程師指南</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* 第十二章專用樣式。敲門示範從新版前後端章搬來，沿用 edge-、api- 前綴 */
+    .edge-demo {
+      position: relative;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      padding: 24px;
+      margin: 28px 0 20px;
+    }
+    .edge-demo::before {
+      content: attr(data-demo-title);
+      position: absolute;
+      top: -11px;
+      left: 16px;
+      background: var(--bg-card);
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+    .edge-demo-label { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+    .edge-screen {
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+    }
+    .edge-screen-title { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+
+    .edge-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+    .edge-btn {
+      min-height: 44px;
+      padding: 8px 18px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-light);
+      background: var(--bg);
+      color: var(--text);
+      font: inherit;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, color 0.2s;
+    }
+    .edge-btn:hover { border-color: var(--accent); }
+    .edge-btn:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+
+    .edge-results { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+    .edge-panel {
+      border-radius: var(--radius-sm);
+      padding: 16px 18px;
+      font-size: 14px;
+      min-width: 0;
+    }
+    .edge-panel-bad { background: rgba(248, 113, 113, 0.06); border: 1px solid rgba(248, 113, 113, 0.2); }
+    .edge-panel-good { background: rgba(74, 222, 128, 0.06); border: 1px solid rgba(74, 222, 128, 0.2); }
+    .edge-panel-title { font-size: 13px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+    .edge-panel-bad .edge-panel-title { color: var(--red); }
+    .edge-panel-good .edge-panel-title { color: var(--green); }
+    .edge-verdict {
+      margin: 0;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-light);
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .edge-verdict.edge-is-bad { color: var(--red); }
+    .edge-verdict.edge-is-ok { color: var(--green); }
+    .edge-verdict.edge-is-luck { color: var(--yellow); }
+    .edge-verdict.edge-pop { animation: edge-pop 0.35s ease-out; }
+    @keyframes edge-pop {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .edge-static > p { font-size: 14px; color: var(--text-muted); }
+    .edge-static .table-wrapper { margin-bottom: 0; }
+
+    .api-request {
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      font-size: 14px;
+      overflow-wrap: anywhere;
+    }
+    .api-who { font-size: 13px; color: var(--text-muted); margin: 16px 0 0; }
+    .edge-btn[aria-pressed="true"].api-pick { border-color: var(--accent); color: var(--accent-light); }
+    .api-code {
+      display: inline-block;
+      min-width: 3.2em;
+      margin-right: 6px;
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    /* 路徑拆解那種一行很長的程式框，手機上在框內捲動，不撐破頁面 */
+    .api-wide { overflow-x: auto; white-space: nowrap; }
+
+    .compare.api-one { grid-template-columns: minmax(0, 1fr); }
+
+    @media (max-width: 600px) {
+      .edge-demo { padding: 20px 16px 16px; }
+      .edge-results { grid-template-columns: minmax(0, 1fr); }
+      .edge-btn { flex: 1 1 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .edge-btn { transition: none; }
+      .edge-verdict.edge-pop { animation: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a href="/" class="site-logo">Claude Code 指南</a>
+    <nav class="site-nav">
+      <a href="/">首頁</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
+    </nav>
+    <button class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</header>
+
+<nav class="mobile-nav">
+  <a href="/">首頁</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/" class="active">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
+</nav>
+
+<main>
+  <section class="container">
+    <div class="page-header">
+      <div class="chapter-label">第十二章</div>
+      <h1>API：兩邊怎麼講話</h1>
+      <p class="lead">上一章選好了材料：頁面放 Cloudflare，資料放 Supabase 或 D1，小程式用 Workers。材料分在不同地方，要彼此講話，靠的就是 API，就像房子要接水接電。你不需要會寫，但要知道它在幹嘛。這章最後要你帶走一句話：每一個 API 都是一扇門，門要守。</p>
+    </div>
+
+    <div class="content">
+
+      <!-- ========== A. API 是什麼 ========== -->
+      <h2 id="api-what">API 是什麼？</h2>
+
+      <div class="analogy">
+        <strong>想像你走進一間餐廳。</strong><br><br>
+        你（前端）坐下來看菜單，選好要吃什麼。<br>
+        服務生（API）把你的點單送進廚房（後端）。<br>
+        廚房做好菜之後，服務生再端出來給你。<br><br>
+        <strong>你不需要知道廚房怎麼煮，也進不去廚房。</strong><br>
+        你只需要知道：菜單上有什麼、怎麼點、點了之後會拿到什麼。
+      </div>
+
+      <p><strong>API</strong> 的全名是 Application Programming Interface，翻成中文就是「程式之間的溝通介面」。前端、後端是什麼，<a href="/chapter5/">第五章 基本知識</a>用餐廳的用餐區和廚房講過，這裡接著講兩邊怎麼講話。</p>
+
+      <p>簡單說：</p>
+      <ul>
+        <li><strong>前端</strong>（你看到的網頁）想要資料 → 跟 API 說「我要 XXX」</li>
+        <li><strong>API</strong> 把請求送到後端 → 後端處理完 → 再透過 API 回傳結果</li>
+        <li>前端收到結果 → 顯示在畫面上</li>
+      </ul>
+
+      <p>不只頁面跟後端，你的程式去叫外部服務（寄信、收款、查 LINE 訊息），走的也是對方開出來的 API。</p>
+
+      <div class="box box-tip">
+        <div class="box-label">為什麼要知道這個？</div>
+        你跟 Claude Code 說「幫我做一個客戶管理系統」，它會幫你建 API。你看到 <code>GET /api/customers</code> 這種東西時，就知道這是「去拿客戶列表」的意思，而不是一臉問號。
+      </div>
+
+      <h3>API 的角色定位</h3>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">沒有人守門的世界</div>
+          <div class="code-block">
+頁面拿著能開所有東西的鑰匙<br>
+直接進資料庫，沒有任何規則<br>
+→ 誰打開網頁都能讀、能改<br>
+→ 每個頁面自己寫查詢<br>
+→ 改一個欄位，好幾個頁面都要改<br>
+→ 手機 App 跟網頁各寫一套
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">有 API 把關的世界</div>
+          <div class="code-block">
+頁面只跟 API 講話<br>
+→ API 統一檢查身分和權限<br>
+→ 規則集中在一個地方<br>
+→ 改一次，全部生效<br>
+→ 手機、網頁、別的系統都用同一組 API
+          </div>
+        </div>
+      </div>
+
+      <p>這裡要分清楚：出問題的是「沒有規則」，不是「頁面直接連資料庫」這個動作本身。<a href="/chapter11/">第十一章</a>推薦的 Supabase 就是設計成讓頁面直接連：它替授權過的資料表開好 API，再靠 RLS（逐列權限）規定每個人只能讀寫自己的那幾筆。<a href="/chapter13/">第十三章 架構拓樸</a>會把這種接法畫出來。規則沒開，才是漏洞。</p>
+
+      <!-- ========== B. 每一個 API 都是一扇門 ========== -->
+      <h2 id="api-door">每一個 API 都是一扇門</h2>
+
+      <p>換個角度看餐廳：服務生每多接一種單，廚房就得多開一個窗口給他進出。後端開出去的每一個 API，都是一扇對外的門。前端從這扇門進來，有心人也從這扇門進來：他不用你的頁面，直接對門送東西。</p>
+
+      <div class="box box-warning">
+        <div class="box-label">每一扇門都要問三件事</div>
+        <strong>是誰？</strong>沒登入的，擋下來。<br>
+        <strong>能不能？</strong>登入了，但這筆不是他的，擋下來。<br>
+        <strong>送來的東西對不對？</strong>金額自己重算，欄位自己再檢查一次。
+      </div>
+
+      <p>門的來源有兩種。用 Supabase，每張表要你（或 Claude）明確授權（grant）才會開一扇門，開門的同時就要開 RLS；開了 RLS 但還沒寫規則，拿著頁面那把公開金鑰的人什麼都拿不到。用 Cloudflare D1，門是小函式一扇一扇開出來的，每一扇都要自己檢查。</p>
+
+      <p>Claude 加功能時，常會順手多開一扇門：一個匯出用的、一個給後台用的。門越開越多，就越可能有一扇忘了上鎖。所以改完要問：<strong>這次有沒有新開門？每一扇有沒有檢查是誰？</strong>什麼判斷一定要放在門後面（後端）、什麼可以放在頁面上，<a href="/chapter16/">第十六章 前後端邊界</a>用八個例子細講。</p>
+
+      <!-- ========== C. HTTP Methods ========== -->
+      <h2 id="api-methods">HTTP 方法（點菜的方式）</h2>
+
+      <p>既然 API 是服務生，你跟服務生講話時，有幾種不同的「動作」。這些動作在技術上叫做 <strong>HTTP Methods</strong>（HTTP 方法）。敲門的時候，要先講你要做哪一種事。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>方法</th>
+              <th>白話</th>
+              <th>餐廳比喻</th>
+              <th>實際例子</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>GET</code></td>
+              <td>「我要看」</td>
+              <td>看菜單、查目前的訂單</td>
+              <td>打開商品頁面、查訂單紀錄</td>
+            </tr>
+            <tr>
+              <td><code>POST</code></td>
+              <td>「我要新增」</td>
+              <td>下一筆新訂單</td>
+              <td>註冊帳號、送出表單、新增一筆資料</td>
+            </tr>
+            <tr>
+              <td><code>PUT</code></td>
+              <td>「我要整個換掉」</td>
+              <td>整張訂單重寫</td>
+              <td>更新個人資料（全部欄位都重新送）</td>
+            </tr>
+            <tr>
+              <td><code>PATCH</code></td>
+              <td>「我要改一部分」</td>
+              <td>只換訂單裡的一道菜</td>
+              <td>只改電話、只改暱稱</td>
+            </tr>
+            <tr>
+              <td><code>DELETE</code></td>
+              <td>「我要刪掉」</td>
+              <td>取消訂單</td>
+              <td>刪除帳號、移除商品</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">PUT 和 PATCH 差在哪？</div>
+        <strong>PUT</strong> 像是把整張考卷擦掉重寫。就算你只改一題，也要把所有答案都重交一遍，漏寫的那幾題可能就變空白。<br>
+        <strong>PATCH</strong> 像是用立可白只修一題，其他題目維持原樣。<br><br>
+        只改一兩格的情況很常見，所以你會常看到 <code>PATCH</code>。
+      </div>
+
+      <!-- ========== D. 狀態碼 ========== -->
+      <h2 id="api-status">狀態碼（服務生的回覆）</h2>
+
+      <p>你跟 API 說「我要 XXX」之後，API 會回一個三位數的<strong>代碼</strong>告訴你結果。這就是 <strong>HTTP 狀態碼</strong>。</p>
+
+      <p>不用背，但看到的時候要知道什麼意思：</p>
+
+      <h3>成功的回覆（2 開頭）</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>代碼</th>
+              <th>白話</th>
+              <th>餐廳比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>200</code></td>
+              <td>成功，資料來了</td>
+              <td>「好的，菜來了」</td>
+            </tr>
+            <tr>
+              <td><code>201</code></td>
+              <td>建立成功</td>
+              <td>「訂單已成立，等候出餐」</td>
+            </tr>
+            <tr>
+              <td><code>204</code></td>
+              <td>成功，沒有東西要回</td>
+              <td>「辦好了」（常見於修改、刪除）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>敲門那一邊的問題（4 開頭）</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>代碼</th>
+              <th>白話</th>
+              <th>餐廳比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>400</code></td>
+              <td>你的要求有問題</td>
+              <td>「菜單上沒這道菜」「你這張單看不懂」</td>
+            </tr>
+            <tr>
+              <td><code>401</code></td>
+              <td>不知道你是誰（沒登入）</td>
+              <td>「請先出示會員卡」</td>
+            </tr>
+            <tr>
+              <td><code>403</code></td>
+              <td>知道你是誰，但你沒有權限</td>
+              <td>「你有卡，但這間包廂不是你訂的」</td>
+            </tr>
+            <tr>
+              <td><code>404</code></td>
+              <td>找不到</td>
+              <td>「那道菜已經下架了」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>後端自己的問題（5 開頭）</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>代碼</th>
+              <th>白話</th>
+              <th>餐廳比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>500</code></td>
+              <td>後端出錯了</td>
+              <td>「廚房出狀況了，我們也沒辦法」</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">記住這個規則</div>
+        <strong>4 開頭＝敲門那一邊的問題</strong>（請求格式錯、沒登入、沒權限）。先看送了什麼、是誰送的。<br>
+        <strong>5 開頭＝後端自己的問題</strong>（程式出錯、資料庫連不上）。把錯誤訊息整段貼給 Claude，請它查後端。<br><br>
+        有些後端對沒權限的人也回 <code>404</code>，故意不讓他知道這筆資料存在。這也是守門的一種。
+      </div>
+
+      <!-- ========== E. 敲門示範 ========== -->
+      <h3 id="api-knock">動手玩：同一扇門，三個人來敲</h3>
+
+      <p>A 設計工作室用你做的客戶管理工具。現在有三個人敲同一扇門，要看 A 設計工作室的客戶 123 號。選一個人，看守門和沒守門的後端各回什麼。</p>
+
+      <div class="demo-container edge-demo" id="api-demo" data-demo-title="互動示範：誰來敲門">
+        <div class="demo-label edge-demo-label">全部是假資料，不會送出任何請求。</div>
+
+        <div id="api-live" hidden>
+          <div class="edge-screen">
+            <div class="edge-screen-title">敲的是這扇門</div>
+            <div class="api-request"><span style="color: var(--blue);">GET</span> /api/customers/123</div>
+          </div>
+
+          <p class="api-who">誰來敲：</p>
+          <div class="edge-actions" role="group" aria-label="選擇敲門的人">
+            <button type="button" class="edge-btn api-pick" data-who="guest" aria-pressed="false">沒登入的人</button>
+            <button type="button" class="edge-btn api-pick" data-who="other" aria-pressed="false">別家公司的登入者</button>
+            <button type="button" class="edge-btn api-pick" data-who="staff" aria-pressed="false">A 設計工作室的業務</button>
+          </div>
+
+          <div class="edge-results" aria-live="polite">
+            <div class="edge-panel edge-panel-bad">
+              <div class="edge-panel-title">沒守門的後端</div>
+              <p class="edge-verdict" id="api-verdict-open">還沒有人來敲。</p>
+            </div>
+            <div class="edge-panel edge-panel-good">
+              <div class="edge-panel-title">有守門的後端</div>
+              <p class="edge-verdict" id="api-verdict-guarded">還沒有人來敲。</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="edge-static" id="api-static">
+          <p>這個示範要開 JavaScript 才能按。下面是同一件事的表格版：</p>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>誰來敲</th><th>沒守門的後端</th><th>有守門的後端</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>沒登入的人</td><td style="color: var(--red);">200，資料給出去</td><td style="color: var(--green);">401，請先登入</td></tr>
+                <tr><td>別家公司的登入者</td><td style="color: var(--red);">200，資料給出去</td><td style="color: var(--green);">403，這筆不是你們的</td></tr>
+                <tr><td>A 設計工作室的業務</td><td>200，正常</td><td style="color: var(--green);">200，正常</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <p>自己人來敲，兩個後端回的一樣。差別只在外人來敲的時候，所以平常用起來完全看不出哪個有守門。這就是為什麼要主動問，不能等出事。</p>
+
+      <p>用 Supabase 的話，被存取規則擋掉的那幾筆通常不會報錯，而是像沒有這筆一樣查不到。反過來，整張表還沒授權的話，會直接收到「permission denied for table」（代碼 42501）：不是資料不見，是門還沒開。</p>
+
+      <!-- ========== F. 客戶管理流程 ========== -->
+      <h2 id="api-example">實際案例：一個「客戶管理」的完整流程</h2>
+
+      <p>假設你請 Claude Code 幫你做一個客戶管理系統，它多半會建出下面這幾扇門。我們來走一遍完整流程：</p>
+
+      <h3>1. 新增客戶（POST）</h3>
+
+      <p>使用者在頁面上填好表單（名稱、電話、Email），按下「送出」。</p>
+
+      <div class="code-block">
+<span style="color: var(--green);">POST</span> /api/customers<br><br>
+送出的資料（Request Body）：<br>
+{<br>
+&nbsp;&nbsp;"name": "B 咖啡店",<br>
+&nbsp;&nbsp;"phone": "04-0000-0000",<br>
+&nbsp;&nbsp;"email": "hello@b-cafe.example"<br>
+}
+      </div>
+
+      <p>後端收到 → 存進資料庫 → 回傳：</p>
+
+      <div class="code-block">
+<span style="color: var(--green);">狀態碼：201 Created</span><br><br>
+回傳的資料（Response）：<br>
+{<br>
+&nbsp;&nbsp;"id": 123,<br>
+&nbsp;&nbsp;"name": "B 咖啡店",<br>
+&nbsp;&nbsp;"phone": "04-0000-0000",<br>
+&nbsp;&nbsp;"email": "hello@b-cafe.example",<br>
+&nbsp;&nbsp;"created_at": "2026-11-13T10:30:00Z"<br>
+}
+      </div>
+
+      <p>前端收到 <code>201</code> → 顯示「新增成功！」</p>
+
+      <p>注意送出去的資料裡沒有「這筆屬於哪家公司」。那一格要後端從登入身分自己填，不能讓前端說了算：前端送什麼都可能被改過，這就是門口要問的「送來的東西對不對」。</p>
+
+      <h3>2. 列出所有客戶（GET）</h3>
+
+      <div class="code-block">
+<span style="color: var(--blue);">GET</span> /api/customers<br><br>
+<span style="color: var(--green);">狀態碼：200 OK</span><br><br>
+回傳：<br>
+[<br>
+&nbsp;&nbsp;{ "id": 123, "name": "B 咖啡店", "phone": "04-0000-0000" },<br>
+&nbsp;&nbsp;{ "id": 124, "name": "C 花店", "phone": "04-0000-0001" },<br>
+&nbsp;&nbsp;{ "id": 125, "name": "D 文具行", "phone": "04-0000-0002" }<br>
+]
+      </div>
+
+      <p>前端收到資料 → 排成表格顯示在頁面上。</p>
+
+      <h3>3. 查看單一客戶（GET＋編號）</h3>
+
+      <div class="code-block">
+<span style="color: var(--blue);">GET</span> /api/customers/123<br><br>
+<span style="color: var(--green);">狀態碼：200 OK</span><br><br>
+回傳：B 咖啡店的完整資料
+      </div>
+
+      <h3>4. 修改客戶資料（PATCH）</h3>
+
+      <p>B 咖啡店換了電話號碼，只要改這個欄位：</p>
+
+      <div class="code-block">
+<span style="color: var(--yellow);">PATCH</span> /api/customers/123<br><br>
+送出的資料：<br>
+{<br>
+&nbsp;&nbsp;"phone": "04-0000-0099"<br>
+}<br><br>
+<span style="color: var(--green);">狀態碼：200 OK</span><br>
+→ 只有電話被改掉，其他欄位不動
+      </div>
+
+      <h3>5. 刪除客戶（DELETE）</h3>
+
+      <div class="code-block">
+<span style="color: var(--red);">DELETE</span> /api/customers/123<br><br>
+<span style="color: var(--green);">狀態碼：200 OK 或 204 No Content</span><br>
+→ B 咖啡店的資料被刪除了
+      </div>
+
+      <p>修改和刪除成功時，有的後端回 <code>200</code> 加上結果，有的回 <code>204</code> 什麼都不附。兩個都是「辦好了」。</p>
+
+      <div class="box box-tip">
+        <div class="box-label">整理一下</div>
+        看出規律了嗎？同一個路徑 <code>/api/customers</code>，搭配不同的 HTTP 方法，就能做不同的事：
+        <ul>
+          <li><code>GET /api/customers</code> → 看全部</li>
+          <li><code>GET /api/customers/123</code> → 看一個</li>
+          <li><code>POST /api/customers</code> → 新增</li>
+          <li><code>PATCH /api/customers/123</code> → 改一個</li>
+          <li><code>DELETE /api/customers/123</code> → 刪一個</li>
+        </ul>
+        這就是 API 設計的核心概念。五行，就是五扇門，每一扇都要問：是誰、能不能、送來的對不對。
+      </div>
+
+      <!-- ========== G. RESTful ========== -->
+      <h2 id="api-rest">API 組合排列的概念（RESTful）</h2>
+
+      <p>上面那種「用 HTTP 方法＋路徑」來操作資料的設計方式，有一個正式的名字叫做 <strong>RESTful API</strong>。</p>
+
+      <h3>RESTful 命名慣例</h3>
+
+      <p>路徑有一些約定俗成的寫法。這是慣例，不是法律，各家寫法不完全一樣；但看懂了，Claude 給你的清單就讀得懂：</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>慣例</th>
+              <th>常見的寫法</th>
+              <th>比較少見的寫法</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>用名詞，動作交給方法</td>
+              <td><code>/api/customers</code></td>
+              <td><code>/api/getCustomers</code></td>
+            </tr>
+            <tr>
+              <td>用複數</td>
+              <td><code>/api/orders</code></td>
+              <td><code>/api/order</code></td>
+            </tr>
+            <tr>
+              <td>一層一層表示關係</td>
+              <td><code>/api/customers/123/orders</code></td>
+              <td><code>/api/getOrdersByCustomer?id=123</code></td>
+            </tr>
+            <tr>
+              <td>版本號放在路徑裡</td>
+              <td><code>/api/v1/customers</code></td>
+              <td><code>/api/customers?version=1</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>路徑（Endpoint）怎麼看</h3>
+
+      <p>一個 API 的地址叫 <strong>Endpoint</strong>。看到一串路徑，可以像看地址一樣拆解：</p>
+
+      <div class="code-block api-wide">
+/api/v1/customers/123/orders<br><br>
+拆解：<br>
+├── /api&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 表示這是 API（不是一般網頁）<br>
+├── /v1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 版本 1<br>
+├── /customers&nbsp;&nbsp;→ 資料類型：客戶<br>
+├── /123&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 特定客戶（編號 123）<br>
+└── /orders&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 這位客戶的訂單
+      </div>
+
+      <p>白話翻譯：<strong>「API 第 1 版，去找編號 123 的客戶，然後拿他的訂單」</strong></p>
+
+      <div class="analogy">
+        <strong>再多幾個例子：</strong><br><br>
+        <code>GET /api/v1/products</code> → 拿所有商品列表<br>
+        <code>POST /api/v1/products</code> → 新增一個商品<br>
+        <code>GET /api/v1/products/456/reviews</code> → 看商品 456 的所有評價<br>
+        <code>DELETE /api/v1/customers/123/orders/789</code> → 刪掉客戶 123 的訂單 789
+      </div>
+
+      <p>Supabase 替資料表開的門也長這樣，只是條件寫在問號後面：</p>
+
+      <div class="code-block api-wide">
+<span style="color: var(--blue);">GET</span> https://（你的專案）.supabase.co/rest/v1/customers?id=eq.123<br><br>
+拆開：rest/v1 是第 1 版的資料窗口，customers 是那張表，<br>
+id=eq.123 是「id 等於 123 的那一筆」
+      </div>
+
+      <h3>跟 Claude Code 的關係</h3>
+
+      <p>同一件事，三種講法：</p>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">不知道 API 概念</div>
+          <div class="code-block">
+「幫我做一個可以新增客戶<br>
+的功能，然後還要能查詢<br>
+跟刪除」
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">知道 API 概念</div>
+          <div class="code-block">
+「幫我建 RESTful API：<br>
+POST/GET/PATCH/DELETE<br>
+/api/v1/customers<br>
+回傳 JSON，需要驗證」
+          </div>
+        </div>
+      </div>
+
+      <div class="compare api-one">
+        <div class="compare-good">
+          <div class="compare-label">再進一步：連門一起講</div>
+          <div class="code-block">
+「客戶資料要能新增、查詢、<br>
+修改、刪除。先列出會開哪幾扇門<br>
+（方法加路徑），每一扇寫明誰能用、<br>
+沒登入和別家公司的人各回什麼。<br>
+我確認了再寫」
+          </div>
+        </div>
+      </div>
+
+      <p>第二種講法比第一種精準，Claude Code 產出的結果也會更符合你的期待。第三種更進一步，不用你會寫程式，只要知道門是什麼、門要守。Claude 列出來的清單，你一扇一扇看過，邊界就守住了。知道這些「菜名」，就能點對菜。</p>
+
+      <!-- ========== H. 帶走 ========== -->
+      <h2 id="api-takeaway">這章帶走什麼</h2>
+
+      <ul>
+        <li><strong>API</strong>＝程式之間溝通的介面（服務生）。頁面跟後端、你的程式跟外部服務，都靠它講話</li>
+        <li><strong>每一個 API 都是一扇門</strong>：每一扇都要問是誰、能不能、送來的對不對。Supabase 的門要授權才開，開了就要有 RLS</li>
+        <li><strong>HTTP 方法</strong>＝你要做什麼動作（GET 看、POST 新增、PUT 整個換、PATCH 改一部分、DELETE 刪）</li>
+        <li><strong>狀態碼</strong>＝服務生的回覆（2 開頭成功、4 開頭敲門那一邊的問題、5 開頭後端自己的問題）</li>
+        <li><strong>RESTful</strong>＝API 路徑的常見慣例（用名詞、用複數、一層一層表示關係）</li>
+        <li><strong>Endpoint</strong>＝API 的地址，像 <code>/api/v1/customers/123/orders</code></li>
+      </ul>
+
+      <div class="box box-tip">
+        <div class="box-label">跟 Claude 怎麼說</div>
+        <strong>動手之前</strong><br>
+        「這個功能先列出會開哪幾扇門（方法加路徑），每一扇寫明誰能用、沒登入和別家公司的人各回什麼。我確認了再寫。」<br>
+        「這筆資料屬於哪家公司、哪個人，由後端從登入身分自己填，不要讓前端送。」<br><br>
+        <strong>改完之後</strong><br>
+        「這次有沒有新開門？每一扇有沒有檢查登入和權限？」<br>
+        「新表要開放給頁面用的話，列出你下了哪些 grant、RLS 規則是什麼。」<br><br>
+        <strong>出錯的時候</strong><br>
+        「這是錯誤訊息，狀態碼是 4 開頭還是 5 開頭？用白話講是哪一邊的問題。」
+      </div>
+
+      <p>API 把各個零件接起來了。下一章把它們畫成一張圖：頁面、資料庫、外部服務各在哪裡，哪一條線不能亂動。</p>
+
+      <!-- Chapter Navigation -->
+      <div class="chapter-nav">
+        <a href="/chapter11/" class="prev">
+          <span class="nav-label">上一章</span>
+          <span class="nav-title">技術棧</span>
+        </a>
+        <a href="/chapter13/" class="next">
+          <span class="nav-label">下一章</span>
+          <span class="nav-title">架構拓樸</span>
+        </a>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>
+      Built with Claude Code |
+      <a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank">Quickstart 懶人包</a> |
+      <a href="https://github.com/lgscvb" target="_blank">GitHub</a>
+    </p>
+  </div>
+</footer>
+
+<script src="/main.js"></script>
+<script>
+// 第十二章互動示範：同一扇門，三個人來敲（全部是假資料，不送出任何請求）
+(function () {
+  var live = document.getElementById('api-live');
+  var fallback = document.getElementById('api-static');
+  var demo = document.getElementById('api-demo');
+  if (!live || !fallback || !demo) return;
+
+  var vOpen = document.getElementById('api-verdict-open');
+  var vGuard = document.getElementById('api-verdict-guarded');
+  var picks = demo.querySelectorAll('.api-pick');
+  if (!vOpen || !vGuard || !picks.length) return;
+
+  var RESULTS = {
+    guest: {
+      open: ['200', '沒問是誰，客戶資料整筆給出去。', 'bad'],
+      guarded: ['401', '不知道你是誰，請先登入。資料沒出門。', 'ok']
+    },
+    other: {
+      open: ['200', '有登入就給。別家公司拿到了 A 設計工作室的客戶。', 'bad'],
+      guarded: ['403', '知道你是誰，但這筆不是你們家的。擋下來。', 'ok']
+    },
+    staff: {
+      open: ['200', '給了，這次剛好是對的人。', 'luck'],
+      guarded: ['200', '是自己公司的業務，這筆是自己家的，給。', 'ok']
+    }
+  };
+
+  function setVerdict(el, r) {
+    el.textContent = '';
+    var code = document.createElement('span');
+    code.className = 'api-code';
+    code.textContent = r[0];
+    el.appendChild(code);
+    el.appendChild(document.createTextNode(r[1]));
+    el.className = 'edge-verdict edge-is-' + r[2];
+    void el.offsetWidth;              // 讓進場動畫可以重播
+    el.classList.add('edge-pop');
+  }
+
+  for (var i = 0; i < picks.length; i++) {
+    picks[i].addEventListener('click', function () {
+      var who = this.getAttribute('data-who');
+      for (var j = 0; j < picks.length; j++) {
+        picks[j].setAttribute('aria-pressed', picks[j] === this ? 'true' : 'false');
+      }
+      setVerdict(vOpen, RESULTS[who].open);
+      setVerdict(vGuard, RESULTS[who].guarded);
+    });
+  }
+
+  fallback.hidden = true;
+  live.hidden = false;
+})();
+</script>
+</body>
+</html>

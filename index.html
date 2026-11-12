@@ -5,6 +5,252 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* 首頁專用樣式：class 一律 home- 前綴 */
+    .home-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    .home-intro {
+      padding-bottom: 40px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .home-intro p { margin: 6px auto; max-width: 640px; }
+    .home-intro a,
+    .home-text a,
+    .home-group-desc a {
+      color: var(--accent-light);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .home-section-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-heading);
+      line-height: 1.35;
+      margin-bottom: 20px;
+    }
+
+    /* --- 入門為什麼重要（舊版首頁主視覺搬來） --- */
+    .home-why { padding-bottom: 48px; }
+    .home-block-head {
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .home-kicker {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .home-big {
+      font-size: clamp(24px, 4vw, 32px);
+      font-weight: 800;
+      line-height: 1.3;
+      color: var(--text-heading);
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+    .home-big .highlight { color: var(--accent); }
+    .home-text p { margin: 12px 0; }
+    .home-text strong { color: var(--accent-light); }
+    .home-saved { color: var(--green); }
+    .home-note {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+
+    /* --- 兩層關係圖 --- */
+    .home-layer2 { padding-bottom: 48px; }
+    .home-layers { margin: 28px 0 24px; }
+    .home-layers-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column-reverse; /* 原始碼順序是第一層、第二層；畫面上第二層疊在上面 */
+      gap: 10px;
+    }
+    .home-layer {
+      display: grid;
+      grid-template-columns: 104px minmax(0, 1fr);
+      column-gap: 20px;
+      row-gap: 8px;
+      align-items: center;
+      padding: 16px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+    .home-layer-2 {
+      margin: 0 32px;
+      background: var(--accent-glow);
+      border-color: rgba(212, 132, 90, 0.4);
+    }
+    .home-layer-head { display: flex; flex-direction: column; gap: 2px; }
+    .home-layer-tag {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+    .home-layer-2 .home-layer-tag { color: var(--accent); }
+    .home-layer-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--text-heading);
+      line-height: 1.3;
+    }
+    .home-chips { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; }
+    .home-chips a {
+      display: inline-flex;
+      align-items: center;
+      min-height: 40px;
+      padding: 6px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 15px;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .home-chips a:hover,
+    .home-chips a:focus-visible { border-color: var(--accent); color: var(--accent-light); }
+    .home-layer-note {
+      grid-column: 2;
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+    .home-layer-2 .home-layer-note { color: #b3aaa3; }
+    .home-layers-caption {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* --- 閱讀路線圖：六段，桌面三欄兩列，手機一欄 --- */
+    .home-route-wrap { padding-bottom: 32px; }
+    .home-route-wrap > .home-section-title { padding-top: 32px; border-top: 1px solid var(--border); }
+    .home-route {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px 28px;
+    }
+    .home-route-step {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 16px 16px 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      min-width: 0;
+    }
+    /* 步驟之間的箭頭：純 CSS 畫，不放文字；每列第一格不畫 */
+    .home-route-step + .home-route-step::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: -21px;
+      width: 12px;
+      height: 12px;
+      border-top: 2px solid var(--accent);
+      border-right: 2px solid var(--accent);
+      transform: translateY(-50%) rotate(45deg);
+    }
+    .home-route-step:nth-child(3n+1)::before { display: none; }
+    .home-route-step:last-child { border-color: var(--border-light); }
+    .home-route-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    .home-route-name {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--text-heading);
+      text-decoration: none;
+    }
+    .home-route-name:hover,
+    .home-route-name:focus-visible { color: var(--accent-light); text-decoration: underline; text-underline-offset: 3px; }
+    .home-route-ch { font-size: 14px; color: var(--text-muted); }
+    .home-route-what { font-size: 14px; line-height: 1.5; color: var(--text-muted); }
+
+    /* --- 章節分組 --- */
+    .home-chapters { padding-bottom: 40px; }
+    .home-chapters > .home-section-title { margin-top: 24px; margin-bottom: 4px; }
+    .home-chapters-sub { color: var(--text-muted); font-size: 15px; }
+    .home-group { margin-top: 32px; scroll-margin-top: 72px; }
+    .home-group + .home-group { margin-top: 48px; }
+    .home-group-head { padding-left: 16px; border-left: 3px solid var(--accent); }
+    .home-group-tag {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--accent);
+    }
+    .home-group-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-heading);
+      line-height: 1.3;
+    }
+    .home-group-desc {
+      margin-top: 6px;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+    .home-group .chapter-grid { margin: 20px 0 0; }
+    .home-chapters .chapter-nav { margin-top: 56px; }
+
+    @media (max-width: 768px) {
+      .home-route { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+      .home-route-step {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: 12px;
+        padding: 14px 16px;
+      }
+      .home-route-what { flex-basis: 100%; }
+      .home-route-step + .home-route-step::before,
+      .home-route-step:nth-child(3n+1)::before {
+        display: block;
+        top: -17px;
+        left: 28px;
+        transform: rotate(135deg);
+      }
+      .home-intro { text-align: left; }
+    }
+
+    @media (max-width: 640px) {
+      .home-layer { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+      .home-layer-2 { margin: 0; }
+      .home-layer-head { flex-direction: row; align-items: baseline; gap: 10px; }
+      .home-layer-note { grid-column: 1; }
+      .home-layers-caption { text-align: left; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .home-chips a,
+      .home-chapters .chapter-card,
+      .home-actions .btn { transition: none; }
+      .home-chapters .chapter-card:hover,
+      .home-actions .btn:hover { transform: none; }
+    }
+  </style>
 </head>
 <body>
 
@@ -12,12 +258,12 @@
   <div class="container">
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
-      <a href="/" class="active">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/">下指令</a>
-      <a href="/chapter3/">工作流程</a>
-      <a href="/chapter9/">術語字典</a>
-      <a href="/appendix/">附錄</a>
+      <a href="/">首頁</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,38 +273,61 @@
 
 <nav class="mobile-nav">
   <a href="/" class="active">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/">第二章：下指令</a>
-  <a href="/chapter3/">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/">第六章：Claude Code</a>
-  <a href="/chapter7/">第七章：技術棧</a>
-  <a href="/chapter8/">第八章：API</a>
-  <a href="/chapter9/">第九章：術語字典</a>
-  <a href="/chapter10/">第十章：進階問題</a>
-  <a href="/chapter11/">第十一章：工具生態</a>
-  <a href="/appendix/">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
-  <!-- Hero -->
+  <!-- 主視覺 -->
   <section class="hero">
     <div class="container">
-      <h1>學會這些術語<br>你跟 AI 的對話成本<span class="highlight">直接砍 80%</span></h1>
+      <h1>做出來不難<br>難的是<span class="highlight">之後還能改、能修</span></h1>
       <p class="subtitle">
-        你不需要會寫程式。但你需要知道那些東西「叫什麼」。<br>
-        因為每多一輪對話，就是在燒你的 Token。
+        一句指令，AI 就能做出一個網站。但它會一直改：前端、後端、加欄位、加表，改到最後纏在一起，沒有人能維護。<br>
+        你不用自己寫程式，要懂的是邊界：這件事放哪一塊，這次可以動到哪裡為止。
       </p>
-      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+      <div class="home-actions">
         <a href="/chapter1/" class="btn btn-primary">開始學習</a>
-        <a href="https://github.com/lgscvb/claude-code-quickstart" class="btn btn-secondary" target="_blank">Quickstart 懶人包</a>
+        <a href="https://github.com/lgscvb/claude-code-quickstart" class="btn btn-secondary" target="_blank" rel="noopener">Quickstart 懶人包</a>
       </div>
     </div>
   </section>
 
-  <!-- The Illusion -->
-  <section class="container" style="padding-bottom: 48px;">
+  <section class="container home-intro">
+    <p>寫給不會寫程式的老闆、行政、業務和經理人。目標是做出別人可以用的工具，或帶團隊導入。</p>
+    <p>連部署、買網域、資料庫都沒碰過也沒關係，這本書從那裡開始講，講到你照著做得出來。</p>
+  </section>
+
+  <!-- 入門為什麼重要（舊版首頁主視覺） -->
+  <section class="container home-why" aria-labelledby="home-why-title">
+    <div class="home-block-head">
+      <span class="home-kicker">入門為什麼重要</span>
+      <h2 class="home-big" id="home-why-title">學會這些術語，你跟 AI 的對話成本<span class="highlight">直接砍 80%</span></h2>
+    </div>
+
+    <div class="home-text">
+      <p>你不需要會寫程式。但你需要知道那些東西「叫什麼」。</p>
+      <p>因為每多一輪對話，就是在燒你的 Token（AI 計算用量的單位，講得越多、來回越多，用得越多）。</p>
+    </div>
+
     <div class="analogy">
       <strong>很多人以為拿到 LLM 就能言出法隨。</strong><br><br>
       現實是：這有一個陡峭的學習曲線。你需要補充基礎知識，才能跟 AI 有效溝通。<br><br>
@@ -75,7 +344,7 @@ AI：「哪個頁面？前端還是 API？」<br>
 你：「就是那個聊天的機器人」<br>
 AI：「LINE Bot？網頁 chatbot？」<br>
 你：「LINE 的，放在免費的地方」<br>
-AI：「Render？Heroku？Railway？」<br>
+AI：「Render？Railway？還是別家？」<br>
 你：「對對對第一個」<br>
 AI：「可能是冷啟動的問題...」
         </div>
@@ -88,88 +357,296 @@ AI：「可能是冷啟動的問題...」
 cron job 每 10 分鐘 ping<br>
 health endpoint」<br><br>
 AI：直接寫 code<br><br>
-<span style="color: var(--green);">Token 消耗少 8 倍以上</span>
+<span class="home-saved">Token 消耗少 8 倍以上</span>
         </div>
       </div>
     </div>
+
+    <p class="home-note">冷啟動（cold start）：免費方案的服務一陣子沒人用就會睡著，下一個人來要先等它醒。以 Render 為例，官方寫的是 15 分鐘沒有流量就休眠，醒來大約要一分鐘；每 10 分鐘去敲它一下，它就不會睡著。不過免費方案每個月的運作時數有上限，一直醒著會把時數用掉。</p>
+
+    <div class="home-text">
+      <p>差別不在聰不聰明，在講不講得出名字。這些名字和講法，在<a href="/chapter2/">第二章</a>到<a href="/chapter6/">第六章</a>，忘了就翻<a href="/glossary/">術語字典</a>。</p>
+    </div>
   </section>
 
-  <!-- Chapter Grid -->
-  <section class="container" style="padding-bottom: 80px;">
-    <h2 style="text-align:center; font-size: 28px; color: var(--text-heading); margin-bottom: 8px;">章節目錄</h2>
-    <p style="text-align:center; color: var(--text-muted); margin-bottom: 32px;">從零開始，一步步建立跟 AI 溝通的能力</p>
+  <!-- 入門之後，還有一層 -->
+  <section class="container home-layer2" aria-labelledby="home-layer2-title">
+    <div class="home-block-head">
+      <span class="home-kicker">入門之後</span>
+      <h2 class="home-section-title" id="home-layer2-title">入門之後，還有一層</h2>
+    </div>
 
-    <div class="chapter-grid">
-      <a href="/chapter1/" class="chapter-card">
-        <span class="chapter-num">第一章</span>
-        <h3>你在跟什麼東西說話</h3>
-        <p>LLM 的本質是「文字接龍」，理解它的能力邊界與 Context Window</p>
-      </a>
+    <div class="home-text">
+      <p>上面那些術語和下指令的方法是入門，照樣要懂。這本書的重點在它上面那一層：技術棧、架構拓樸。</p>
+      <p>不是整個丟給 AI 做就好。你不用自己寫程式，但至少要了解：功能（function）怎麼切、架構拓樸、SQL 設計、資料表的欄位。</p>
+      <p>AI 會改、會修，但它會一直改。改到後面耦合嚴重，全部纏在一起，動一個地方就壞到別的地方，沒辦法維護。</p>
+      <p>所以能力是<strong>知道邊界</strong>：這件事該放在哪一塊，這次可以動到哪裡為止。</p>
+    </div>
 
-      <a href="/chapter2/" class="chapter-card">
-        <span class="chapter-num">第二章</span>
-        <h3>怎麼跟 LLM 下指令</h3>
-        <p>目標、邊界、情境三層模型。為什麼「不要什麼」比「要什麼」更重要</p>
-      </a>
+    <div class="analogy">
+      <strong>像請師傅來裝潢。</strong>你不用自己砌牆，但要知道哪一面是承重牆。師傅說「這面順便敲掉比較快」的時候，你才說得出「這面不能動」。
+    </div>
 
-      <a href="/chapter3/" class="chapter-card">
-        <span class="chapter-num">第三章</span>
-        <h3>正確的工作流程</h3>
-        <p>Demo → 確認 → 規劃 → 執行。i18n 的先後順序陷阱</p>
-      </a>
+    <div class="home-text">
+      <p>邊界畫不到百分之百乾淨，前端和後端中間那條線就是。但你要知道它在哪裡。</p>
+    </div>
 
-      <a href="/chapter4/" class="chapter-card">
-        <span class="chapter-num">第四章</span>
-        <h3>你缺什麼知識</h3>
-        <p>根目錄、路徑、前後端、Domain、子路由——跟 LLM 溝通的基本語言</p>
-      </a>
+    <figure class="home-layers">
+      <ol class="home-layers-list">
+        <li class="home-layer home-layer-1">
+          <div class="home-layer-head">
+            <span class="home-layer-tag">第一層</span>
+            <span class="home-layer-name">入門</span>
+          </div>
+          <ul class="home-chips">
+            <li><a href="/chapter2/">LLM 本質</a></li>
+            <li><a href="/chapter3/">下指令</a></li>
+            <li><a href="/chapter4/">工作流程</a></li>
+            <li><a href="/chapter5/">基本知識</a></li>
+            <li><a href="/chapter6/">描述力</a></li>
+            <li><a href="/glossary/">術語</a></li>
+          </ul>
+          <p class="home-layer-note">說得出東西叫什麼，AI 一次就聽懂</p>
+        </li>
+        <li class="home-layer home-layer-2">
+          <div class="home-layer-head">
+            <span class="home-layer-tag">第二層</span>
+            <span class="home-layer-name">知道邊界</span>
+          </div>
+          <ul class="home-chips">
+            <li><a href="/chapter11/">技術棧</a></li>
+            <li><a href="/chapter12/">API</a></li>
+            <li><a href="/chapter13/">架構拓樸</a></li>
+            <li><a href="/chapter14/">功能怎麼切</a></li>
+            <li><a href="/chapter15/">資料表與欄位</a></li>
+            <li><a href="/chapter16/">前後端</a></li>
+            <li><a href="/chapter17/">會出事的地方</a></li>
+          </ul>
+          <p class="home-layer-note">看得出這次該動哪一塊、動到哪裡為止</p>
+        </li>
+      </ol>
+      <figcaption class="home-layers-caption">第二層疊在第一層上面，入門的照樣要懂。兩層中間是動手做（第七到九章）和 Claude Code（第十章）。</figcaption>
+    </figure>
 
-      <a href="/chapter5/" class="chapter-card">
-        <span class="chapter-num">第五章</span>
-        <h3>學會描述你看到的東西</h3>
-        <p>網頁結構、UI 元件圖鑑、CSS 基礎、瀏覽器三劍客</p>
-      </a>
+    <div class="box box-tip">
+      <div class="box-label">跟 Claude 怎麼說</div>
+      「這次只改報價單的畫面，不要動資料表，也不要動後端」<br>
+      「如果一定要動到別的地方，先停下來，告訴我要動哪裡、為什麼」
+    </div>
+  </section>
 
-      <a href="/chapter6/" class="chapter-card">
-        <span class="chapter-num">第六章</span>
-        <h3>Claude Code 是什麼</h3>
-        <p>跟其他 LLM 的差別：控制整台電腦、MCP 生態、Subagent</p>
-      </a>
+  <!-- 閱讀路線圖 -->
+  <section class="container home-route-wrap" aria-labelledby="home-route-title">
+    <h2 class="home-section-title" id="home-route-title">閱讀路線</h2>
+    <ol class="home-route">
+      <li class="home-route-step">
+        <span class="home-route-num">1</span>
+        <a href="#home-g1" class="home-route-name">開頭</a>
+        <span class="home-route-ch">第一章</span>
+        <span class="home-route-what">這本書在教什麼、要懂到什麼程度</span>
+      </li>
+      <li class="home-route-step">
+        <span class="home-route-num">2</span>
+        <a href="#home-g2" class="home-route-name">入門</a>
+        <span class="home-route-ch">第二到六章</span>
+        <span class="home-route-what">先會講：東西叫什麼、指令怎麼下</span>
+      </li>
+      <li class="home-route-step">
+        <span class="home-route-num">3</span>
+        <a href="#home-g3" class="home-route-name">動手做</a>
+        <span class="home-route-ch">第七到九章</span>
+        <span class="home-route-what">放上網、接網址、存資料，親手走一次</span>
+      </li>
+      <li class="home-route-step">
+        <span class="home-route-num">4</span>
+        <a href="#home-g4" class="home-route-name">工具</a>
+        <span class="home-route-ch">第十章</span>
+        <span class="home-route-what">Claude Code 能碰什麼、怎麼放手</span>
+      </li>
+      <li class="home-route-step">
+        <span class="home-route-num">5</span>
+        <a href="#home-g5" class="home-route-name">判斷</a>
+        <span class="home-route-ch">第十一到十七章</span>
+        <span class="home-route-what">會選、會畫、會切，知道邊界在哪</span>
+      </li>
+      <li class="home-route-step">
+        <span class="home-route-num">6</span>
+        <a href="#home-g6" class="home-route-name">收尾</a>
+        <span class="home-route-ch">第十八章、兩個附錄</span>
+        <span class="home-route-what">其他工具，和卡住時回來翻的地方</span>
+      </li>
+    </ol>
+  </section>
 
-      <a href="/chapter7/" class="chapter-card">
-        <span class="chapter-num">第七章</span>
-        <h3>用什麼材料蓋房子</h3>
-        <p>技術棧推薦：Cloudflare + Supabase + GitHub + GCP VM</p>
-      </a>
+  <!-- 章節目錄 -->
+  <section class="container home-chapters">
+    <h2 class="home-section-title">章節目錄</h2>
+    <p class="home-chapters-sub">從零開始：先會講，再親手做一次，最後學會判斷。</p>
 
-      <a href="/chapter8/" class="chapter-card">
-        <span class="chapter-num">第八章</span>
-        <h3>API 是什麼</h3>
-        <p>GET / POST / PUT / DELETE——房子怎麼接水接電</p>
-      </a>
+    <div class="home-group" id="home-g1">
+      <div class="home-group-head">
+        <span class="home-group-tag">第一段</span>
+        <h3 class="home-group-title">開頭</h3>
+        <p class="home-group-desc">整本書在教什麼、為什麼要懂，和接下來每一章各自守哪一條邊界。</p>
+      </div>
+      <div class="chapter-grid">
+        <a href="/chapter1/" class="chapter-card">
+          <span class="chapter-num">第一章</span>
+          <h3>為什麼要懂：能改能修，靠的是知道邊界</h3>
+          <p>AI 會一直改，改到纏在一起。你要會的不是寫程式，是知道線在哪</p>
+        </a>
+      </div>
+    </div>
 
-      <a href="/chapter9/" class="chapter-card">
-        <span class="chapter-num">第九章</span>
-        <h3>術語快速理解</h3>
-        <p>SQL、RAG、Docker、CI/CD、Heartbeat——不用會操作，知道是什麼就好</p>
-      </a>
+    <div class="home-group" id="home-g2">
+      <div class="home-group-head">
+        <span class="home-group-tag">第二段</span>
+        <h3 class="home-group-title">入門</h3>
+        <p class="home-group-desc">你在跟什麼東西說話、指令怎麼下、流程怎麼走、東西叫什麼。照順序讀。</p>
+      </div>
+      <div class="chapter-grid">
+        <a href="/chapter2/" class="chapter-card">
+          <span class="chapter-num">第二章</span>
+          <h3>LLM 本質：你在跟什麼東西說話</h3>
+          <p>LLM 的本質是「文字接龍」，理解它的能力邊界、Context Window 和 Token</p>
+        </a>
+        <a href="/chapter3/" class="chapter-card">
+          <span class="chapter-num">第三章</span>
+          <h3>下指令：怎麼跟 LLM 下指令</h3>
+          <p>目標、邊界、情境三層模型。為什麼「不要什麼」比「要什麼」更重要</p>
+        </a>
+        <a href="/chapter4/" class="chapter-card">
+          <span class="chapter-num">第四章</span>
+          <h3>工作流程：先 Demo，再動手</h3>
+          <p>先做 Demo、看著它確認邊界、規劃架構，最後才正式寫</p>
+        </a>
+        <a href="/chapter5/" class="chapter-card">
+          <span class="chapter-num">第五章</span>
+          <h3>基本知識：你缺什麼知識</h3>
+          <p>根目錄、路徑、前後端、網域、子路由：跟 AI 溝通的基本語言</p>
+        </a>
+        <a href="/chapter6/" class="chapter-card">
+          <span class="chapter-num">第六章</span>
+          <h3>描述力：學會描述你看到的東西</h3>
+          <p>網頁結構、元件叫什麼、CSS 基礎。講得出名字，AI 才改得到對的地方</p>
+        </a>
+      </div>
+    </div>
 
-      <a href="/chapter10/" class="chapter-card">
-        <span class="chapter-num">第十章</span>
-        <h3>蓋大樓才會遇到的問題</h3>
-        <p>異步寫入、SSOT、耦合——進階但必須知道的觀念</p>
-      </a>
+    <div class="home-group" id="home-g3">
+      <div class="home-group-head">
+        <span class="home-group-tag">第三段</span>
+        <h3 class="home-group-title">動手做</h3>
+        <p class="home-group-desc">把東西放上網、接上自己的網址、讓資料有地方存。先親手做過一次，後面講邊界才有感覺。</p>
+      </div>
+      <div class="chapter-grid">
+        <a href="/chapter7/" class="chapter-card">
+          <span class="chapter-num">第七章</span>
+          <h3>部署：放上網，別人才用得到</h3>
+          <p>改完直接上傳的純靜態頁面放 Cloudflare，程式碼放 GitHub</p>
+        </a>
+        <a href="/chapter8/" class="chapter-card">
+          <span class="chapter-num">第八章</span>
+          <h3>網域：一個自己的網址</h3>
+          <p>網域在哪裡買、怎麼接到你放上網的頁面</p>
+        </a>
+        <a href="/chapter9/" class="chapter-card">
+          <span class="chapter-num">第九章</span>
+          <h3>資料庫：資料要有地方存</h3>
+          <p>Supabase 或 Cloudflare D1 是什麼、怎麼挑，存進去的資料去哪裡看</p>
+        </a>
+      </div>
+    </div>
 
-      <a href="/chapter11/" class="chapter-card">
-        <span class="chapter-num">第十一章</span>
-        <h3>工具生態</h3>
-        <p>Obsidian、MCP、Quickstart 懶人包——我的實際使用經驗</p>
-      </a>
+    <div class="home-group" id="home-g4">
+      <div class="home-group-head">
+        <span class="home-group-tag">第四段</span>
+        <h3 class="home-group-title">工具</h3>
+        <p class="home-group-desc">你在電腦上的工作，幾乎都可以丟給它。丟之前先知道它能碰什麼。</p>
+      </div>
+      <div class="chapter-grid">
+        <a href="/chapter10/" class="chapter-card">
+          <span class="chapter-num">第十章</span>
+          <h3>Claude Code 怎麼用</h3>
+          <p>在終端機裡讓它讀檔、跑指令、改檔案，哪些放手、哪些要它先問你</p>
+        </a>
+      </div>
+    </div>
 
-      <a href="/appendix/" class="chapter-card">
-        <span class="chapter-num">附錄</span>
-        <h3>常見問題</h3>
-        <p>錯誤訊息怎麼讀、.env 是什麼、Git 基礎</p>
+    <div class="home-group" id="home-g5">
+      <div class="home-group-head">
+        <span class="home-group-tag">第五段</span>
+        <h3 class="home-group-title">判斷</h3>
+        <p class="home-group-desc">用什麼材料、系統長什麼樣、功能和資料怎麼放，和最容易被一點一點改糊的那條線。</p>
+      </div>
+      <div class="chapter-grid">
+        <a href="/chapter11/" class="chapter-card">
+          <span class="chapter-num">第十一章</span>
+          <h3>技術棧：不打包，先找 GitHub</h3>
+          <p>純靜態頁面放 Cloudflare，資料庫用 Supabase 或 D1，版控用 GitHub；動手前先找現成的</p>
+        </a>
+        <a href="/chapter12/" class="chapter-card">
+          <span class="chapter-num">第十二章</span>
+          <h3>API：房子怎麼接水接電</h3>
+          <p>GET、POST、PUT、DELETE，前端怎麼跟後端要資料、交資料</p>
+        </a>
+        <a href="/chapter13/" class="chapter-card">
+          <span class="chapter-num">第十三章</span>
+          <h3>架構拓樸：先畫出來，才知道哪裡不能亂動</h3>
+          <p>整個系統有哪幾塊、誰連到誰、資料怎麼流，畫成一張圖，才指得出這次會動到哪裡</p>
+        </a>
+        <a href="/chapter14/" class="chapter-card">
+          <span class="chapter-num">第十四章</span>
+          <h3>功能怎麼切：一塊只做一件事</h3>
+          <p>每塊講清楚吃進什麼、交出什麼、不該順手做什麼。改一條折扣規則，不用動好幾個檔案</p>
+        </a>
+        <a href="/chapter15/" class="chapter-card">
+          <span class="chapter-num">第十五章</span>
+          <h3>資料表與欄位：資料的家要先蓋好</h3>
+          <p>看懂資料放在哪張表、哪個欄位、為什麼這樣放，Claude 要加欄位之前該先問什麼</p>
+        </a>
+        <a href="/chapter16/" class="chapter-card">
+          <span class="chapter-num">第十六章</span>
+          <h3>前後端邊界：什麼放前面，什麼一定要放後面</h3>
+          <p>什麼可以在頁面上用 JS 做，什麼一定要放後面。線畫不到百分之百乾淨，但要知道它在哪</p>
+        </a>
+        <a href="/chapter17/" class="chapter-card">
+          <span class="chapter-num">第十七章</span>
+          <h3>會出事的地方：異步、單一資料來源、耦合</h3>
+          <p>順序亂掉、同一份資料存好幾處、改一個壞三個</p>
+        </a>
+      </div>
+    </div>
+
+    <div class="home-group" id="home-g6">
+      <div class="home-group-head">
+        <span class="home-group-tag">第六段</span>
+        <h3 class="home-group-title">收尾</h3>
+        <p class="home-group-desc">其他用得到的工具，和卡住、忘了的時候回來翻的地方。</p>
+      </div>
+      <div class="chapter-grid">
+        <a href="/chapter18/" class="chapter-card">
+          <span class="chapter-num">第十八章</span>
+          <h3>其他工具：筆記、影片、懶人包</h3>
+          <p>Obsidian 管筆記、Remotion 做影片、Quickstart 懶人包，怎麼交給 Claude Code</p>
+        </a>
+        <a href="/appendix/" class="chapter-card">
+          <span class="chapter-num">附錄</span>
+          <h3>常見問題</h3>
+          <p>錯誤訊息怎麼讀、.env 是什麼、Git 基礎。卡住的時候先來這裡查</p>
+        </a>
+        <a href="/glossary/" class="chapter-card">
+          <span class="chapter-num">附錄</span>
+          <h3>術語字典</h3>
+          <p>SQL、RAG、Docker、CI/CD 這些詞，一句白話講清楚。不用會操作，知道是什麼就好</p>
+        </a>
+      </div>
+    </div>
+
+    <div class="chapter-nav">
+      <a href="/chapter1/" class="next">
+        <span class="nav-label">下一章</span>
+        <span class="nav-title">為什麼要懂</span>
       </a>
     </div>
   </section>

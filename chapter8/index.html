@@ -3,8 +3,166 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第八章：API 是什麼 — Claude Code 指南</title>
+  <title>第八章：網域 — Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+  /* ===== 第八章專用樣式（dom- 前綴）===== */
+  .dom-pre { white-space: pre; }
+
+  /* 一步一張卡：要做什麼／跟 Claude 怎麼說／你自己動手／做完會看到／常見卡住 */
+  .dom-step {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    background: var(--bg-card);
+    margin: 28px 0;
+    overflow: hidden;
+  }
+  .dom-step-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dom-step-no {
+    flex: none;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-light);
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    padding: 1px 10px;
+    white-space: nowrap;
+  }
+  .dom-step-head h3 { margin: 0; font-size: 18px; }
+  .dom-step-row {
+    display: grid;
+    grid-template-columns: 9em minmax(0, 1fr);
+    gap: 4px 16px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+  .dom-step-row:last-child { border-bottom: none; }
+  .dom-step-row > div { min-width: 0; }
+  .dom-step-row p { margin: 0 0 8px; font-size: 15px; }
+  .dom-step-row p:last-child { margin-bottom: 0; }
+  .dom-step-row ul { margin: 0; padding-left: 1.2em; }
+  .dom-step-row li { margin: 2px 0; font-size: 15px; }
+  .dom-step-label { font-weight: 700; color: var(--text-heading); font-size: 14px; }
+  .dom-say .dom-step-label { color: var(--accent-light); }
+  .dom-you .dom-step-label { color: var(--yellow); }
+  .dom-see .dom-step-label { color: var(--green); }
+  .dom-stuck .dom-step-label { color: var(--red); }
+  .dom-say-line {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    margin: 0 0 8px;
+    color: var(--text);
+  }
+  .dom-say-line:last-child { margin-bottom: 0; }
+
+  /* 流程示意：桌機橫排、手機直排；純 HTML/CSS，不用 JS */
+  .content .dom-flow {
+    list-style: none;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 0;
+    margin: 24px 0 8px;
+    padding: 0;
+    counter-reset: domflow;
+  }
+  .content .dom-flow > li {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: stretch;
+    margin: 0;
+    counter-increment: domflow;
+  }
+  .dom-flow-node {
+    flex: 1 1 auto;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    background: var(--bg-code);
+    padding: 12px 12px 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    text-align: center;
+  }
+  .dom-flow-node::before {
+    content: counter(domflow);
+    display: block;
+    width: 22px; height: 22px; line-height: 22px;
+    margin: 0 auto 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #111;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .dom-flow-node strong { display: block; color: var(--text-heading); font-size: 15px; margin-bottom: 4px; }
+  .dom-flow-node small { display: block; color: var(--text-muted); font-size: 13px; }
+  .dom-flow-arrow {
+    flex: none;
+    align-self: center;
+    width: 22px;
+    text-align: center;
+    color: var(--accent-light);
+    font-size: 16px;
+  }
+  .dom-flow-arrow::before { content: "→"; }
+  .dom-flow > li:last-child .dom-flow-arrow { display: none; }
+  .dom-flow-caption { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+  .dom-flow-node.dom-hl { border-color: var(--accent); }
+
+  @media (max-width: 760px) {
+    .content .dom-flow { flex-direction: column; }
+    .content .dom-flow > li { flex-direction: column; }
+    .dom-flow-node { text-align: left; padding-left: 48px; position: relative; }
+    .dom-flow-node::before { position: absolute; left: 14px; top: 13px; margin: 0; }
+    .dom-flow-arrow { width: auto; padding: 2px 0; }
+    .dom-flow-arrow::before { content: "↓"; }
+  }
+
+  /* 電話簿表格裡的範例值 */
+  .dom-rec { font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 13px; color: var(--accent-light); word-break: break-all; }
+  .dom-tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 0 8px;
+    border-radius: 999px;
+    border: 1px solid var(--border-light);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* 邊界表：放心交／要你自己 */
+  .dom-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+  .dom-split > div { min-width: 0; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 16px 18px; background: var(--bg-card); }
+  .dom-split h3 { margin-top: 0; font-size: 17px; }
+  .dom-split ul { margin-bottom: 0; }
+  .dom-split li { font-size: 15px; }
+  .dom-split .dom-ok h3 { color: var(--green); }
+  .dom-split .dom-mine h3 { color: var(--yellow); }
+
+  @media (max-width: 640px) {
+    .dom-step-row { grid-template-columns: minmax(0, 1fr); padding: 12px 16px; }
+    .dom-step-head { padding: 14px 16px; flex-wrap: wrap; }
+    .dom-split { grid-template-columns: minmax(0, 1fr); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dom-step, .dom-flow-node { transition: none; }
+  }
+</style>
+
 </head>
 <body>
 
@@ -13,11 +171,11 @@
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
       <a href="/">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/">下指令</a>
-      <a href="/chapter3/">工作流程</a>
-      <a href="/chapter9/">術語字典</a>
-      <a href="/appendix/">附錄</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,438 +185,618 @@
 
 <nav class="mobile-nav">
   <a href="/">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/">第二章：下指令</a>
-  <a href="/chapter3/">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/">第六章：Claude Code</a>
-  <a href="/chapter7/">第七章：技術棧</a>
-  <a href="/chapter8/" class="active">第八章：API</a>
-  <a href="/chapter9/">第九章：術語字典</a>
-  <a href="/chapter10/">第十章：進階問題</a>
-  <a href="/chapter11/">第十一章：工具生態</a>
-  <a href="/appendix/">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/" class="active">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
   <section class="container">
     <div class="page-header">
       <div class="chapter-label">第八章</div>
-      <h1>API 是什麼（房子怎麼接水接電）</h1>
-      <p class="lead">你的程式要跟外界溝通，靠的就是 API。不需要會寫，但要知道它在幹嘛。</p>
+      <h1>網域：買一個網址，接到你的網站</h1>
+      <p class="lead">第七章把 B 咖啡店的預約頁面放上網了，但網址又長又難記。這章帶你買一個自己的網址，把它接到那個頁面，順便把小鎖頭、子網域、收信這幾件事一次講清楚。</p>
     </div>
 
     <div class="content">
 
-      <!-- A. API 是什麼 -->
-      <h2>API 是什麼？</h2>
+      <p><a href="/chapter7/">上一章</a>做完，B 咖啡店的「線上預約表」已經在網路上了，任何人打開網址都看得到。問題是那個網址長得像 <code>b-cafe-booking.某某某.workers.dev</code>，老闆印不上名片，客人也記不住。</p>
 
-      <div class="analogy">
-        <strong>想像你走進一間餐廳。</strong><br><br>
-        你（前端）坐下來看菜單，選好要吃什麼。<br>
-        服務生（API）把你的訂單送到廚房（後端）。<br>
-        廚房做好菜之後，服務生再端回來給你。<br><br>
-        <strong>你不需要知道廚房怎麼煮，也不用進去廚房。</strong><br>
-        你只需要知道：菜單上有什麼、怎麼點、點了之後會得到什麼。
+      <p>這一章要做的事只有一件：讓客人打 <code>book.b-cafe.example</code> 這種短短的、看得出是誰家的網址，就到得了同一個預約頁面。為了做到這件事，會順便碰到幾個你一定聽過、但可能從沒搞懂的東西：網域、DNS、HTTPS 小鎖頭、MX 紀錄。不用背，照著做一遍就有感覺了。</p>
+
+      <div class="box box-info">
+        <div class="box-label">書裡的網址是假的</div>
+        <p>這章用 <code>b-cafe.example</code> 當 B 咖啡店的網址。<code>.example</code> 這個結尾是國際上保留給「寫範例用」的，任何人都買不到，所以不會不小心指到別人的網站。你實際操作時，換成你自己買的網址就好。</p>
       </div>
 
-      <p><strong>API</strong> 的全名是 <code>Application Programming Interface</code>，翻成中文就是「程式之間的溝通介面」。</p>
+      <!-- ========== 網域是什麼 ========== -->
+      <h2 id="what">網域是什麼：門牌，不是房子</h2>
 
-      <p>簡單說：</p>
+      <p><a href="/chapter5/">第五章</a>講過：網域（Domain）是網站的門牌。你不用記大樓的座標（IP 位址），記門牌就好。這裡不重講，只補一個買網址之前一定要懂的觀念：</p>
+
+      <div class="analogy">
+        <strong>門牌和房子是分開買的。</strong>第七章你已經「租了房子」：頁面放在 Cloudflare 上。這章是去「申請門牌」，再把門牌釘到那間房子上。門牌可以換房子掛（以後網站搬家，門牌不用換），房子也可以同時掛好幾塊門牌。
+      </div>
+
+      <p>所以「買網域」不等於「做網站」。只買網域，什麼都不會出現；只有房子沒門牌，網站照樣能用，只是地址很醜。兩件事接起來，才是客人看到的樣子。</p>
+
+      <p>還有一件事要先知道：網域不是買斷，是<strong>按年租</strong>。一次可以先付一年或好幾年，到期要續約。忘了續約，門牌會被收回，之後可能被別人買走。這件事後面會一再提到，因為它是這整章最容易出大事的地方。</p>
+
+      <!-- ========== 結尾怎麼選 ========== -->
+      <h2 id="tld">.com、.com.tw、.tw：結尾怎麼選</h2>
+
+      <p>網址最後面那段叫<strong>頂級網域</strong>（TLD）。它決定了兩件事：你能不能買、去哪裡買。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>結尾</th>
+              <th>誰可以買</th>
+              <th>大家看到的感覺</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>.com</code></td>
+              <td>任何人</td>
+              <td>最常見，全世界通用。好名字很多已經被買走</td>
+            </tr>
+            <tr>
+              <td><code>.com.tw</code></td>
+              <td>依法設立登記的公司、行號、有限合夥、其他營利團體，或完成稅籍登記的執業專業人士</td>
+              <td>一看就是台灣的公司。個人工作室還沒登記的不能買</td>
+            </tr>
+            <tr>
+              <td><code>.tw</code></td>
+              <td>個人、公司都可以。跟 <code>.com.tw</code> 不同，不用公司登記（實際條件以你選的註冊商頁面為準）</td>
+              <td>短、看得出是台灣</td>
+            </tr>
+            <tr>
+              <td><code>.idv.tw</code></td>
+              <td>個人，任何自然人都可以申請</td>
+              <td>個人網站、作品集</td>
+            </tr>
+            <tr>
+              <td><code>.org.tw</code></td>
+              <td>財團法人、非營利社團法人等非營利組織</td>
+              <td>協會、基金會</td>
+            </tr>
+            <tr>
+              <td><code>.台灣</code></td>
+              <td>TWNIC 管理的中文結尾，前面可以是中文或英文</td>
+              <td>好記，但有些系統、表單不支援中文網址，用之前先試</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>.tw 系列都由台灣網路資訊中心（TWNIC）管理，上面的資格照 TWNIC 官網和註冊商頁面整理（2026-11-13 查）。整理成一句話：<strong>有公司登記，可以考慮 .com.tw；還沒登記、或想要國際通用，選 .com。</strong></p>
+
+      <p>B 咖啡店有商業登記，所以 <code>.com.tw</code> 和 <code>.com</code> 都能買。很多店家兩個都買，一個主用，另一個轉過去，免得被別人搶註。要不要兩個都買是預算問題，不是技術問題。</p>
+
+      <h3>名字怎麼取</h3>
       <ul>
-        <li><strong>前端</strong>（你看到的網頁）想要資料 → 跟 API 說「我要 XXX」</li>
-        <li><strong>API</strong> 把請求送到後端 → 後端處理完 → 再透過 API 回傳結果</li>
-        <li>前端收到結果 → 顯示在畫面上</li>
+        <li><strong>念得出來、拼得出來</strong>：電話裡講一次對方就打得對。避免 0 和 o、l 和 1 這種容易看錯的組合</li>
+        <li><strong>短</strong>：要印在名片、杯套、招牌上</li>
+        <li><strong>不要跟大品牌撞名</strong>：撞到別人的商標，之後可能被要求交出來</li>
+        <li><strong>先想好用途分層</strong>：主網址給品牌，功能放子網域。預約放 <code>book.</code>、訂購放 <code>shop.</code>，這個後面會講</li>
       </ul>
 
-      <div class="box box-tip">
-        <div class="box-label">為什麼要知道這個？</div>
-        當你跟 Claude Code 說「幫我做一個客戶管理系統」，它會幫你建 API。你看到 <code>GET /api/customers</code> 這種東西時，就知道這是「去拿客戶列表」的意思，而不是一臉問號。
-      </div>
+      <!-- ========== 去哪裡買 ========== -->
+      <h2 id="where">去哪裡買</h2>
 
-      <h3>API 的角色定位</h3>
+      <p>賣網域的店叫<strong>註冊商</strong>（Registrar）。同一個網址在哪一家買都一樣，差在價錢、介面、能買哪些結尾、DNS 好不好管。這裡只講兩條路，都是查得到官方頁面的。</p>
 
-      <div class="compare">
-        <div class="compare-bad">
-          <div class="compare-label">沒有 API 的世界</div>
-          <div class="code-block">
-前端直接連資料庫<br>
-→ 安全漏洞大開<br>
-→ 每個頁面自己寫查詢邏輯<br>
-→ 改一個欄位，10 個頁面都要改<br>
-→ 手機 App 跟網頁各寫一套
-          </div>
-        </div>
-        <div class="compare-good">
-          <div class="compare-label">有 API 的世界</div>
-          <div class="code-block">
-前端只跟 API 溝通<br>
-→ API 統一管理權限和驗證<br>
-→ 邏輯集中在一個地方<br>
-→ 改一次，全部生效<br>
-→ 手機 / 網頁 / 第三方都用同一組 API
-          </div>
-        </div>
-      </div>
+      <h3>路線 A：Cloudflare Registrar</h3>
+      <p>第七章頁面已經放在 Cloudflare，網域也在同一家買，接起來最省事。官方文件寫的幾個重點：</p>
+      <ul>
+        <li><strong>照成本價賣</strong>：官方寫照註冊局的價格收，不另外加價，續約也照註冊局的牌價。實際價錢要在 Cloudflare 的購買頁面看（以官方頁面為準，2026-11-13 查）</li>
+        <li><strong>預設開自動續約</strong>，隨時可以關</li>
+        <li><strong>聯絡資料預設遮起來</strong>：註冊局允許的話，你的個人資料不會被公開查到</li>
+        <li><strong>DNS 一定要用 Cloudflare 的</strong>：在這裡買的網域，不能改用別家的 DNS</li>
+      </ul>
+      <p>限制也要知道：</p>
+      <ul>
+        <li><strong>不賣 .tw、.com.tw</strong>（Cloudflare 支援清單上沒有，2026-11-13 查）。要台灣結尾只能走路線 B</li>
+        <li><strong>不支援中文網址</strong>：有特殊字元的國際化網域名稱買不到</li>
+        <li><strong>聯絡資料只收英文字母</strong>：公司名、地址要用英文或拼音填，而且要完整正確，資料不實可能被停用或取消</li>
+      </ul>
 
-      <!-- B. HTTP Methods -->
-      <h2>HTTP Methods（點菜的方式）</h2>
-
-      <p>既然 API 是「服務生」，那你跟服務生講話時，有幾種不同的「動作」。這些動作在技術上叫做 <strong>HTTP Methods</strong>（HTTP 方法）。</p>
-
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>方法</th>
-              <th>白話</th>
-              <th>餐廳比喻</th>
-              <th>實際例子</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>GET</code></td>
-              <td>「我要看」</td>
-              <td>看菜單 / 查目前的訂單</td>
-              <td>打開商品頁面、查訂單紀錄</td>
-            </tr>
-            <tr>
-              <td><code>POST</code></td>
-              <td>「我要新增」</td>
-              <td>下一筆新訂單</td>
-              <td>註冊帳號、送出表單、新增一筆資料</td>
-            </tr>
-            <tr>
-              <td><code>PUT</code></td>
-              <td>「我要整個換掉」</td>
-              <td>整張訂單重寫</td>
-              <td>更新個人資料（全部欄位都重新送）</td>
-            </tr>
-            <tr>
-              <td><code>PATCH</code></td>
-              <td>「我要改一部分」</td>
-              <td>只改訂單裡的一道菜</td>
-              <td>只改密碼、只改暱稱</td>
-            </tr>
-            <tr>
-              <td><code>DELETE</code></td>
-              <td>「我要刪掉」</td>
-              <td>取消訂單</td>
-              <td>刪除帳號、移除商品</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="box box-info">
-        <div class="box-label">PUT vs PATCH 差在哪？</div>
-        <strong>PUT</strong> 像是把整張考卷擦掉重寫。就算你只改一題，也要把所有答案都重填一遍。<br>
-        <strong>PATCH</strong> 像是用立可白只修一題。其他題目維持原樣。<br><br>
-        實務上大部分系統用 <code>PATCH</code> 比較多，因為「只改一個欄位」的需求比「整個重送」常見得多。
-      </div>
-
-      <!-- C. 狀態碼 -->
-      <h2>狀態碼（服務生的回覆）</h2>
-
-      <p>你跟 API 說「我要 XXX」之後，API 會回一個<strong>數字代碼</strong>告訴你結果。這就是 <strong>HTTP 狀態碼</strong>。</p>
-
-      <p>不用背，但看到的時候要知道什麼意思：</p>
-
-      <h3>成功的回覆（2xx）</h3>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>代碼</th>
-              <th>白話</th>
-              <th>餐廳比喻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>200</code></td>
-              <td>成功，資料來了</td>
-              <td>「好的，菜來了」</td>
-            </tr>
-            <tr>
-              <td><code>201</code></td>
-              <td>建立成功</td>
-              <td>「訂單已成立，等候出餐」</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>你的問題（4xx）</h3>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>代碼</th>
-              <th>白話</th>
-              <th>餐廳比喻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>400</code></td>
-              <td>你的要求有問題</td>
-              <td>「菜單上沒這道菜」「你的格式不對」</td>
-            </tr>
-            <tr>
-              <td><code>401</code></td>
-              <td>沒有登入</td>
-              <td>「請先出示會員卡」</td>
-            </tr>
-            <tr>
-              <td><code>403</code></td>
-              <td>沒有權限</td>
-              <td>「VIP 專屬區域，你進不去」</td>
-            </tr>
-            <tr>
-              <td><code>404</code></td>
-              <td>找不到</td>
-              <td>「那道菜已經下架了」</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3>伺服器的問題（5xx）</h3>
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>代碼</th>
-              <th>白話</th>
-              <th>餐廳比喻</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><code>500</code></td>
-              <td>伺服器壞了</td>
-              <td>「廚房失火了，我們也沒辦法」</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="box box-warning">
-        <div class="box-label">記住這個規則</div>
-        <strong>4xx = 你的問題</strong>（請求格式錯、沒登入、沒權限）<br>
-        <strong>5xx = 伺服器的問題</strong>（後端程式炸了、資料庫掛了）<br><br>
-        看到 4xx 先檢查自己；看到 5xx 去找後端工程師。
-      </div>
-
-      <!-- D. 實際案例 -->
-      <h2>實際案例：一個「客戶管理」的完整流程</h2>
-
-      <p>假設你請 Claude Code 幫你做一個客戶管理系統，它會建出以下這些 API。我們來走一遍完整流程：</p>
-
-      <h3>1. 新增客戶（POST）</h3>
-
-      <p>使用者在前端填好表單（姓名、電話、Email），按下「送出」。</p>
-
-      <div class="code-block">
-<span style="color: var(--green);">POST</span> /api/customers<br><br>
-送出的資料（Request Body）：<br>
-{<br>
-&nbsp;&nbsp;"name": "王小明",<br>
-&nbsp;&nbsp;"phone": "0912-345-678",<br>
-&nbsp;&nbsp;"email": "ming@example.com"<br>
-}
-      </div>
-
-      <p>後端收到 → 存進資料庫 → 回傳：</p>
-
-      <div class="code-block">
-<span style="color: var(--green);">狀態碼：201 Created</span><br><br>
-回傳的資料（Response）：<br>
-{<br>
-&nbsp;&nbsp;"id": 123,<br>
-&nbsp;&nbsp;"name": "王小明",<br>
-&nbsp;&nbsp;"phone": "0912-345-678",<br>
-&nbsp;&nbsp;"email": "ming@example.com",<br>
-&nbsp;&nbsp;"created_at": "2026-03-28T10:30:00Z"<br>
-}
-      </div>
-
-      <p>前端收到 <code>201</code> → 顯示「新增成功！」</p>
-
-      <h3>2. 列出所有客戶（GET）</h3>
-
-      <div class="code-block">
-<span style="color: var(--blue);">GET</span> /api/customers<br><br>
-<span style="color: var(--green);">狀態碼：200 OK</span><br><br>
-回傳：<br>
-[<br>
-&nbsp;&nbsp;{ "id": 123, "name": "王小明", "phone": "0912-345-678" },<br>
-&nbsp;&nbsp;{ "id": 124, "name": "李大華", "phone": "0933-456-789" },<br>
-&nbsp;&nbsp;{ "id": 125, "name": "張美玲", "phone": "0955-567-890" }<br>
-]
-      </div>
-
-      <p>前端收到資料 → 渲染成表格顯示在頁面上。</p>
-
-      <h3>3. 查看單一客戶（GET + ID）</h3>
-
-      <div class="code-block">
-<span style="color: var(--blue);">GET</span> /api/customers/123<br><br>
-<span style="color: var(--green);">狀態碼：200 OK</span><br><br>
-回傳：王小明的完整資料
-      </div>
-
-      <h3>4. 修改客戶資料（PATCH）</h3>
-
-      <p>王小明換了電話號碼，只要改這個欄位：</p>
-
-      <div class="code-block">
-<span style="color: var(--yellow);">PATCH</span> /api/customers/123<br><br>
-送出的資料：<br>
-{<br>
-&nbsp;&nbsp;"phone": "0987-654-321"<br>
-}<br><br>
-<span style="color: var(--green);">狀態碼：200 OK</span><br>
-→ 只有電話被改掉，其他欄位不動
-      </div>
-
-      <h3>5. 刪除客戶（DELETE）</h3>
-
-      <div class="code-block">
-<span style="color: var(--red);">DELETE</span> /api/customers/123<br><br>
-<span style="color: var(--green);">狀態碼：200 OK</span><br>
-→ 王小明的資料被刪除了
-      </div>
+      <h3>路線 B：台灣的註冊商</h3>
+      <p>TWNIC 官網有一份「受理註冊機構」名單，名單上的才能賣 .tw 系列。台灣人常見的像是中華電信 HiNet 的網域註冊、PChome 的買網址，名單上還有十幾家，可以自己去看。</p>
+      <ul>
+        <li><strong>好處</strong>：中文介面，能買 <code>.com.tw</code>、<code>.tw</code>、<code>.台灣</code>，公司名可以照中文登記</li>
+        <li><strong>要注意</strong>：各家價錢、首年優惠、續約價都不一樣，DNS 管理畫面也各長各的。之後要接 Cloudflare，得到註冊商那邊改一個叫「名稱伺服器」的設定（下面步驟會帶）</li>
+      </ul>
+      <p>PChome 買網址的頁面寫明：從 2023 年 6 月 1 日起，.tw 網域在公開查詢上預設不顯示聯絡資料。也就是 .tw 系列不用另外加買隱私保護。</p>
 
       <div class="box box-tip">
-        <div class="box-label">整理一下</div>
-        看出規律了嗎？同一個路徑 <code>/api/customers</code>，搭配不同的 HTTP Method，就能做不同的事：
-        <ul>
-          <li><code>GET /api/customers</code> → 看全部</li>
-          <li><code>GET /api/customers/123</code> → 看一個</li>
-          <li><code>POST /api/customers</code> → 新增</li>
-          <li><code>PATCH /api/customers/123</code> → 改一個</li>
-          <li><code>DELETE /api/customers/123</code> → 刪一個</li>
-        </ul>
-        這就是 API 設計的核心概念。
+        <div class="box-label">兩條路怎麼選</div>
+        <p>要 <code>.com</code>：Cloudflare 買，最少步驟。要 <code>.com.tw</code>：台灣註冊商買，再把 DNS 交給 Cloudflare 管。兩條路最後都會變成「DNS 在 Cloudflare」，後面的步驟就一樣了。</p>
       </div>
 
-      <!-- E. RESTful API -->
-      <h2>API 組合排列的概念（RESTful）</h2>
+      <!-- ========== 買的時候注意 ========== -->
+      <h2 id="buy-careful">買的時候要注意的事</h2>
 
-      <p>上面那種「用 HTTP Method + 路徑」來操作資源的設計方式，有一個正式的名字叫做 <strong>RESTful API</strong>。</p>
+      <p>網域很便宜，但出事的時候很貴。下面每一條，都是有人真的踩過的。</p>
 
-      <h3>RESTful 命名慣例</h3>
+      <h3>1. 看續約價，不是只看首年價</h3>
+      <p>有些註冊商首年很便宜，第二年起恢復原價。比價時把「續約價」那一欄找出來，算三年總共多少。Cloudflare 官方說續約照註冊局牌價；其他家請在購買前看清楚價格說明頁。</p>
 
-      <p>好的 API 設計有一些約定俗成的規則：</p>
+      <h3>2. 自動續約要開，信用卡要有效</h3>
+      <p>自動續約開著，卡過期一樣扣不到款。網域到期前註冊商會寄信提醒，那封信寄到哪個信箱很重要：<strong>要寄到一個你真的會看的信箱</strong>，不要用已經離職員工的信箱。</p>
+      <p>B 咖啡店的做法：用店裡共用的信箱註冊，並在行事曆上自己再設一個到期前一個月的提醒。</p>
 
-      <div class="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>規則</th>
-              <th>好的例子</th>
-              <th>不好的例子</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>用名詞，不用動詞</td>
-              <td><code>/api/customers</code></td>
-              <td><code>/api/getCustomers</code></td>
-            </tr>
-            <tr>
-              <td>用複數</td>
-              <td><code>/api/orders</code></td>
-              <td><code>/api/order</code></td>
-            </tr>
-            <tr>
-              <td>巢狀表示關聯</td>
-              <td><code>/api/customers/123/orders</code></td>
-              <td><code>/api/getOrdersByCustomer?id=123</code></td>
-            </tr>
-            <tr>
-              <td>版本號放前面</td>
-              <td><code>/api/v1/customers</code></td>
-              <td><code>/api/customers?version=1</code></td>
-            </tr>
-          </tbody>
-        </table>
+      <h3>3. 隱私保護</h3>
+      <p>網域的註冊資料以前是公開查得到的，現在多數會遮起來。Cloudflare 預設遮；.tw 系列從 2023 年 6 月起預設不顯示。在其他家買 <code>.com</code>，結帳時看一下有沒有「隱私保護」或類似選項，是不是要另外付錢。</p>
+
+      <h3>4. 帳號用誰的名字</h3>
+      <p>網域登記在誰名下，法律上就是誰的。<strong>公司的網址，就登記公司；用公司的信箱開帳號。</strong>不要登記在老闆個人、員工個人名下，以後拆夥、離職、繼承都會很麻煩。</p>
+
+      <h3>5. 不要讓外包用他的帳號幫你買</h3>
+      <div class="box box-danger">
+        <div class="box-label">這條最常出事</div>
+        <p>外包說「網址我幫你買就好，比較快」。快是快，但網域就在他的帳號裡。哪天合作不愉快、他聯絡不到、或公司收掉，你的網址可能就拿不回來，名片、招牌、Google 上的評價全部指向一個你管不了的地方。</p>
+        <p>正確做法：<strong>你自己開帳號、自己付款、網域在你名下。</strong>需要外包幫忙設定，就把他加成你帳號底下的成員，或你在旁邊登入讓他操作，做完收回權限。</p>
       </div>
+      <p>已經在別人帳號裡的網域，可以轉到你自己的帳號或別家註冊商，但要對方配合。國際網域管理機構 ICANN 的說明是：剛註冊、剛轉移、或剛改過註冊人名字的 60 天內，註冊商可以拒絕轉出。越早處理越好。</p>
 
-      <h3>Endpoint 怎麼看</h3>
-
-      <p>當你看到一個 API 路徑，可以像看地址一樣來拆解：</p>
-
-      <div class="code-block">
-/api/v1/users/123/orders<br><br>
-拆解：<br>
-├── /api       → 表示這是 API（不是一般網頁）<br>
-├── /v1        → 版本 1<br>
-├── /users     → 資源類型：使用者<br>
-├── /123       → 特定使用者（ID = 123）<br>
-└── /orders    → 這個使用者的訂單
-      </div>
-
-      <p>白話翻譯：<strong>「API 版本 1，去找 ID 為 123 的使用者，然後拿他的訂單」</strong></p>
+      <!-- ========== DNS ========== -->
+      <h2 id="dns">DNS 是什麼：網路的電話簿</h2>
 
       <div class="analogy">
-        <strong>再多幾個例子：</strong><br><br>
-        <code>GET /api/v1/products</code> → 拿所有商品列表<br>
-        <code>POST /api/v1/products</code> → 新增一個商品<br>
-        <code>GET /api/v1/products/456/reviews</code> → 看商品 456 的所有評價<br>
-        <code>DELETE /api/v1/users/123/orders/789</code> → 刪掉使用者 123 的訂單 789
+        <strong>DNS 是一本電話簿。</strong>你要打給「B 咖啡店」，不用背電話號碼，翻電話簿查名字就找到號碼。瀏覽器也一樣：你打 <code>book.b-cafe.example</code>，它先去 DNS 查「這個名字對到哪台機器」，查到了才連過去。
       </div>
 
-      <h3>跟 Claude Code 的關係</h3>
+      <p>買了網域，等於在電話簿裡有了一頁屬於你的格子。格子裡要寫什麼，由你決定，一行叫一筆<strong>紀錄</strong>（record）。你不用會寫，但要看得懂這幾種：</p>
 
-      <p>當你對 Claude Code 說：</p>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>種類</th>
+              <th>一句白話</th>
+              <th>B 咖啡店的例子</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>A</strong></td>
+              <td>這個名字對到哪個 IP 位址（機器的號碼）。另一種 AAAA 是新版號碼</td>
+              <td>用 Cloudflare 的話通常不用你填，它會自己處理</td>
+            </tr>
+            <tr>
+              <td><strong>CNAME</strong></td>
+              <td>這個名字是另一個名字的別名：「查我，請去查它」</td>
+              <td><span class="dom-rec">order.b-cafe.example</span> → 外部訂購平台給你的網址。接第七章的 Worker 不用自己加 CNAME，步驟 3 交給 Cloudflare 自動建；先手動加了，步驟 3 反而會失敗</td>
+            </tr>
+            <tr>
+              <td><strong>MX</strong></td>
+              <td>寄到這個網域的信，要送到哪個郵件伺服器</td>
+              <td>寄給 <span class="dom-rec">hello@b-cafe.example</span> 的信送去店裡用的信箱服務</td>
+            </tr>
+            <tr>
+              <td><strong>TXT</strong></td>
+              <td>一段文字，通常是給別的服務驗證「這個網域真的是你的」</td>
+              <td>開 Google 商家、信箱服務時，對方要你貼一段驗證碼</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <div class="compare">
-        <div class="compare-bad">
-          <div class="compare-label">不知道 API 概念</div>
-          <div class="code-block">
-「幫我做一個可以新增客戶<br>
-的功能，然後還要能查詢<br>
-跟刪除」
+      <p>還有一個詞會出現：<strong>名稱伺服器</strong>（nameserver）。它是「這本電話簿放在誰家」。網域在台灣註冊商買、電話簿要交給 Cloudflare 管，就是去註冊商那邊把名稱伺服器改成 Cloudflare 給你的那兩個。改完之後，所有紀錄都在 Cloudflare 的畫面裡管。</p>
+
+      <h3>客人打網址的那一刻，發生了什麼</h3>
+
+      <ol class="dom-flow" aria-label="客人打開預約頁面的流程">
+        <li><div class="dom-flow-node"><strong>客人的手機</strong>打 book.b-cafe.example<small>瀏覽器還不知道要去哪</small></div><span class="dom-flow-arrow" aria-hidden="true"></span></li>
+        <li><div class="dom-flow-node dom-hl"><strong>查 DNS</strong>翻電話簿<small>「book 這行寫的是：去 Cloudflare」</small></div><span class="dom-flow-arrow" aria-hidden="true"></span></li>
+        <li><div class="dom-flow-node"><strong>Cloudflare</strong>出示憑證<small>手機確認身分沒錯，網址列出現小鎖頭</small></div><span class="dom-flow-arrow" aria-hidden="true"></span></li>
+        <li><div class="dom-flow-node"><strong>預約頁面</strong>送到手機<small>就是第七章放上去的那份檔案</small></div><span class="dom-flow-arrow" aria-hidden="true"></span></li>
+      </ol>
+      <p class="dom-flow-caption">頁面本身是第七章從你的電腦、經過 GitHub 放上 Cloudflare 的。這章只是在電話簿裡多寫一行，讓好記的名字也找得到它。</p>
+
+      <p>DNS 改了不會馬上全世界生效。電話簿有很多份副本散在各地，每份都要時間更新。Cloudflare 自己的紀錄通常幾分鐘內就好；改名稱伺服器這種大動作，官方說最多可能要等 24 小時。<strong>改完沒看到效果，先等，不要一直改。</strong>一直改只會讓你搞不清楚現在是哪一版。</p>
+
+      <!-- ========== 動手做 ========== -->
+      <h2 id="steps">動手做：把 B 咖啡店的網址接上預約頁</h2>
+
+      <p>目標：客人打 <code>book.b-cafe.example</code>，看到第七章那個預約頁面，網址列有小鎖頭。</p>
+
+      <p>每一步分成三格：<strong>要做什麼</strong>、<strong>跟 Claude 怎麼說</strong>、<strong>你自己要動手的地方</strong>。第三格是註冊帳號、登入、付款、收驗證信、按允許這類事，Claude 不該也不能替你做。下面寫的按鈕名稱，是 2026-11-13 照 Cloudflare 官方文件寫的；畫面改版的話，跟 Claude 說「照官方文件現在的做法帶我」就好。</p>
+
+      <!-- 步驟 1 -->
+      <div class="dom-step">
+        <div class="dom-step-head"><span class="dom-step-no">步驟 1</span><h3>想名字、查有沒有被買走</h3></div>
+        <div class="dom-step-row">
+          <div class="dom-step-label">要做什麼</div>
+          <div><p>列出三到五個候選名字，確認哪些還能買、該選哪個結尾。</p></div>
+        </div>
+        <div class="dom-step-row dom-say">
+          <div class="dom-step-label">跟 Claude 怎麼說</div>
+          <div>
+            <p class="dom-say-line">「我是 B 咖啡店，有商業登記。幫我想五個好念、好拼的網址候選，各給 .com 和 .com.tw 兩種。用 whois 查哪些看起來還沒被註冊，列成表。只查，不要幫我買任何東西。」</p>
           </div>
         </div>
-        <div class="compare-good">
-          <div class="compare-label">知道 API 概念</div>
-          <div class="code-block">
-「幫我建 RESTful API：<br>
-POST/GET/PATCH/DELETE<br>
-/api/v1/customers<br>
-回傳 JSON，需要驗證」
+        <div class="dom-step-row dom-you">
+          <div class="dom-step-label">你自己動手</div>
+          <div><p>從表裡挑一個，念給一個朋友聽，請他打出來，看拼不拼得對。</p></div>
+        </div>
+        <div class="dom-step-row dom-see">
+          <div class="dom-step-label">做完會看到</div>
+          <div><p>一張表：名字、結尾、看起來能不能買。Claude 查的只是參考，<strong>最後以註冊商搜尋結果為準</strong>。</p></div>
+        </div>
+        <div class="dom-step-row dom-stuck">
+          <div class="dom-step-label">常見卡住</div>
+          <div>
+            <ul>
+              <li><strong>喜歡的名字都被買了</strong>：加地名或品類，例如 <code>b-cafe-taichung</code>、<code>bcafe-coffee</code>。不要用一長串數字</li>
+              <li><strong>whois 查不到結果</strong>：有些結尾不開放這樣查，直接到註冊商的搜尋框打打看</li>
+            </ul>
           </div>
         </div>
       </div>
 
-      <p>右邊的指令更精準，Claude Code 產出的結果也會更符合你的期待。不需要你會寫程式碼，但知道這些「菜名」就能點對菜。</p>
+      <!-- 步驟 2 -->
+      <div class="dom-step">
+        <div class="dom-step-head"><span class="dom-step-no">步驟 2</span><h3>買網域（路線 A：.com 在 Cloudflare 買）</h3></div>
+        <div class="dom-step-row">
+          <div class="dom-step-label">要做什麼</div>
+          <div><p>在 Cloudflare 上把網址買下來。要 .com.tw 的人跳到步驟 2B。</p></div>
+        </div>
+        <div class="dom-step-row dom-say">
+          <div class="dom-step-label">跟 Claude 怎麼說</div>
+          <div>
+            <p class="dom-say-line">「我要在 Cloudflare Registrar 買 b-cafe.example。照官方文件現在的步驟，一步一步告訴我要點哪裡、每一格填什麼。付款和送出我自己按。」</p>
+          </div>
+        </div>
+        <div class="dom-step-row dom-you">
+          <div class="dom-step-label">你自己動手</div>
+          <div>
+            <ul>
+              <li>用<strong>第七章那個 Cloudflare 帳號</strong>登入，不要另外註冊新帳號。確認登入的是同一個帳號、信箱已經驗證過（沒驗證過的帳號買不了網域）</li>
+              <li>網域一定要買在放預約頁的同一個帳號裡。分在兩個帳號，步驟 3 會找不到這個網域，接不起來</li>
+              <li>到 <strong>Register domains</strong> 頁面，搜尋框打名字，按 <strong>Search</strong></li>
+              <li>在要的網址旁按 <strong>Purchase</strong>，在 <strong>Payment option</strong> 選要先付幾年</li>
+              <li>填聯絡資料（只能填英文字母，公司名用英文或拼音）</li>
+              <li>選付款方式、看過條款，按 <strong>Complete purchase</strong></li>
+            </ul>
+          </div>
+        </div>
+        <div class="dom-step-row dom-see">
+          <div class="dom-step-label">做完會看到</div>
+          <div><p>官方說註冊最多約 30 秒完成。網域會出現在你的帳號裡，畫面上有一個下次自動續約的日期。信箱會收到一封要你驗證註冊人信箱的信。</p></div>
+        </div>
+        <div class="dom-step-row dom-stuck">
+          <div class="dom-step-label">常見卡住</div>
+          <div>
+            <ul>
+              <li><strong>沒收驗證信、或放著不理</strong>：ICANN 規定註冊人信箱要驗證。沒驗證，網域會被暫停、指到停放頁面，網站打不開。去垃圾信匣找，點完連結</li>
+              <li><strong>聯絡資料打中文被擋</strong>：這裡只收英文字母，改用英文或拼音</li>
+              <li><strong>搜尋結果沒有你要的網址</strong>：代表已經被買走，或 Cloudflare 不賣這個結尾</li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
-      <div class="box box-info">
-        <div class="box-label">本章重點回顧</div>
-        <ul>
-          <li><strong>API</strong> = 程式之間溝通的介面（服務生）</li>
-          <li><strong>HTTP Methods</strong> = 你要做什麼動作（GET 看 / POST 新增 / PATCH 改 / DELETE 刪）</li>
-          <li><strong>狀態碼</strong> = 服務生的回覆（200 成功 / 4xx 你的問題 / 5xx 伺服器的問題）</li>
-          <li><strong>RESTful</strong> = API 的命名規則（用名詞、用複數、巢狀表示關聯）</li>
-          <li><strong>Endpoint</strong> = API 的地址，像 <code>/api/v1/users/123/orders</code></li>
-        </ul>
+      <!-- 步驟 2B -->
+      <div class="dom-step">
+        <div class="dom-step-head"><span class="dom-step-no">步驟 2B</span><h3>買網域（路線 B：.com.tw 在台灣註冊商買），再把 DNS 交給 Cloudflare</h3></div>
+        <div class="dom-step-row">
+          <div class="dom-step-label">要做什麼</div>
+          <div><p>在台灣註冊商買好網址，把它加進 Cloudflare，最後到註冊商那邊把名稱伺服器改成 Cloudflare 給的兩個。</p></div>
+        </div>
+        <div class="dom-step-row dom-say">
+          <div class="dom-step-label">跟 Claude 怎麼說</div>
+          <div>
+            <p class="dom-say-line">「我在台灣的註冊商買了 b-cafe.example，要把 DNS 改給 Cloudflare 管。照 Cloudflare 官方文件現在的步驟帶我。改名稱伺服器之前，先幫我列出這個網域現在所有的 DNS 紀錄，特別是 MX 和 TXT，存成一個檔案給我留底。」</p>
+            <p class="dom-say-line">「我改完名稱伺服器了，幫我查生效了沒。」</p>
+          </div>
+        </div>
+        <div class="dom-step-row dom-you">
+          <div class="dom-step-label">你自己動手</div>
+          <div>
+            <ul>
+              <li>在註冊商開帳號、付款買網域（公司登記資料照實填，.com.tw 會審資格）</li>
+              <li>用第七章那個 Cloudflare 帳號登入（放預約頁的同一個帳號），到 <strong>Domains</strong>，按 <strong>Onboard a domain</strong>，輸入網址，選免費方案</li>
+              <li>Cloudflare 會掃描現有紀錄。<strong>拿 Claude 列的留底檔逐行對</strong>，少的自己補上</li>
+              <li>Cloudflare 會給你兩個名稱伺服器。登入註冊商的管理頁，把原本的名稱伺服器換成這兩個，一字不差</li>
+            </ul>
+          </div>
+        </div>
+        <div class="dom-step-row dom-see">
+          <div class="dom-step-label">做完會看到</div>
+          <div><p>Cloudflare 的 Domains 頁面上，這個網址的狀態變成 <strong>Active</strong>，並且會收到 Cloudflare 寄來的通知信。在那之前會先停在等名稱伺服器更新的狀態。</p></div>
+        </div>
+        <div class="dom-step-row dom-stuck">
+          <div class="dom-step-label">常見卡住</div>
+          <div>
+            <ul>
+              <li><strong>等了很久還沒 Active</strong>：官方說最多可能要 24 小時。超過了，請 Claude 查名稱伺服器是不是拼錯一個字</li>
+              <li><strong>註冊商那邊有開 DNSSEC</strong>（一種防偽造的簽章設定）：官方提醒要<strong>先關掉再改名稱伺服器</strong>，不然網站可能整個連不到。換好之後可以在 Cloudflare 重新開</li>
+              <li><strong>掃描漏了紀錄</strong>：官方說掃描不保證抓得到全部。漏掉的多半是 MX，後果是收不到信，見後面「拿網域收信」</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 步驟 3 -->
+      <div class="dom-step">
+        <div class="dom-step-head"><span class="dom-step-no">步驟 3</span><h3>把 book 子網域接到第七章的頁面</h3></div>
+        <div class="dom-step-row">
+          <div class="dom-step-label">要做什麼</div>
+          <div>
+            <p>告訴 Cloudflare：<code>book.b-cafe.example</code> 這塊門牌，掛到第七章那個預約頁面。</p>
+            <p>第七章的頁面可能是用 Cloudflare 的 Workers 放的，也可能是 Pages。兩邊做法不同，讓 Claude 先看你的專案是哪一種。</p>
+          </div>
+        </div>
+        <div class="dom-step-row dom-say">
+          <div class="dom-step-label">跟 Claude 怎麼說</div>
+          <div>
+            <p class="dom-say-line">「把 book.b-cafe.example 接到第七章部署的預約頁面。先看這個專案是 Workers 還是 Pages，照 Cloudflare 官方文件現在的做法設定自訂網域。設定前先告訴你打算改哪個檔案、加哪一筆 DNS 紀錄，等我說好再動。不要動到其他 DNS 紀錄。」</p>
+          </div>
+        </div>
+        <div class="dom-step-row dom-you">
+          <div class="dom-step-label">你自己動手</div>
+          <div>
+            <ul>
+              <li>Claude 第一次用 <code>wrangler</code>（Cloudflare 的 CLI）時要登入：它會開一個瀏覽器頁面，由你確認是自己的帳號、按同意授權</li>
+              <li>看 Claude 列的改動計畫，確認只動 book 這一筆，回它「好」</li>
+            </ul>
+          </div>
+        </div>
+        <div class="dom-step-row dom-see">
+          <div class="dom-step-label">做完會看到</div>
+          <div>
+            <p><strong>Workers 的話</strong>：設定檔裡多了幾行（下面有樣子），部署之後，Worker 的 <strong>Settings</strong> → <strong>Domains &amp; Routes</strong> 裡會列出 <code>book.b-cafe.example</code>。Cloudflare 會自己幫你建好 DNS 紀錄和憑證。</p>
+            <p><strong>Pages 的話</strong>：在 <strong>Workers &amp; Pages</strong> 選這個專案 → <strong>Custom domains</strong> → <strong>Set up a domain</strong>，輸入網址按 <strong>Continue</strong>。網域已經在 Cloudflare 的，它會自動加好 CNAME 紀錄。</p>
+          </div>
+        </div>
+        <div class="dom-step-row dom-stuck">
+          <div class="dom-step-label">常見卡住</div>
+          <div>
+            <ul>
+              <li><strong>Workers 加不上，說名字已被占用</strong>：官方寫明，已經有 CNAME 紀錄的名字不能再設成自訂網域。多半是之前自己手動加過一筆，請 Claude 列出來、跟你確認後再處理</li>
+              <li><strong>Pages 打開出現 522 錯誤</strong>：官方說沒先在 Pages 的 Custom domains 綁定，就直接去 DNS 加 CNAME，會出現這個錯。回到上面那個畫面補綁定</li>
+              <li><strong>Workers 要求網域在 Cloudflare 上</strong>：還沒做步驟 2 或 2B 的，先回去做。做了還是找不到網域，多半是網域和預約頁分在兩個 Cloudflare 帳號，請 Claude 幫你確認</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <p>Workers 的做法，Claude 會在設定檔 <code>wrangler.jsonc</code> 加上這一段（官方文件的寫法，網址換成你的）：</p>
+      <div class="code-block dom-pre">{
+  "routes": [
+    {
+      "pattern": "book.b-cafe.example",
+      "custom_domain": true
+    }
+  ]
+}</div>
+      <p>你不用會寫，但看得懂就好：<code>pattern</code> 是門牌，<code>custom_domain: true</code> 是「這是一個自訂網域」。改完它會用 <code>wrangler</code> 重新部署。以後網站搬家、門牌要換，就是改這幾行。</p>
+
+      <!-- 步驟 4 -->
+      <div class="dom-step">
+        <div class="dom-step-head"><span class="dom-step-no">步驟 4</span><h3>驗收：打得開、有小鎖頭、舊網址還在</h3></div>
+        <div class="dom-step-row">
+          <div class="dom-step-label">要做什麼</div>
+          <div><p>確認客人真的打得開，而且是安全連線。</p></div>
+        </div>
+        <div class="dom-step-row dom-say">
+          <div class="dom-step-label">跟 Claude 怎麼說</div>
+          <div>
+            <p class="dom-say-line">「幫我驗收 book.b-cafe.example：查 DNS 有沒有生效、https 打不打得開、憑證是不是有效的、打開的內容是不是第七章那個預約頁。用 http 開會不會自動跳到 https。結果列成清單，有問題先不要改，跟我說原因。」</p>
+          </div>
+        </div>
+        <div class="dom-step-row dom-you">
+          <div class="dom-step-label">你自己動手</div>
+          <div>
+            <ul>
+              <li>用自己的手機、<strong>關掉 Wi-Fi 改用行動網路</strong>打開一次</li>
+              <li>點一下網址列的小鎖頭，看憑證是不是發給這個網址</li>
+              <li>試填一次預約表（第九章之前，資料還不會真的存起來）</li>
+            </ul>
+          </div>
+        </div>
+        <div class="dom-step-row dom-see">
+          <div class="dom-step-label">做完會看到</div>
+          <div><p>手機打得開預約頁，網址列有小鎖頭、沒有「不安全」字樣。Claude 回報的清單每一項都通過。</p></div>
+        </div>
+        <div class="dom-step-row dom-stuck">
+          <div class="dom-step-label">常見卡住</div>
+          <div>
+            <ul>
+              <li><strong>電腦打得開、手機打不開</strong>（或相反）：通常是 DNS 副本還沒全部更新。等一下再試，不要急著改設定</li>
+              <li><strong>出現「不安全」或憑證錯誤</strong>：憑證要等網域生效後才會發。剛設定完先等；等很久還是這樣，請 Claude 查 DNS 紀錄裡有沒有一筆叫 CAA 的設定擋住了 Cloudflare 發憑證</li>
+              <li><strong>打開是舊內容</strong>：瀏覽器存了舊版。用無痕視窗開一次</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 步驟 5 -->
+      <div class="dom-step">
+        <div class="dom-step-head"><span class="dom-step-no">步驟 5</span><h3>把新網址換到客人看得到的地方</h3></div>
+        <div class="dom-step-row">
+          <div class="dom-step-label">要做什麼</div>
+          <div><p>名片、Google 商家、社群簡介、LINE 官方帳號上的連結，換成新網址。</p></div>
+        </div>
+        <div class="dom-step-row dom-say">
+          <div class="dom-step-label">跟 Claude 怎麼說</div>
+          <div>
+            <p class="dom-say-line">「幫我做一張 book.b-cafe.example 的 QR Code 圖檔，存在 assets 資料夾。再列一張清單：店裡哪些地方可能還放著舊網址，讓我一個一個去換。」</p>
+          </div>
+        </div>
+        <div class="dom-step-row dom-you">
+          <div class="dom-step-label">你自己動手</div>
+          <div><p>登入各平台改連結。這些是你的帳號，登入跟送出由你來。</p></div>
+        </div>
+        <div class="dom-step-row dom-see">
+          <div class="dom-step-label">做完會看到</div>
+          <div><p>用手機掃 QR Code，直接開到預約頁。</p></div>
+        </div>
+        <div class="dom-step-row dom-stuck">
+          <div class="dom-step-label">常見卡住</div>
+          <div><p><strong>舊網址要不要關</strong>：先不要。第七章那個長網址留著，萬一新網址出問題，還有一條路。等新網址穩定一陣子再決定。</p></div>
+        </div>
+      </div>
+
+      <!-- ========== 子網域 ========== -->
+      <h2 id="subdomain">子網域：一個網址，分好幾個門</h2>
+
+      <p>第五章說過，子網域是「大樓裡的哪個部門」。買一個 <code>b-cafe.example</code>，前面要加什麼都不用再付錢：</p>
+      <ul>
+        <li><code>b-cafe.example</code>：品牌首頁</li>
+        <li><code>book.b-cafe.example</code>：線上預約（這章做的）</li>
+        <li><code>shop.b-cafe.example</code>：以後要賣咖啡豆再開</li>
+        <li><code>admin.b-cafe.example</code>：店員看預約的後台（第九章之後才會有）</li>
+      </ul>
+
+      <p>為什麼預約要放子網域，不放 <code>b-cafe.example/book</code> 這種路徑？兩種都可以，差在<strong>拆不拆得開</strong>：</p>
+      <ul>
+        <li><strong>子網域</strong>：每個功能是獨立的一個網站，可以各自放在不同地方、各自部署。預約頁壞了，首頁不受影響。以後預約改用現成的訂位系統，把 book 這一行指過去就好</li>
+        <li><strong>路徑</strong>：全部都在同一個網站裡，管理簡單，但改一個地方要整站重新上傳</li>
+      </ul>
+      <p>這就是第十三章架構拓樸要講的「怎麼切」。小店家的經驗法則：<strong>給客人用的、給店員用的分開；會換供應商的東西，給它一個自己的子網域。</strong></p>
+
+      <h3>www 和沒有 www</h3>
+      <p><code>www.b-cafe.example</code> 和 <code>b-cafe.example</code> 在電話簿裡是兩行，不會自動相通。Cloudflare 的文件也寫明，自訂網域是一個名字對一個名字。所以要決定一個當正式網址，另一個設定成自動轉過去。</p>
+      <div class="code-block">
+「b-cafe.example 當正式網址。有人打 www.b-cafe.example，自動轉到 b-cafe.example，路徑要跟著帶過去。照 Cloudflare 官方文件現在建議的方式做，先跟我說你要怎麼設。」
+      </div>
+
+      <!-- ========== HTTPS ========== -->
+      <h2 id="https">HTTPS 小鎖頭怎麼來的</h2>
+
+      <div class="analogy">
+        <strong>小鎖頭像是店門口掛的營業登記證。</strong>客人一進門先看一眼：這間店真的叫這個名字，不是冒牌的。看完之後，店裡講的話也只有你們兩個聽得到。
+      </div>
+
+      <p>網址前面的 <code>https</code> 代表加密連線。瀏覽器連上網站時，網站要拿出一張<strong>憑證</strong>（SSL／TLS 憑證），證明「我就是 book.b-cafe.example」。憑證由公認的發證單位核發，瀏覽器認得，就顯示小鎖頭；不認得，或沒有憑證，就跳「不安全」。</p>
+
+      <p>以前憑證要自己買、自己裝、每年記得換。放在 Cloudflare 上就不用：</p>
+      <ul>
+        <li>網域在 Cloudflare 上生效後，官方說會<strong>免費自動發憑證，也會自動續期</strong>，免費方案就有</li>
+        <li>Workers 加自訂網域時，官方說會替那個名字產生憑證</li>
+        <li>自動發的憑證涵蓋主網域和「一層」子網域：<code>book.b-cafe.example</code> 沒問題；<code>a.book.b-cafe.example</code> 這種兩層的不在預設範圍，所以子網域不要疊太多層</li>
+      </ul>
+
+      <div class="box box-warning">
+        <div class="box-label">小鎖頭不等於安全</div>
+        <p>小鎖頭只保證「連線是加密的、網址沒被冒充」。頁面裡有沒有把不該公開的東西放出來，它不管。例如把資料庫的管理金鑰寫進網頁，加密連線只是把金鑰「安全地」送給每個訪客。這件事<a href="/chapter9/">第九章</a>和<a href="/chapter16/">第十六章</a>會講。</p>
+      </div>
+
+      <!-- ========== 收信 ========== -->
+      <h2 id="mail">網域之後要拿來收信</h2>
+
+      <p>有了網域，店家常常下一步就是 <code>hello@b-cafe.example</code> 這種信箱。收信靠的是電話簿裡的 <strong>MX 紀錄</strong>：它告訴全世界「寄給這個網域的信，送到哪個郵件伺服器」。</p>
+
+      <p>MX 紀錄最怕的不是不會設，是<strong>被不小心蓋掉或刪掉</strong>。蓋掉的那一刻什麼都不會壞，網站照樣打得開，只是信開始寄不進來，往往過了好幾天才有人發現「怎麼最近都沒有客人來信」。常見的幾個時機：</p>
+      <ul>
+        <li><strong>把 DNS 搬到 Cloudflare 時</strong>：掃描沒抓到原本的 MX，搬完就沒了。這是步驟 2B 要你先留底的原因</li>
+        <li><strong>設定網站時，工具或教學叫你「先清掉舊紀錄」</strong>：清掉的可能包括 MX</li>
+        <li><strong>換信箱服務時</strong>：新舊兩家的 MX 同時留著，或舊的刪了新的還沒加</li>
+        <li><strong>開了 Cloudflare 的郵件轉寄（Email Routing）</strong>：它會加上自己的 MX，把信轉到你指定的信箱。原本已經在用別家信箱的，要想清楚信要送去哪一邊</li>
+      </ul>
+
+      <p>B 咖啡店的規矩寫成一句，放進專案的 CLAUDE.md（<a href="/chapter10/">第十章</a>講過，這是給 Claude 的交代）：</p>
+      <div class="code-block">
+「動任何 DNS 紀錄之前，先列出現在所有的紀錄存檔。MX 和 TXT 紀錄一律不准改、不准刪，要動先問我。」
+      </div>
+
+      <p>TXT 紀錄也一樣要小心。信箱服務常要你加幾筆 TXT（業界叫 SPF、DKIM、DMARC，作用是證明「這封信真的是從這個網域寄出來的」，少了信容易被丟進垃圾信匣）。看到這幾個字開頭的 TXT，就當成跟 MX 一樣重要。</p>
+
+      <p>Cloudflare 上的 MX、TXT 紀錄不能開「代理」（畫面上那朵橘色雲），只有 A、AAAA、CNAME 可以。看到 Claude 想把 MX 改成代理，就是它搞錯了。</p>
+
+      <!-- ========== 邊界 ========== -->
+      <h2 id="boundary">哪裡有邊界</h2>
+
+      <p>這章的每個動作，都可以分成「放心交給 Claude」和「一定要你自己確認」兩堆。分的原則很簡單：<strong>查、寫設定、檢查，交給它；花錢、登入、刪東西、會影響別人的，你自己來。</strong></p>
+
+      <div class="dom-split">
+        <div class="dom-ok">
+          <h3>放心交給 Claude</h3>
+          <ul>
+            <li>想名字、查有沒有被註冊、比價（附來源網址）</li>
+            <li>照官方文件一步一步帶你點畫面</li>
+            <li>改 <code>wrangler.jsonc</code>、重新部署</li>
+            <li>列出現有 DNS 紀錄、存成留底檔</li>
+            <li>查 DNS 生效沒、HTTPS 正不正常</li>
+            <li>做 QR Code、整理要換網址的清單</li>
+          </ul>
+        </div>
+        <div class="dom-mine">
+          <h3>一定要你自己</h3>
+          <ul>
+            <li>開帳號、登入、驗證信箱</li>
+            <li>付款、設定自動續約、確認信用卡有效</li>
+            <li>網域登記在誰名下</li>
+            <li>到註冊商改名稱伺服器</li>
+            <li>刪除任何 DNS 紀錄，尤其 MX、TXT</li>
+            <li>網域轉移、讓別人加入你的帳號</li>
+            <li>授權 <code>wrangler</code> 登入時按同意</li>
+          </ul>
+        </div>
+      </div>
+
+      <p>還有三件事，這章只點到，後面的判斷章節會細講：</p>
+      <ul>
+        <li><strong>金鑰不能放進頁面</strong>：Cloudflare 的 API 金鑰、第九章會拿到的資料庫金鑰，任何一把能改東西的鑰匙，都不能寫進網頁的檔案，也不能推上公開的 GitHub。網頁是會送到每個訪客手上的。什麼能放前面、什麼一定要在後面，見<a href="/chapter16/">第十六章 前後端邊界</a></li>
+        <li><strong>付款與續約</strong>：網域到期沒續，不只網站打不開，信也收不到。這類「平常不會壞、一壞就全壞」的地方，見<a href="/chapter17/">第十七章 會出事的地方</a></li>
+        <li><strong>刪除資料庫</strong>：下一章會建資料庫。刪掉資料庫跟刪掉 MX 紀錄一樣，按下去當下看不出事，事後救不回來，一律你自己確認</li>
+      </ul>
+      <p>網站要拆成幾塊、每塊放哪裡、子網域怎麼分，是<a href="/chapter13/">第十三章 架構拓樸</a>和<a href="/chapter14/">第十四章 功能怎麼切</a>的題目；預約資料要存哪些欄位，是<a href="/chapter15/">第十五章 資料表與欄位</a>。現在先把門牌掛好，知道這幾條線在哪就夠了。</p>
+
+      <!-- ========== 章末 ========== -->
+      <h2>這章帶走什麼</h2>
+      <ul>
+        <li>網域是門牌，網站是房子，兩個分開買、再接起來。網域是按年租的，要續約。</li>
+        <li>有公司登記可以選 .com.tw；國際通用選 .com。Cloudflare 不賣 .tw 系列，要的話去 TWNIC 名單上的台灣註冊商買。</li>
+        <li>網域登記在公司名下、用自己的帳號買，不要讓外包用他的帳號代買。看續約價，開自動續約，確認提醒信寄得到你。</li>
+        <li>DNS 是電話簿。A 和 CNAME 管網站、MX 管收信、TXT 管驗證。改了要等，不要一直改。</li>
+        <li>子網域不用另外付錢，拿來把功能分開：預約一個門、後台一個門。</li>
+        <li>小鎖頭放在 Cloudflare 上會自動發、自動續，但它只管連線，不管頁面裡放了什麼。</li>
+        <li>動 DNS 之前先留底；MX 和 TXT 不准隨便動。</li>
+      </ul>
+
+      <p>現在客人打 <code>book.b-cafe.example</code> 就看得到預約表，但按下送出，資料還沒有地方放。下一章幫它接上資料庫，讓預約真的存起來。</p>
+
+      <h2>跟 Claude 怎麼說</h2>
+      <div class="code-block">
+「幫我想五個好念、好拼的網址，查哪些還沒被註冊。只查，不要買。」<br><br>
+「照 Cloudflare 官方文件現在的步驟，一步一步帶我買網域。付款和送出我自己按。」<br><br>
+「動 DNS 之前，先列出現在所有的紀錄存成檔案。MX 和 TXT 不准改、不准刪。」<br><br>
+「把 book.b-cafe.example 接到這個專案。先告訴我打算改哪個檔案、加哪筆紀錄，我說好再動。」<br><br>
+「幫我驗收新網址：DNS 生效沒、https 正不正常、內容對不對。有問題先跟我說原因，不要直接改。」
       </div>
 
       <!-- Chapter Navigation -->
       <div class="chapter-nav">
         <a href="/chapter7/" class="prev">
           <span class="nav-label">上一章</span>
-          <span class="nav-title">用什麼材料蓋房子（技術棧）</span>
+          <span class="nav-title">部署</span>
         </a>
         <a href="/chapter9/" class="next">
           <span class="nav-label">下一章</span>
-          <span class="nav-title">術語快速理解（字典頁）</span>
+          <span class="nav-title">資料庫</span>
         </a>
       </div>
 

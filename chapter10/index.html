@@ -3,8 +3,265 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>第十章：蓋大樓才會遇到的問題 — Claude Code 指南</title>
+  <title>第十章：Claude Code 怎麼用 — Claude Code 非工程師指南</title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ===== 第十章自用樣式（class 前綴一律 cli-）===== */
+    #cli-howto, #cli-perm, #cli-core, #cli-mcp, #cli-screen, #cli-devtools, #cli-quickstart { scroll-margin-top: 84px; }
+
+    /* 對照框在手機上不被長字串撐破 */
+    .content .compare-bad, .content .compare-good { min-width: 0; }
+
+    .cli-link { color: var(--accent-light); text-underline-offset: 3px; }
+    .cli-link:hover { color: var(--accent); }
+
+    .cli-key {
+      display: inline-block;
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      font-size: 0.82em;
+      line-height: 1.4;
+      padding: 1px 7px;
+      border: 1px solid var(--border-light);
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      background: var(--bg-card);
+      color: var(--text-heading);
+      white-space: nowrap;
+    }
+
+    /* 主張 */
+    .cli-claim {
+      margin: 24px 0;
+      padding: 28px 28px 24px;
+      border: 1px solid var(--border-light);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      background: var(--bg-card);
+    }
+    .content .cli-claim-quote {
+      margin: 0 0 12px;
+      font-size: 24px;
+      line-height: 1.5;
+      font-weight: 700;
+      color: var(--text-heading);
+    }
+    .cli-claim-quote em { font-style: normal; color: var(--accent-light); }
+    .content .cli-claim-note { margin: 0 0 10px; font-size: 15px; color: var(--text-muted); }
+    .content .cli-claim-note:last-child { margin-bottom: 0; }
+
+    /* 表格：手機上改成一列一張卡 */
+    .cli-stack td:first-child { font-weight: 700; color: var(--text-heading); white-space: nowrap; }
+    .cli-say { color: var(--accent-light); }
+    @media (max-width: 640px) {
+      .cli-stack thead {
+        position: absolute;
+        width: 1px; height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+      }
+      .cli-stack, .cli-stack tbody, .cli-stack tr, .cli-stack td { display: block; width: 100%; }
+      .cli-stack tr { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+      .cli-stack tr:last-child { border-bottom: none; }
+      .cli-stack td { padding: 0; border: none; white-space: normal; }
+      .cli-stack td:first-child { white-space: normal; font-size: 16px; }
+      .cli-stack td + td { margin-top: 10px; }
+      .cli-stack td + td::before {
+        content: attr(data-label);
+        display: block;
+        margin-bottom: 2px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+      }
+    }
+
+    /* 自主處理的循環圖 */
+    .cli-loop {
+      display: flex;
+      align-items: stretch;
+      gap: 10px;
+      margin: 24px 0;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+    }
+    .cli-loop-node {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 12px 10px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-heading);
+      line-height: 1.4;
+    }
+    .cli-loop-node small {
+      display: block;
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-muted);
+    }
+    .cli-loop-who {
+      display: block;
+      margin-bottom: 2px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--accent);
+    }
+    .cli-loop-arrow {
+      flex: 0 0 auto;
+      align-self: center;
+      color: var(--text-muted);
+      font-size: 18px;
+      line-height: 1;
+    }
+    .cli-loop-arrow::before { content: "\2192"; }
+    .cli-loop-cycle {
+      flex: 3.6 1 0;
+      min-width: 0;
+      padding: 8px 10px 10px;
+      border: 1px dashed var(--accent);
+      border-radius: var(--radius-sm);
+    }
+    .cli-loop-cycle-label {
+      margin-bottom: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--accent-light);
+      text-align: center;
+    }
+    .cli-loop-track { display: flex; align-items: stretch; gap: 8px; }
+    @media (max-width: 720px) {
+      .cli-loop, .cli-loop-track { flex-direction: column; }
+      .cli-loop-node, .cli-loop-cycle { flex: 0 0 auto; }
+      .cli-loop-arrow::before { content: "\2193"; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .cli-loop-s1, .cli-loop-s2, .cli-loop-s3 { animation: cli-loop-pulse 6s ease-in-out infinite; }
+      .cli-loop-s2 { animation-delay: 2s; }
+      .cli-loop-s3 { animation-delay: 4s; }
+    }
+    @keyframes cli-loop-pulse {
+      0%, 30%, 100% { border-color: var(--border-light); box-shadow: none; }
+      6%, 24% { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    }
+
+    /* 步驟 */
+    .cli-step {
+      margin: 28px 0;
+      padding: 2px 0 2px 20px;
+      border-left: 2px solid var(--border-light);
+    }
+    .cli-step-num {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--accent);
+    }
+    .content .cli-step-title {
+      margin: 2px 0 10px;
+      font-size: 18px;
+      line-height: 1.5;
+      color: var(--text-heading);
+    }
+    .cli-step > :last-child { margin-bottom: 0; }
+    @media (max-width: 480px) {
+      .cli-step { padding-left: 14px; }
+      .cli-claim { padding: 20px 18px 18px; }
+      .content .cli-claim-quote { font-size: 20px; }
+    }
+
+    /* 互動示意：權限詢問 */
+    .cli-demo {
+      position: relative;
+      margin: 28px 0 20px;
+      padding: 24px;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      background: var(--bg-card);
+    }
+    .cli-demo::before {
+      content: attr(data-cli-title);
+      position: absolute;
+      top: -11px;
+      left: 16px;
+      padding: 0 8px;
+      background: var(--bg-card);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: var(--accent);
+    }
+    .cli-demo-label { margin-bottom: 16px; font-size: 13px; color: var(--text-muted); }
+    .cli-perm-screen {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-code);
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      overflow-wrap: anywhere;
+    }
+    .cli-perm-title { font-weight: 700; color: var(--accent-light); }
+    .cli-perm-cmd { margin-top: 2px; color: var(--text-heading); }
+    .cli-perm-q { margin: 10px 0 8px; color: var(--text); }
+    .cli-perm-opts { display: grid; gap: 6px; }
+    .cli-perm-opt {
+      display: block;
+      width: 100%;
+      min-height: 44px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      overflow-wrap: anywhere;
+    }
+    .cli-perm-opt:hover { border-color: var(--accent); }
+    .cli-perm-opt:focus-visible { outline: 2px solid var(--accent-light); outline-offset: 2px; }
+    .cli-perm-opt[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+      color: var(--text-heading);
+    }
+    .cli-perm-foot { margin-top: 10px; font-size: 12px; }
+    .cli-perm-explain { margin-top: 14px; font-size: 15px; }
+    .cli-perm-answer { margin: 0 0 10px; }
+    .cli-perm-answer:last-child { margin-bottom: 0; }
+    .cli-perm-answer strong { color: var(--accent-light); }
+    .cli-perm-hint { margin: 0; color: var(--text-muted); }
+    /* 有 JavaScript 時一次只顯示選到的那一則；沒有時四則全部列出 */
+    .cli-demo:not(.cli-js) .cli-perm-hint { display: none; }
+    .cli-demo.cli-js .cli-perm-answer { display: none; }
+    .cli-demo.cli-js .cli-perm-answer.cli-on { display: block; }
+
+    /* 章末清單 */
+    .cli-takeaway { margin: 16px 0; padding-left: 0; list-style: none; }
+    .content .cli-takeaway li {
+      margin: 0 0 10px;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+    }
+  </style>
 </head>
 <body>
 
@@ -13,11 +270,11 @@
     <a href="/" class="site-logo">Claude Code 指南</a>
     <nav class="site-nav">
       <a href="/">首頁</a>
-      <a href="/chapter1/">LLM 本質</a>
-      <a href="/chapter2/">下指令</a>
-      <a href="/chapter3/">工作流程</a>
-      <a href="/chapter9/">術語字典</a>
-      <a href="/appendix/">附錄</a>
+      <a href="/chapter1/">為什麼要懂</a>
+      <a href="/chapter2/">入門</a>
+      <a href="/chapter7/">動手做</a>
+      <a href="/chapter10/">Claude Code</a>
+      <a href="/glossary/">術語字典</a>
     </nav>
     <button class="hamburger" aria-label="選單">
       <span></span><span></span><span></span>
@@ -27,388 +284,1153 @@
 
 <nav class="mobile-nav">
   <a href="/">首頁</a>
-  <a href="/chapter1/">第一章：LLM 本質</a>
-  <a href="/chapter2/">第二章：下指令</a>
-  <a href="/chapter3/">第三章：工作流程</a>
-  <a href="/chapter4/">第四章：基本知識</a>
-  <a href="/chapter5/">第五章：描述力</a>
-  <a href="/chapter6/">第六章：Claude Code</a>
-  <a href="/chapter7/">第七章：技術棧</a>
-  <a href="/chapter8/">第八章：API</a>
-  <a href="/chapter9/">第九章：術語字典</a>
-  <a href="/chapter10/" class="active">第十章：進階問題</a>
-  <a href="/chapter11/">第十一章：工具生態</a>
-  <a href="/appendix/">附錄</a>
+  <a href="/chapter1/">第一章：為什麼要懂</a>
+  <a href="/chapter2/">第二章：LLM 本質</a>
+  <a href="/chapter3/">第三章：下指令</a>
+  <a href="/chapter4/">第四章：工作流程</a>
+  <a href="/chapter5/">第五章：基本知識</a>
+  <a href="/chapter6/">第六章：描述力</a>
+  <a href="/chapter7/">第七章：部署</a>
+  <a href="/chapter8/">第八章：網域</a>
+  <a href="/chapter9/">第九章：資料庫</a>
+  <a href="/chapter10/" class="active">第十章：Claude Code 怎麼用</a>
+  <a href="/chapter11/">第十一章：技術棧</a>
+  <a href="/chapter12/">第十二章：API</a>
+  <a href="/chapter13/">第十三章：架構拓樸</a>
+  <a href="/chapter14/">第十四章：功能怎麼切</a>
+  <a href="/chapter15/">第十五章：資料表與欄位</a>
+  <a href="/chapter16/">第十六章：前後端邊界</a>
+  <a href="/chapter17/">第十七章：會出事的地方</a>
+  <a href="/chapter18/">第十八章：其他工具</a>
+  <a href="/appendix/">附錄：常見問題</a>
+  <a href="/glossary/">附錄：術語字典</a>
 </nav>
 
 <main>
   <section class="container">
     <div class="page-header">
       <div class="chapter-label">第十章</div>
-      <h1>蓋大樓才會遇到的問題</h1>
-      <p class="lead">當你的專案從「一頁式網站」長成「多功能系統」，有些觀念會從「聽過就好」變成「不懂就踩坑」。這一章把第三章簡單提過的概念展開講清楚。</p>
-    </div>
-  </section>
-
-  <section class="container content">
-
-    <!-- ===== A. 異步寫入 ===== -->
-    <h2>異步寫入（Async）：三道菜同時做</h2>
-
-    <div class="analogy">
-      <strong>比喻：餐廳廚房。</strong><br><br>
-      你在餐廳點了三道菜：沙拉、牛排、甜點。<br><br>
-      <strong>同步做法</strong>：廚房做完沙拉 → 端出來 → 做牛排 → 端出來 → 做甜點 → 端出來。你等到天荒地老。<br><br>
-      <strong>異步做法</strong>：三道菜同時開工！沙拉區切菜、烤爐烤牛排、甜點師做提拉米蘇。誰先做好誰先上桌。效率大幅提升。
+      <h1>Claude Code 怎麼用</h1>
+      <p class="lead">一般 LLM 是只能出嘴巴的顧問，Claude Code 是有手有腳能實際動工的工人。這一章從安裝帶你用到順手，也教你替它畫線：哪些事直接做、哪些先問你、哪些碰都不能碰。</p>
     </div>
 
-    <p>程式的世界也是這樣。同步（Synchronous）是一件事做完才做下一件；異步（Asynchronous）是多件事同時做，誰先完成誰先回報。</p>
+    <div class="content">
 
-    <p>用文字畫出來大概長這樣：</p>
+      <p>前面三章講的是把東西放上網、幫它取個網址、替它找地方存資料。這些事，實際動手的多半是 Claude Code。這一章把它本身講清楚：它跟網頁上聊天的 AI 差在哪、怎麼裝、怎麼下第一句話、怎麼管住它。</p>
 
-    <div class="code-block">
-<strong style="color: var(--accent-light);">同步流程（一件一件來）</strong><br>
-<br>
-[查使用者資料] ──等 2 秒──&gt; 完成<br>
-　　　　　　　　　　　　　　[查訂單紀錄] ──等 3 秒──&gt; 完成<br>
-　　　　　　　　　　　　　　　　　　　　　　　　　　　[寄通知信] ──等 1 秒──&gt; 完成<br>
-<br>
-<span style="color: var(--red);">總共花了：2 + 3 + 1 = 6 秒</span><br>
-<br>
-──────────────────────────────<br>
-<br>
-<strong style="color: var(--accent-light);">異步流程（同時開工）</strong><br>
-<br>
-[查使用者資料] ──等 2 秒──&gt; 完成 ┐<br>
-[查訂單紀錄]　──等 3 秒──&gt; 完成 ├─&gt; 全部到齊，繼續！<br>
-[寄通知信]　　──等 1 秒──&gt; 完成 ┘<br>
-<br>
-<span style="color: var(--green);">總共花了：3 秒（取最慢的那個）</span>
-    </div>
+      <p>會動手，就要先講好它能動到哪裡。這本書一直說「知道邊界」，在這一章，邊界很具體：哪些事它可以直接做、哪些要先問你、哪些碰都不能碰。這些線都是你畫的，後面的權限模式、CLAUDE.md、Hook 就是畫線的工具。</p>
 
-    <p>看起來異步完勝？沒錯，<strong>大部分情況下異步確實更快</strong>。但問題來了——</p>
+      <!-- ========== A. Claude Code vs 一般 LLM ========== -->
+      <h2>Claude Code vs 一般 LLM（ChatGPT／Gemini 網頁版）</h2>
 
-    <h3>異步的坑：順序不一定對</h3>
+      <p>你在 ChatGPT 或 Gemini 的網頁上問問題，它會給你很好的答案、甚至幫你寫一段程式碼。但有個致命的問題：<strong>它只能用嘴巴</strong>。</p>
 
-    <p>回到餐廳的比喻：如果甜點比牛排先做好，但甜點的淋醬需要用牛排的肉汁呢？甜點先到你桌上，但它還沒淋醬——這就出問題了。</p>
+      <p>它可以告訴你「你應該在 index.html 的第 37 行加一段程式碼」，但它不能幫你開檔案、不能幫你存檔、不能幫你跑指令。你還是得自己動手。</p>
 
-    <div class="analogy">
-      <strong>程式裡的真實案例：</strong><br><br>
-      你寫了一個「註冊流程」：<br>
-      1. 在資料庫建立使用者帳號<br>
-      2. 用這個帳號的 ID 去建立預設設定<br>
-      3. 寄歡迎信給使用者<br><br>
-      如果三步同時跑（異步），第二步可能比第一步先完成——但帳號還沒建好，哪來的 ID？<br><br>
-      <strong>結果：程式爆掉，因為它找不到一個還不存在的帳號。</strong>
-    </div>
+      <div class="analogy">
+        <strong>白話比喻：</strong><br><br>
+        一般 LLM（ChatGPT／Gemini 網頁版）＝<strong>只能用嘴巴的顧問</strong><br>
+        他坐在旁邊給你建議，但不能碰你的電腦。你問他「這個 bug 怎麼修？」他會說「你去那個檔案改第 37 行」，但他自己不能改。<br><br>
+        Claude Code ＝<strong>有手有腳的工人</strong><br>
+        他可以直接打開你的檔案、改程式碼、存檔、跑測試、甚至幫你把東西上傳到網路上。你只需要下指令，他就去做。
+      </div>
 
-    <h3>Race Condition：搶最後一個座位</h3>
-
-    <p><strong>Race Condition（競爭條件）</strong>是異步最經典的問題。想像這個場景：</p>
-
-    <p>電影院最後一個座位。小明和小華同時在不同的電腦上訂票。兩個人幾乎同一秒按下「訂票」。系統查了一下：「有一個空位？有！」→ 兩個人都成功訂到了。但實際上只有一個座位。</p>
-
-    <div class="compare">
-      <div class="compare-bad">
-        <div class="compare-label">沒處理 Race Condition</div>
-        <div class="code-block">
-小明查：有 1 個空位 → 訂！<br>
-小華查：有 1 個空位 → 訂！<br>
-<br>
-結果：2 個人搶到 1 個座位<br>
-<span style="color: var(--red);">有人到現場沒位子坐</span>
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">一般 LLM（只能出嘴巴）</div>
+          <div class="code-block">
+你：「幫我把首頁標題改成紅色」<br><br>
+AI：「請在 styles.css 裡找到 .title，<br>
+加上 color: red;」<br><br>
+然後你要自己：<br>
+1. 打開 styles.css<br>
+2. 找到 .title<br>
+3. 加上那行程式碼<br>
+4. 存檔<br>
+5. 重新整理瀏覽器確認<br><br>
+<span style="color: var(--red);">你還是得自己動手</span>
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">Claude Code（直接動手做）</div>
+          <div class="code-block">
+你：「幫我把首頁標題改成紅色」<br><br>
+Claude Code：<br>
+1. 自己打開 styles.css<br>
+2. 找到 .title<br>
+3. 加上 color: red;<br>
+4. 存檔<br>
+5. 告訴你改了哪一行<br><br>
+<span style="color: var(--green);">你講要什麼，它去做，你驗收</span>
+          </div>
         </div>
       </div>
-      <div class="compare-good">
-        <div class="compare-label">有處理 Race Condition</div>
+
+      <p>簡單來說，一般 LLM 是你的「軍師」，Claude Code 是你的「施工隊」。軍師能出好主意，但施工隊能直接把房子蓋起來。</p>
+
+      <!-- ========== B. 控制面向 ========== -->
+      <h2>Claude Code 的核心差異：控制面向</h2>
+
+      <p>Claude Code 厲害的地方，不只是「能動手」，更是「<strong>你可以精準控制它能做什麼</strong>」。就像你雇了一個工人，你可以規定他能進哪些房間、能碰哪些東西。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>面向</th>
+              <th>說明</th>
+              <th>白話</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>電腦權限</strong></td>
+              <td>可以讀寫檔案、執行終端機指令、操作瀏覽器、管理 Git 版控</td>
+              <td>有手有腳的工人，能搬磚、釘釘子、刷油漆</td>
+            </tr>
+            <tr>
+              <td><strong>控制程度</strong></td>
+              <td>透過 CLAUDE.md 交代規矩、權限模式決定問不問你、權限規則和 Hook 擋住不准做的事</td>
+              <td>你可以設定這個工人「能做什麼、不能做什麼」，就像給員工一本規範手冊</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">重點</div>
+        Claude Code 不是「失控的 AI 自己亂做事」。它更像是一個聽話的員工：你給規範，它就照規範做；你說不能碰的東西，它就不碰。<br><br>
+        不過要分清楚「交代」和「上鎖」：寫在 CLAUDE.md 裡的規範是交代，它會盡量照做，但不是硬性的鎖。真的絕對不准碰的事，要用權限規則或 Hook 來擋，那才是鎖。
+      </div>
+
+      <!-- ========== C. 使用方式 ========== -->
+      <h2>使用 Claude Code 的方式（不只三種）</h2>
+
+      <p>Claude Code 不是只有一種打開方式。現在的入口有：終端機裡的 CLI、VS Code、JetBrains、桌面 App、網頁版，再加上手機 App。背後是同一顆引擎，差別只在你從哪裡跟它說話。這一章講的權限模式、CLAUDE.md，在每個入口都一樣適用。下面先講常用的幾條路，其餘的整理在後面的表裡。</p>
+
+      <h3>1. 終端機裡的 CLI</h3>
+      <p>先分清楚兩個詞。<strong><a class="cli-link" href="/glossary/#t-terminal">終端機</a></strong>（Terminal）是打字下指令的那個視窗。<strong><a class="cli-link" href="/glossary/#t-cli">CLI</a></strong>（Command Line Interface）是在終端機裡用打字操作的工具：<code>claude</code> 是 CLI，後面幾章會出現的 <code>gh</code>（GitHub 的）、<code>wrangler</code>（Cloudflare 的）也都是 CLI。</p>
+      <p>用法就是打開終端機，打 <code>claude</code>，按 Enter，開始對話：</p>
+      <div class="code-block">
+$ claude<br>
+&gt; 幫我看一下這個專案的結構<br><br>
+Claude Code 會直接讀取你的檔案，然後回答你
+      </div>
+      <div class="analogy">
+        <strong>白話：</strong>像直接跟工人面對面說話。沒有花俏的介面，你說一句，他就去做。
+      </div>
+      <p>這是功能最完整的入口，也是這本指南主要在用的方式。從安裝到做完第一個任務，下面有一整節帶你走：<a class="cli-link" href="#cli-howto">CLI 怎麼用</a>。</p>
+
+      <h3>2. VS Code 編輯器</h3>
+      <p>如果你用 VS Code 寫程式（或看程式碼），有兩種方式使用 Claude Code：</p>
+      <ul>
+        <li><strong>在 VS Code 內建的終端機裡用</strong>：跟上面終端機的用法一模一樣，只是終端機嵌在編輯器裡面</li>
+        <li><strong>用 Claude Code 擴充功能（Extension）</strong>：會出現一個對話面板，像在 VS Code 裡面開了一個 LINE 聊天室</li>
+      </ul>
+      <div class="box box-info">
+        <div class="box-label">小知識</div>
+        用擴充功能的好處是，你可以一邊看程式碼、一邊跟 Claude Code 聊天，它改了什麼你馬上在編輯器裡就看得到。
+      </div>
+
+      <h3>看它改了什麼：Diff</h3>
+      <p>Diff 就是「比較兩個版本的差異」。你可以把它想成 Word 的「追蹤修訂」功能：紅色是刪除的部分、綠色是新增的部分。</p>
+      <p>VS Code 會在側邊欄列出哪些檔案被改了，點進去就能看到每一行的差異；桌面 App 也有同樣的改動檢視。這是用 Claude Code 很大的好處之一：<strong>它改了什麼，你一目瞭然</strong>。不用擔心 Claude 偷偷改了什麼你不知道的東西。</p>
+      <div class="analogy">
+        <strong>白話：</strong>Diff 就像老師用紅筆批改作業：哪裡被劃掉、哪裡是新寫的，全部清清楚楚。你不用逐行去比對「到底改了什麼」，工具幫你標好了。
+      </div>
+
+      <h3>3. Claude Desktop（桌面應用程式）</h3>
+      <p>Anthropic 出的桌面 App。打開後點側邊欄上方的 <strong>Code</strong> 分頁，就是 Claude Code。App 已經內建，不用另外安裝 CLI，不想碰終端機的人從這裡開始比較順。幾個在這裡用起來特別方便的能力：</p>
+      <ul>
+        <li><strong>Computer Use（電腦操控）</strong>：可以操控你電腦上的桌面軟體，像是打開沒有 CLI、也沒有網頁版的那種軟體，幫你點按鈕、填資料。就像你的手被 AI 附身了。<strong>瀏覽器它只能看、不能點</strong>，網頁上的操作要交給 Claude in Chrome（後面<a class="cli-link" href="#cli-screen">讓 Claude 操作畫面</a>那一節有講）。目前是研究預覽版（macOS 與 Windows），預設關閉，要先到設定裡打開</li>
+        <li><strong>Browser 面板</strong>：App 內建一個瀏覽器，讓它開網頁、看畫面。跟你平常用的瀏覽器分開，沒有你存的登入</li>
+        <li><strong>Dispatch（用手機派工）</strong>：人在外面，用手機 Claude App 丟一個任務回來，由你電腦上的桌面 App 接手去做（電腦要開著），做完或需要你同意時手機會跳通知。手機和桌面 App 要先配對一次；限 Pro、Max、Ultra 方案</li>
+        <li><strong>Schedule 功能（排程任務）</strong>：可以設定排程，讓 Claude 在特定時間自動執行任務。例如「每天早上 9 點幫我整理 Email 摘要」。排在自己電腦上的任務，要 App 開著、電腦醒著才會跑；排在雲端的任務，電腦關機也會跑</li>
+      </ul>
+
+      <h3>4. 網頁版與手機 App</h3>
+      <p>在瀏覽器打開 <code>claude.ai/code</code>，或用手機 Claude App 裡的 Code 分頁，Claude Code 會在雲端的機器上跑：不用安裝，筆電闔上它也繼續做。差別是它在雲端，處理的是放在 GitHub 上（或你上傳上去）的專案，不會直接動你電腦裡的資料夾。要處理自己電腦上的資料夾，還是得用 CLI 或桌面 App。</p>
+      <p>另外有一個叫 Remote Control 的功能：電腦上正在跑的那一場對話，可以用手機或另一台電腦的瀏覽器接著操作，實際做事的還是你那台電腦，所以電腦要開著。</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>使用方式</th>
+              <th>介面</th>
+              <th>適合誰</th>
+              <th>特色</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>終端機裡的 CLI</td>
+              <td>純文字，全用打字</td>
+              <td>習慣終端機的人，或願意花十分鐘學的人</td>
+              <td>功能最完整，這本書主要用它</td>
+            </tr>
+            <tr>
+              <td>VS Code</td>
+              <td>終端機或對話面板</td>
+              <td>有在寫程式／看程式碼的人</td>
+              <td>邊看程式碼邊對話，改了什麼直接看得到</td>
+            </tr>
+            <tr>
+              <td>JetBrains</td>
+              <td>IDE 裡的外掛（要另外裝 CLI）</td>
+              <td>用 IntelliJ、PyCharm、WebStorm 的工程師</td>
+              <td>在 IDE 裡看 Diff</td>
+            </tr>
+            <tr>
+              <td>Claude Desktop</td>
+              <td>圖形化桌面 App 的 Code 分頁</td>
+              <td>不想碰終端機的人</td>
+              <td>Computer Use、Browser 面板、Dispatch、排程</td>
+            </tr>
+            <tr>
+              <td>網頁版／手機 App</td>
+              <td>瀏覽器或手機</td>
+              <td>想丟一個長任務、人不在電腦前的人</td>
+              <td>在雲端跑，不用安裝；處理 GitHub 上的專案</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>除了這些，還有 Slack、Chrome 擴充功能、GitHub Actions 等整合，屬於進階用法，這裡先不展開。</p>
+
+      <!-- ========== C2. CLI 怎麼用 ========== -->
+      <h2 id="cli-howto">CLI 怎麼用</h2>
+
+      <div class="cli-claim">
+        <p class="cli-claim-quote">簡單說，你在電腦上的工作，<em>幾乎 99%</em> 都可以丟給它自己處理。</p>
+        <p class="cli-claim-note">這不是哪份報告的統計數字，是我自己每天用下來的體感：只要一件事是「坐在電腦前、動鍵盤滑鼠就做得完」的，大多可以改成跟它講清楚要什麼，它自己做完，你來驗收。</p>
+        <p class="cli-claim-note">丟給它的是動手。做到哪裡為止、哪裡不准碰，還是你定。</p>
+      </div>
+
+      <p>它最擅長的是寫程式，但只要是在終端機裡打指令做得完的事，它都幫得上忙：寫文件、找檔案、查資料。而「打指令做得完的事」，比多數人以為的多很多。</p>
+
+      <h3>非工程師實際會丟給它的工作</h3>
+
+      <div class="table-wrapper">
+        <table class="cli-stack">
+          <thead>
+            <tr>
+              <th>工作</th>
+              <th>你說什麼</th>
+              <th>它會自己做哪些步驟</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>整理資料夾與檔名</td>
+              <td data-label="你說什麼" class="cli-say">「把這個資料夾裡的檔案依類型分到子資料夾，檔名前面加上日期。先列出你打算怎麼分，我說好再動。」</td>
+              <td data-label="它會自己做">列出所有檔案 → 提分類方案等你點頭 → 建資料夾、搬檔、改名 → 再列一次，核對數量有沒有少</td>
+            </tr>
+            <tr>
+              <td>處理 Excel</td>
+              <td data-label="你說什麼" class="cli-say">「把這三個月的訂單 Excel 合成一份，算出每個客戶的總金額，另存成新檔，原檔不要動。」</td>
+              <td data-label="它會自己做">寫一小段程式去讀 Excel → 合併、計算 → 另存新檔 → 抽幾筆回頭對照原檔驗算</td>
+            </tr>
+            <tr>
+              <td>處理 PDF</td>
+              <td data-label="你說什麼" class="cli-say">「讀這個資料夾裡的合約 PDF，把簽約日、到期日、金額整理成一張表。讀不清楚的標出來，不要猜。」</td>
+              <td data-label="它會自己做">逐份讀 PDF → 抽出欄位 → 寫成表格檔 → 列出需要你人工確認的幾份</td>
+            </tr>
+            <tr>
+              <td>批次改圖</td>
+              <td data-label="你說什麼" class="cli-say">「把 photos 裡的圖全部縮到寬 1200 像素、轉成 JPG，放到新資料夾 resized，原圖留著。」</td>
+              <td data-label="它會自己做">看電腦裡有沒有能用的改圖工具，沒有就提議安裝 → 寫批次指令 → 執行 → 抽查幾張的尺寸和格式</td>
+            </tr>
+            <tr>
+              <td>寫信草稿</td>
+              <td data-label="你說什麼" class="cli-say">「依這份報價單寫一封給 B 咖啡店的說明信，語氣客氣、三段以內，存成草稿檔，不要寄出。」</td>
+              <td data-label="它會自己做">讀報價單 → 寫草稿存成文字檔 → 跟你說重點放在哪。要它真的寄信，得先幫它接上信箱（靠下面會講的 MCP）</td>
+            </tr>
+            <tr>
+              <td>查資料整理成報告</td>
+              <td data-label="你說什麼" class="cli-say">「查三家同類服務的方案與價格，整理成一頁比較表，每一項附官方網址。查不到的寫『查不到』，不要猜。」</td>
+              <td data-label="它會自己做">上網搜尋 → 打開各家的網站讀 → 整理成檔案 → 每一項附上來源網址</td>
+            </tr>
+            <tr>
+              <td>架網站並部署</td>
+              <td data-label="你說什麼" class="cli-say">「幫 A 設計工作室做一頁式介紹網站，要有營業時間和地圖連結。做好先在我電腦上開給我看，我說好再上線。」</td>
+              <td data-label="它會自己做">寫網頁檔案 → 在你電腦上開起來給你看 → 照你的意見改 → 用部署工具的指令上線（怎麼部署看<a class="cli-link" href="/chapter7/">第七章</a>）</td>
+            </tr>
+            <tr>
+              <td>做影片</td>
+              <td data-label="你說什麼" class="cli-say">「用這五張產品照做一支 30 秒的直式介紹影片，每張照片配一句字卡。」</td>
+              <td data-label="它會自己做">用 Remotion 這類「用程式做影片」的工具開專案 → 一幕一幕寫 → 先輸出畫面給你看 → 照意見修改 → 輸出成影片檔（Remotion 在<a class="cli-link" href="/chapter18/">第十八章</a>細講）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>「它會自己做」那一欄是示意，實際步驟它會看你的檔案狀況自己調整。重點在「你說什麼」那一欄：每一句都講了<strong>要什麼結果</strong>，多半還講了<strong>哪一步先停下來</strong>或<strong>什麼不能動</strong>。這就是<a class="cli-link" href="/chapter3/#three">第三章</a>說的「目標」和「邊界」。</p>
+
+      <h3>「自主處理」是什麼意思</h3>
+
+      <p>你給的是<strong>目標</strong>，不是步驟。它自己拆步驟、動手、檢查，出錯自己修，一直到做完、或真的卡住了才回來找你。過程分三段：看現況、動手做、檢查結果。三段會反覆轉，直到任務完成，而且你隨時可以插手。</p>
+
+      <div class="cli-loop">
+        <div class="cli-loop-node"><span class="cli-loop-who">你</span>給目標<small>要什麼、怎樣算完</small></div>
+        <div class="cli-loop-arrow" aria-hidden="true"></div>
+        <div class="cli-loop-cycle">
+          <div class="cli-loop-cycle-label">它自己反覆轉，直到做完</div>
+          <div class="cli-loop-track">
+            <div class="cli-loop-node cli-loop-s1">看現況<small>讀檔案、查資料</small></div>
+            <div class="cli-loop-arrow" aria-hidden="true"></div>
+            <div class="cli-loop-node cli-loop-s2">動手做<small>改檔案、跑指令</small></div>
+            <div class="cli-loop-arrow" aria-hidden="true"></div>
+            <div class="cli-loop-node cli-loop-s3">檢查結果<small>沒過就回頭再修</small></div>
+          </div>
+        </div>
+        <div class="cli-loop-arrow" aria-hidden="true"></div>
+        <div class="cli-loop-node"><span class="cli-loop-who">你</span>驗收<small>看結果、看改動</small></div>
+      </div>
+
+      <p>舉個不寫程式的例子（示意，實際每次不一樣）：</p>
+      <div class="code-block">
+你：「把這個資料夾的 200 張照片，依拍攝日期改檔名。做完總數要一樣。」<br><br>
+它自己做的事：<br>
+1. 列出資料夾，確認真的有 200 張<br>
+2. 寫一小段程式，讀每張照片的拍攝日期<br>
+3. 先拿 5 張試改，看結果對不對<br>
+4. 全部改完，再數一次：200 張都在<br>
+5. 發現有 3 張沒有日期資訊，沒有硬改，列出來問你怎麼處理
+      </div>
+      <p>第 3 到 5 步就是「自主」的重點：它會自己驗算，出錯自己修，判斷不了才停下來問。</p>
+
+      <div class="box box-tip">
+        <div class="box-label">你能幫的最大的忙</div>
+        給它一個「怎樣算做完」的標準，讓它有東西可以自己對答案。例如「做完檔案總數要一樣」「金額加總要等於原表的合計」。有標準，它才知道什麼時候該回頭再修。
+      </div>
+
+      <h3 id="cli-perm">它會先停下來問你的事</h3>
+
+      <p>「自主」不等於「什麼都不問」。它問不問，看的是當下的<strong>權限模式</strong>（四種模式的對照和切換方法在下面的步驟 6）：</p>
+
+      <div class="table-wrapper">
+        <table class="cli-stack">
+          <thead>
+            <tr>
+              <th>情況</th>
+              <th>它會怎麼做</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>手動模式（Manual）</td>
+              <td data-label="它會怎麼做">讀檔案不問；每次要改檔案、跑指令之前，都會停下來等你同意。</td>
+            </tr>
+            <tr>
+              <td>自動模式（Auto）</td>
+              <td data-label="它會怎麼做">不再一步一步問。讀檔、改工作資料夾裡的檔案，直接做，不經過審查。其餘的動作（主要是跑指令、連到外面的服務）先交給另一個專門把關的模型看過，有風險就攔下來。預設會攔的例子：從網路下載程式就直接執行、把機密資料送到外部、正式環境的部署、永久刪除這場對話開始前就存在的檔案。</td>
+            </tr>
+            <tr>
+              <td>任何模式</td>
+              <td data-label="它會怎麼做">像「把你整個使用者資料夾刪掉」這種對重要位置的刪除，不會自動放行，一定停下來問你。另外，它主動問你的問題，一定等你回答；但自動模式下它比較少問，會傾向一路做下去。</td>
+            </tr>
+            <tr>
+              <td>操作瀏覽器時</td>
+              <td data-label="它會怎麼做">碰到登入頁或「我不是機器人」驗證，它會停下來，請你自己處理。</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>在自動模式被攔下來時，畫面會跳通知。想知道攔了什麼，打 <code>/permissions</code>，切到「Recently blocked」分頁就看得到，確認沒問題再放行。連續被攔 3 次、或一場裡累計被攔 20 次，自動模式會先暫停，退回一步一步問你。</p>
+
+      <div class="box box-warning">
+        <div class="box-label">付款、寄信、發訊息：你要自己先畫線</div>
+        預設的攔截清單管的是「機密資料外流」「救不回來的刪除」這一類，沒有保證「每一筆付款、每一封信寄出前一定先問你」。所以我的做法是在指令裡直接講：「寄出前先給我看」「付款那一步停下來等我」「刪除前先列清單」。<br><br>
+        你講過的界線（例如「先不要上傳」「上線前等我看過」），自動模式會照著攔，要你開口才算解除。它自己覺得「條件達成了」不算。<br><br>
+        但這些界線是從對話裡讀的，不是存成規則。對話太長、前面被壓成摘要之後，界線可能跟著不見。長任務做到一半，重要的界線再講一次；要永久有效，就用 <code>/permissions</code> 寫成禁止的規則。
+      </div>
+
+      <h3>第一次用，為什麼要看它做了什麼</h3>
+
+      <ul>
+        <li><strong>它聽懂的，不一定是你想的。</strong>「整理一下」對你是分資料夾，對它可能是連檔名一起改。看過一次，你就知道下次要怎麼講</li>
+        <li><strong>不是每件事都能復原。</strong>按兩下 <span class="cli-key">Esc</span> 可以把它改過的檔案倒回去，但只限它用內建的編輯功能改的檔案；用指令搬走、改名、刪掉的檔案不一定救得回來，寄出去的信、上線的網站、寫進資料庫的資料更是倒不回來</li>
+        <li><strong>自動模式不保證安全。</strong>它只是少問你幾次。方向你有把握的事才放手，敏感的事還是要自己看</li>
+      </ul>
+
+      <div class="box box-tip">
+        <div class="box-label">第一次的安全做法</div>
+        <ol style="margin-bottom: 0;">
+          <li>先把資料夾<strong>複製一份</strong>，讓它在副本上做</li>
+          <li>第一句先叫它「只看不改」，或按幾下 <span class="cli-key">Shift</span> + <span class="cli-key">Tab</span> 切到 Plan 模式，讓它先交計畫，你同意才動手（Plan 模式怎麼用，<a class="cli-link" href="/chapter4/#plan-mode">第四章</a>有完整流程）</li>
+          <li>做完叫它列出「你改了哪些檔案、各改了什麼」</li>
+          <li>想看它實際跑了哪些動作，按 <span class="cli-key">Ctrl</span> + <span class="cli-key">O</span> 展開詳細紀錄</li>
+        </ol>
+      </div>
+
+      <h3>照著做：從安裝到第一個任務</h3>
+
+      <p>以下依 2026 年 11 月的官方文件整理。指令會隨版本調整，跟你畫面上不一樣時，以原文為準：<a class="cli-link" href="https://code.claude.com/docs/en/quickstart" target="_blank" rel="noopener">code.claude.com/docs</a>。</p>
+
+      <div class="cli-step">
+        <div class="cli-step-num">步驟 1</div>
+        <h4 class="cli-step-title">先確認兩件事</h4>
+        <ul>
+          <li><strong>帳號</strong>：要 Claude 的付費方案（Pro、Max、Ultra、Team、Enterprise 任一種），或 Claude Console 帳號（開發者用的，先儲值、用多少扣多少）。免費方案不含 Claude Code</li>
+          <li><strong>電腦</strong>：macOS 13.0 以上，或 Windows 10（1809 版）以上；記憶體 4 GB 以上</li>
+        </ul>
+      </div>
+
+      <div class="cli-step">
+        <div class="cli-step-num">步驟 2</div>
+        <h4 class="cli-step-title">打開終端機</h4>
+        <ul>
+          <li><strong>Mac</strong>：按 <span class="cli-key">Cmd</span> + <span class="cli-key">Space</span>，輸入 Terminal，按 <span class="cli-key">Enter</span></li>
+          <li><strong>Windows</strong>：按 <span class="cli-key">Win</span> + <span class="cli-key">X</span>，選「Windows PowerShell」或「終端機（Terminal）」。開出來的視窗，每一行開頭有 <code>PS</code> 兩個字就對了</li>
+        </ul>
+        <p>會跳出一個只有文字、游標在閃的視窗，那就是終端機。用法只有一種：打一行字，按 Enter，等它回應。在這裡不能用滑鼠點選項，要用方向鍵移動。</p>
+      </div>
+
+      <div class="cli-step">
+        <div class="cli-step-num">步驟 3</div>
+        <h4 class="cli-step-title">安裝</h4>
+        <p>把對應的那一行指令複製起來（只要指令那一行，不含「Mac：」這種標題），貼進終端機，按 Enter。貼上的按法：Mac 是 <span class="cli-key">Cmd</span> + <span class="cli-key">V</span>；Windows 是 <span class="cli-key">Ctrl</span> + <span class="cli-key">V</span>，或按一下滑鼠右鍵。</p>
         <div class="code-block">
-小明查：有 1 個空位 → 鎖住 → 訂！<br>
-小華查：座位被鎖 → 等一下...<br>
-小明完成 → 解鎖 → 空位 = 0<br>
-小華查：沒位子了 → 顯示已售完<br>
-<span style="color: var(--green);">正確！一個座位只賣一次</span>
+Mac：<br>
+curl -fsSL https://claude.ai/install.sh | bash<br><br>
+Windows（PowerShell）：<br>
+irm https://claude.ai/install.ps1 | iex
+        </div>
+        <ul>
+          <li>下載時畫面<strong>不會有進度條</strong>，視窗開著等就好。裝完會出現 <code>Claude Code successfully installed!</code></li>
+          <li><strong>另開一個新的</strong>終端機視窗（照步驟 2 再開一次），輸入 <code>claude --version</code>，按 Enter。有印出版本號，就是裝好了</li>
+          <li>用這個方式裝的，之後會在背景自動更新</li>
+          <li>如果出現 <code>command not found: claude</code>（Windows 是 <code>'claude' is not recognized</code>），照官方的<a class="cli-link" href="https://code.claude.com/docs/en/terminal-guide" target="_blank" rel="noopener">新手終端機指南</a>最下面的排除步驟處理</li>
+        </ul>
+        <div class="box box-warning">
+          <div class="box-label">貼指令之前</div>
+          把一行指令貼進終端機，等於讓它在你的電腦上做事。上面兩行出自 Anthropic 官方文件。其他網站叫你貼的指令，看不懂就先不要貼，可以先丟給 Claude，問它這一行在做什麼。
         </div>
       </div>
-    </div>
 
-    <div class="box box-tip">
-      <div class="box-label">跟 Claude 怎麼說</div>
-      當你的系統開始有「多人同時操作」的需求時，記得跟 Claude 說：<br>
-      「這個功能可能有 race condition，幫我加上 lock 機制」或<br>
-      「這幾個步驟有順序依賴，不能用 Promise.all，要依序執行」
-    </div>
-
-    <!-- ===== B. SSOT ===== -->
-    <h2>SSOT：全公司只有一本電話簿</h2>
-
-    <p><strong>SSOT</strong> 是 <strong>Single Source of Truth</strong> 的縮寫，中文叫「單一真理來源」。聽起來很哲學，但其實超級實用。</p>
-
-    <div class="analogy">
-      <strong>比喻：電話簿。</strong><br><br>
-      假設公司有三個部門，每個部門各自維護一份員工電話簿。<br><br>
-      小明換了手機號碼，HR 部門更新了，但業務部和工程部還是舊號碼。<br>
-      三個月後，業務部打小明電話打不通，客戶的案子卡住了——<br><br>
-      <strong>問題出在哪？同一筆資料存了三份，只更新了一份。</strong>
-    </div>
-
-    <p>程式裡也是一模一樣的問題。來看一個實際案例：</p>
-
-    <h3>實際問題：商品價格存了三個地方</h3>
-
-    <div class="compare">
-      <div class="compare-bad">
-        <div class="compare-label">沒有 SSOT — 三份資料各自為政</div>
+      <div class="cli-step">
+        <div class="cli-step-num">步驟 4</div>
+        <h4 class="cli-step-title">走進資料夾，再啟動</h4>
+        <p>Claude Code 以「你啟動它的那個資料夾」當工作範圍：裡面的檔案和子資料夾它都能讀，範圍以外的要你另外同意。所以先走進你要它處理的資料夾，再啟動。</p>
         <div class="code-block">
-<span style="color: var(--red);">前端 JavaScript：</span><br>
-const price = 299; // 寫死在程式裡<br>
-<br>
-<span style="color: var(--red);">後端 API：</span><br>
-return { price: 350 }; // 上次改了忘記通知前端<br>
-<br>
-<span style="color: var(--red);">資料庫：</span><br>
-product.price = 399; // 最新的價格<br>
-<br>
-<span style="color: var(--red);">結果：客戶看到 299，結帳變 350，<br>
-帳務對帳是 399。三個數字都不一樣。</span>
+cd 資料夾的路徑<br>
+claude
+        </div>
+        <p><code>cd</code> 是「走進這個資料夾」的意思。兩行分開打，每打完一行按一次 Enter。</p>
+        <ul>
+          <li><strong>還沒有資料夾</strong>：先在桌面開一個新資料夾，把要處理的檔案<strong>複製</strong>一份進去，第一次就用它練習</li>
+          <li><strong>路徑不用自己打</strong>：先打 <code>cd</code> 加一個空格，再把資料夾從 Finder（Windows 是檔案總管）拖進終端機視窗，路徑會自動填上，再按 Enter</li>
+          <li><strong>第一次會要你登入</strong>：照畫面指示，它會開瀏覽器讓你登入 Claude 帳號。登入完回到終端機視窗就好，之後不用再登</li>
+          <li><strong>沒用過的資料夾，會先問你信不信任它</strong>：用方向鍵選，按 Enter 確認。自己的資料夾就選信任；從網路上抓來的專案，先想一下再選</li>
+          <li><strong>不要在家目錄直接啟動</strong>（家目錄就是你的使用者資料夾最上層，剛打開終端機時所在的位置）：範圍太大，而且每次啟動都會重問一次信任。開一個專門的資料夾給它</li>
+        </ul>
+      </div>
+
+      <div class="cli-step">
+        <div class="cli-step-num">步驟 5</div>
+        <h4 class="cli-step-title">下第一句話</h4>
+        <p>登入完、選好信任，畫面下方會出現一個輸入框，表示 Claude Code 已經啟動。從這裡開始打的字是對它說話，不再是終端機指令。用中文講就行，按 Enter 送出。想換行不送出，按 <span class="cli-key">Shift</span> + <span class="cli-key">Enter</span>（Mac 內建的終端機和 Windows Terminal 都支援；按了沒反應，改按 <span class="cli-key">Ctrl</span> + <span class="cli-key">J</span>）。</p>
+        <div class="compare">
+          <div class="compare-bad">
+            <div class="compare-label">第一句就叫它動手</div>
+            <div class="code-block">
+「幫我整理一下這個資料夾」<br><br>
+<span style="color: var(--red);">整理成怎樣？哪些不能動？它只能猜</span>
+            </div>
+          </div>
+          <div class="compare-good">
+            <div class="compare-label">先看，再做</div>
+            <div class="code-block">
+第一句：「先不要改任何東西。看一下這個資料夾裡有什麼，用五句話以內告訴我。」<br><br>
+第二句：「把這裡的 PDF 發票依月份分到子資料夾。做完告訴我每個月各幾份，總數要跟現在一樣。看不出月份的先不要動，列出來問我。」<br><br>
+<span style="color: var(--green);">有結果、有完成標準、有先停下來的點</span>
+            </div>
+          </div>
+        </div>
+        <p>不知道它會什麼，也可以直接問：「你可以幫我做哪些事？」它會自己去查說明文件回答你。</p>
+      </div>
+
+      <div class="cli-step">
+        <div class="cli-step-num">步驟 6</div>
+        <h4 class="cli-step-title">它問「要不要允許」的時候</h4>
+        <p>每次要動手之前，Claude Code 會先看現在是哪個<strong>權限模式</strong>，決定要直接做、還是停下來問你。目前是哪一種，顯示在輸入框下方。</p>
+        <p>先知道一件事：新版（v2.1.283 起）在終端機啟動時，<strong>預設就是 Auto 模式</strong>，多數動作不會問你。第一次啟動，畫面最上方會顯示一則說明；帳號或模型不支援時才會是 Manual。</p>
+        <p>想從最保守的開始，按 <span class="cli-key">Shift</span> + <span class="cli-key">Tab</span>，直到輸入框下方出現 <code>manual mode on</code>；或啟動時改打 <code>claude --permission-mode manual</code>。</p>
+        <p>在 Manual 模式（或 Accept edits 模式碰到檔案以外的指令），它要改檔案、跑指令時會停下來問，畫面大概長這樣：</p>
+
+        <div class="cli-demo" data-cli-title="互動示意：權限詢問">
+          <div class="cli-demo-label">點任何一個選項，看它代表什麼。這是示意畫面，實際文字會隨版本不同。</div>
+          <div class="cli-perm-screen">
+            <div class="cli-perm-title">Bash command</div>
+            <div>依拍攝日期重新命名照片</div>
+            <div class="cli-perm-cmd">python3 rename_photos.py</div>
+            <div>This command requires approval</div>
+            <div class="cli-perm-q">Do you want to proceed?</div>
+            <div class="cli-perm-opts" role="group" aria-label="權限詢問的四個選項">
+              <button type="button" class="cli-perm-opt" data-cli-opt="yes" aria-pressed="false">1. Yes</button>
+              <button type="button" class="cli-perm-opt" data-cli-opt="always" aria-pressed="false">2. Yes, and don't ask again for: …</button>
+              <button type="button" class="cli-perm-opt" data-cli-opt="auto" aria-pressed="false">3. Yes, and switch to auto mode</button>
+              <button type="button" class="cli-perm-opt" data-cli-opt="no" aria-pressed="false">4. No</button>
+            </div>
+            <div class="cli-perm-foot">Esc to cancel · Tab to amend</div>
+          </div>
+          <div class="cli-perm-explain" aria-live="polite">
+            <p class="cli-perm-hint">還沒選。點上面的選項看說明。</p>
+            <p class="cli-perm-answer" data-cli-answer="yes"><strong>Yes：</strong>只同意這一次，下次同類的動作還會再問。最保險，剛開始用建議都選這個。</p>
+            <p class="cli-perm-answer" data-cli-answer="always"><strong>Yes, and don't ask again：</strong>同意，而且以後同一類指令不再問。跑指令的同意會存成規則，之後在這個專案裡都有效；改檔案的同意則只到這一場結束。確定是無害的例行動作再選。</p>
+            <p class="cli-perm-answer" data-cli-answer="auto"><strong>Yes, and switch to auto mode：</strong>同意，並把這一場切成自動模式。之後不再一步一步問，有風險的動作改由背後把關的模型攔。這個選項不是每次都會出現。</p>
+            <p class="cli-perm-answer" data-cli-answer="no"><strong>No：</strong>不同意。它不會執行，停下來等你說接下來怎麼做，按 Esc 效果一樣。想順便告訴它為什麼，先移到 No 再按 Tab，可以補一句話，它會照你的理由調整後繼續。</p>
+          </div>
+        </div>
+
+        <p>實際的畫面不能用滑鼠點：用方向鍵上下移到要的選項，按 Enter 確認。</p>
+
+        <p>看不懂它要跑的指令？先選 No，再問它：「剛剛那一行是在做什麼？會動到哪些檔案？」問清楚了再叫它重做。</p>
+
+        <p>權限模式有四種常用的，按 <span class="cli-key">Shift</span> + <span class="cli-key">Tab</span> 輪流切換：</p>
+        <div class="table-wrapper">
+          <table class="cli-stack">
+            <thead>
+              <tr>
+                <th>模式</th>
+                <th>不用問就會做的事</th>
+                <th>白話</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Manual<br><code>manual mode on</code></td>
+                <td data-label="不用問就會做">只有讀檔案。要改檔、跑指令都先停下來等你同意</td>
+                <td data-label="白話">新人第一天：每個動作都先舉手</td>
+              </tr>
+              <tr>
+                <td>Accept edits<br><code>accept edits on</code></td>
+                <td data-label="不用問就會做">讀檔、改檔，以及工作資料夾內的建資料夾、搬移、複製、刪除這類常見檔案指令</td>
+                <td data-label="白話">檔案的事放手，其他指令照問</td>
+              </tr>
+              <tr>
+                <td>Plan<br><code>plan mode on</code></td>
+                <td data-label="不用問就會做">只看不改：讀檔、查資料，然後寫一份計畫給你，你同意才動手</td>
+                <td data-label="白話">先交企劃書，你同意才動手</td>
+              </tr>
+              <tr>
+                <td>Auto<br><code>auto mode on</code></td>
+                <td data-label="不用問就會做">幾乎全部。讀檔和資料夾內的改檔直接做；其餘動作先經過另一個模型審查，有風險的會被攔下</td>
+                <td data-label="白話">資深員工：放手做，背後有稽核</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box box-danger">
+          <div class="box-label">不要照抄的指令</div>
+          網路上常有人教你啟動時加 <code>--dangerously-skip-permissions</code>，意思是「全部不問、也不檢查」。官方寫明這只該用在隔離的環境（容器、虛擬機）。你平常工作的電腦不是隔離環境，不要用。
         </div>
       </div>
-      <div class="compare-good">
-        <div class="compare-label">有 SSOT — 只存一個地方</div>
-        <div class="code-block">
-<span style="color: var(--green);">資料庫（唯一真相）：</span><br>
-product.price = 399;<br>
-<br>
-<span style="color: var(--green);">後端 API：</span><br>
-return db.getProduct(id); // 去 DB 查<br>
-<br>
-<span style="color: var(--green);">前端：</span><br>
-const data = await fetch('/api/product');<br>
-// 顯示後端回傳的價格<br>
-<br>
-<span style="color: var(--green);">結果：不管在哪裡看，都是 399。<br>
-改一個地方，全部同步更新。</span>
+
+      <div class="cli-step">
+        <div class="cli-step-num">步驟 7</div>
+        <h4 class="cli-step-title">中斷、修正、明天接著做</h4>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>你想做的事</th>
+                <th>怎麼做</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>它做歪了，馬上喊停</td>
+                <td>按 <span class="cli-key">Esc</span>。已經做完的部分會留著，它停下來等你說話</td>
+              </tr>
+              <tr>
+                <td>不想打斷，只是補一句</td>
+                <td>直接打字按 Enter。它做完手上這個動作就會讀到，接著調整</td>
+              </tr>
+              <tr>
+                <td>把檔案倒回之前的樣子</td>
+                <td>輸入框是空的時候按兩下 <span class="cli-key">Esc</span>（或打 <code>/rewind</code>），選要回到哪一句話之前</td>
+              </tr>
+              <tr>
+                <td>今天先到這裡</td>
+                <td>打 <code>/exit</code>，或快速連按兩下 <span class="cli-key">Ctrl</span> + <span class="cli-key">D</span></td>
+              </tr>
+              <tr>
+                <td>明天接著做</td>
+                <td>走進同一個資料夾，打 <code>claude -c</code>，直接回到最近那一場對話</td>
+              </tr>
+              <tr>
+                <td>想挑更早的某一場</td>
+                <td>打 <code>claude -r</code>，或在對話裡打 <code>/resume</code>，從清單裡選</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>對話紀錄存在你自己的電腦上，所以隔天接得回來。一場對話做到一半，可以打 <code>/rename 名字</code> 幫它取名，之後比較好找。</p>
+      </div>
+
+      <div class="cli-step">
+        <div class="cli-step-num">步驟 8</div>
+        <h4 class="cli-step-title">常用的斜線指令</h4>
+        <p>在輸入框打 <code>/</code> 會跳出指令清單，繼續打字可以篩選。先記這幾個就夠用：</p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>指令</th>
+                <th>做什麼</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>/help</code></td><td>列出可以用的指令</td></tr>
+              <tr><td><code>/clear</code></td><td>開一場全新的對話。舊的還在，用 <code>/resume</code> 找得回來</td></tr>
+              <tr><td><code>/compact</code></td><td>對話太長時，把前面的內容壓成摘要，騰出空間繼續做</td></tr>
+              <tr><td><code>/resume</code></td><td>回到之前的某一場對話</td></tr>
+              <tr><td><code>/rewind</code></td><td>把對話或檔案倒回先前的某個時間點</td></tr>
+              <tr><td><code>/model</code></td><td>換模型</td></tr>
+              <tr><td><code>/init</code></td><td>幫這個資料夾產生一份 CLAUDE.md 初稿</td></tr>
+              <tr><td><code>/memory</code></td><td>查看、編輯 CLAUDE.md，以及它自己記下的筆記</td></tr>
+              <tr><td><code>/permissions</code></td><td>管理「允許／先問／禁止」的規則，查看最近被攔下的動作</td></tr>
+              <tr><td><code>/mcp</code></td><td>看目前接了哪些外部服務（下面會講的 MCP）</td></tr>
+              <tr><td><code>/context</code></td><td>看目前這場對話的空間被什麼佔用</td></tr>
+              <tr><td><code>/usage</code></td><td>看這一場花了多少、方案額度用到哪裡</td></tr>
+              <tr><td><code>/powerup</code></td><td>內建的互動小教學，帶你認識各種功能</td></tr>
+              <tr><td><code>/exit</code></td><td>離開 Claude Code</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
-    </div>
 
-    <p>SSOT 的原則很簡單：<strong>每一筆資料只存在一個地方，其他需要這筆資料的地方，都去那裡查。</strong></p>
+      <div class="cli-step">
+        <div class="cli-step-num">步驟 9</div>
+        <h4 class="cli-step-title">把檔案、截圖交給它</h4>
+        <ul>
+          <li><strong>資料夾裡的檔案</strong>：直接講檔名就好，它會自己去讀，不用你把內容貼給它</li>
+          <li><strong>想指定某一個檔案</strong>：打 <code>@</code> 再打幾個字，會跳出檔案清單讓你選</li>
+          <li><strong>截圖或圖片</strong>，三種給法：
+            <ul>
+              <li>把圖檔拖進 Claude Code 的視窗</li>
+              <li>複製圖片後貼上。Mac 按 <span class="cli-key">Ctrl</span> + <span class="cli-key">V</span>（是 Ctrl，不是平常貼文字的 Cmd；用 iTerm2 這套終端機才可以按 Cmd + V）。Windows 按 <span class="cli-key">Alt</span> + <span class="cli-key">V</span></li>
+              <li>直接把圖檔的路徑打給它</li>
+            </ul>
+          </li>
+          <li><strong>資料夾以外的檔案</strong>：打 <code>/add-dir</code> 加上那個資料夾的路徑，把它加進這一場的工作範圍</li>
+          <li><strong>PDF、圖片</strong>它可以直接讀（超過 10 頁的 PDF 會分段讀，電腦裡要有 poppler 這個小工具，沒有就請它幫你裝）。<strong>Excel（.xlsx）</strong>這類檔案它不能直接打開，會改成寫一小段程式去讀。這是正常的，不用你處理</li>
+        </ul>
+      </div>
 
-    <h3>SSOT 的常見應用場景</h3>
+      <div class="box box-info">
+        <div class="box-label">接下來</div>
+        這本指南一直叫你優先選「有 CLI 的工具」，原因是省 Token。這一段在<a class="cli-link" href="/chapter11/#cli-token">第十一章</a>的「CLI 省 Token 的觀念」，這裡不重複。<br><br>
+        走完上面九步還是不想用終端機？桌面 App 的 Code 分頁是同一顆引擎，換成圖形介面而已，這一節講的權限模式和 CLAUDE.md 在那邊一樣適用。
+      </div>
 
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>場景</th>
-            <th>真理來源（SSOT）</th>
-            <th>其他地方怎麼做</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>商品價格</td>
-            <td>資料庫</td>
-            <td>前端、後端都去 DB 查</td>
-          </tr>
-          <tr>
-            <td>使用者權限</td>
-            <td>後端的權限表</td>
-            <td>前端只負責顯示，不自己判斷</td>
-          </tr>
-          <tr>
-            <td>設定值</td>
-            <td>環境變數 / 設定檔</td>
-            <td>程式啟動時讀取，不寫死在程式裡</td>
-          </tr>
-          <tr>
-            <td>UI 狀態</td>
-            <td>狀態管理工具（如 Redux）</td>
-            <td>各元件去 store 讀取，不各自維護</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <!-- ========== D. 核心功能介紹 ========== -->
+      <h2 id="cli-core">核心功能介紹</h2>
 
-    <div class="box box-warning">
-      <div class="box-label">跟 Claude 怎麼說</div>
-      「這個資料的 SSOT 是資料庫，前端不要自己存一份」<br>
-      「幫我檢查一下，有沒有同一筆資料被存在多個地方的情況」
-    </div>
+      <p>Claude Code 不只是「能幫你改檔案的 ChatGPT」。它有一整套工具和機制，讓你能像管理一個團隊一樣管理 AI。以下是你一定會碰到的核心功能。名字很多，先知道各自是什麼；要用的時候跟 Claude 說你要什麼，設定檔讓它寫。</p>
 
-    <!-- ===== C. 耦合 ===== -->
-    <h2>耦合（Coupling）：積木 vs 膠水模型</h2>
+      <h3>CLAUDE.md：員工的 SOP 手冊</h3>
+      <p>每次開新對話，它都是從頭開始。要它記得你的規矩，就寫進 <code>CLAUDE.md</code>：放在專案資料夾最上層的純文字檔案。Claude Code 每次啟動時都會先讀它，就像員工每天上班前先看一次規範手冊。</p>
+      <p>你可以在裡面寫：</p>
+      <ul>
+        <li>這個專案用什麼技術、放在哪裡</li>
+        <li>程式碼風格（例如：用 2 個空格縮排，不要用 Tab）</li>
+        <li>哪些檔案不能動</li>
+        <li>特殊的工作流程（例如：改完先開給我看，我說好再上線）</li>
+      </ul>
+      <div class="code-block">
+# CLAUDE.md 範例<br><br>
+## 專案規範<br>
+- 純靜態網站：HTML、CSS、JavaScript，不用打包<br>
+- 放在 Cloudflare，資料庫用 Supabase<br>
+- 縮排用 2 個空格<br>
+- 改完先在我電腦上開起來給我看，我說好再上線<br><br>
+## 禁止事項<br>
+- 不要動 database/ 資料夾<br>
+- 不要在程式碼裡寫入任何密碼或 API Key
+      </div>
+      <p>不會寫就打 <code>/init</code>，它會看過資料夾幫你產生初稿，你再改。裡面該寫哪些邊界，<a class="cli-link" href="/chapter3/#claude-md">第三章</a>有講。</p>
 
-    <div class="analogy">
-      <strong>比喻：積木和膠水。</strong><br><br>
-      想像你蓋了一個模型城堡：<br><br>
-      <strong>用積木蓋的（低耦合）</strong>：每一塊都是獨立的。你拆掉一棟塔樓，城牆還是好好的。想換一個更酷的塔樓？直接拔掉舊的、插上新的。<br><br>
-      <strong>用膠水黏的（高耦合）</strong>：所有零件都黏死在一起。你想拆掉一棟塔樓？不好意思，旁邊的城牆、護城河、吊橋全部一起碎掉。因為它們都黏在一起了。
-    </div>
+      <h3>CLAUDE.md 放在哪一層</h3>
+      <p>CLAUDE.md 其實不只一個。最常用到的是前兩層，就像公司的規範有分「全公司通用」和「各部門專用」：</p>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>層級</th>
+              <th>位置</th>
+              <th>作用</th>
+              <th>比喻</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>全域（你個人的）</strong></td>
+              <td><code>~/.claude/CLAUDE.md</code></td>
+              <td>你所有的專案都會讀到。放通用偏好：用繁體中文回我、先講結論</td>
+              <td>公司的「員工守則」，不管你調到哪個部門都要遵守</td>
+            </tr>
+            <tr>
+              <td><strong>專案</strong></td>
+              <td>專案資料夾裡的 <code>CLAUDE.md</code></td>
+              <td>只有這個專案會讀到，跟團隊共用。放技術棧、命名、部署規則</td>
+              <td>部門的「SOP」，只有這個部門的人要看</td>
+            </tr>
+            <tr>
+              <td><strong>專案裡只給自己的</strong></td>
+              <td>專案資料夾裡的 <code>CLAUDE.local.md</code></td>
+              <td>只有你讀得到，不進版控、不跟團隊共用</td>
+              <td>你自己貼在螢幕邊的便利貼</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Claude 每次開工，這幾份都會讀進去，是「疊在一起讀」，不是誰蓋掉誰，所以不要寫互相矛盾的規則。另外，公司 IT 可以統一派發一份全公司共用的組織層級規範。</p>
 
-    <p>軟體的世界裡，「耦合」就是指兩個功能之間的<strong>依賴程度</strong>。依賴越深，耦合越高；依賴越少，耦合越低。</p>
+      <h3>Memory：跨 Session 記憶系統</h3>
+      <p>一般的 LLM 對話，關掉視窗就全忘了。Claude Code 有記憶系統，可以把重要的事情記住，下次開新的 Session 還是知道。</p>
+      <div class="box box-info">
+        <div class="box-label">Memory 的運作方式</div>
+        Claude Code 有兩套記憶。一套是<strong>你寫的</strong> CLAUDE.md；另一套是<strong>它自己記的</strong>「自動記憶」（auto memory）：工作中它會把你的偏好、你糾正過它的事記成筆記檔，存在你的電腦上，預設就是開的。下次你再開對話，兩套都會先讀進來，就像員工翻看自己上次的工作筆記。<br><br>
+        你說「記住這件事」，它會寫進自動記憶；想寫進 CLAUDE.md，就明講「把這條加進 CLAUDE.md」。想看它記了什麼，打 <code>/memory</code>。
+      </div>
+      <div class="box box-warning">
+        <div class="box-label">交代不是上鎖</div>
+        官方寫明：CLAUDE.md 和記憶對它來說是參考，不是強制設定。它會盡量照做，但不保證。真的絕對不准碰的事，要用權限規則（<code>/permissions</code> 裡設成禁止）或下面的 Hook 來擋，那才是鎖。
+      </div>
 
-    <h3>高耦合的痛：改 A 壞 B C D</h3>
+      <h3>Subagent：帶一個團隊做事</h3>
+      <p>Claude Code 不只是一個人。它可以「派出」子代理人（Subagent），讓多個任務同時進行。就像工頭把工作分給不同工人平行處理：</p>
+      <ul>
+        <li>Subagent A：去查這個 API 的文件</li>
+        <li>Subagent B：同時幫我改首頁的 CSS</li>
+        <li>Subagent C：同時去跑測試</li>
+      </ul>
+      <p>三個任務同時進行，比一個一個排隊做快很多。每個子代理在自己的對話空間做事，做完只把摘要交回來，所以要翻一大堆檔案、但你只要結論的時候特別好用，主對話不會被塞滿。用量算在同一個額度裡。</p>
 
-    <p>這是新手最常遇到的地獄場景。你跟 Claude 說「幫我改一下登入頁面的按鈕顏色」，結果改完之後：</p>
+      <h3>Hook：自動化觸發器</h3>
+      <p>Hook 是一種「自動觸發的規則」：在固定時機一定會跑的小程式，不靠它記得，時間到就跑。你可以設定：</p>
+      <ul>
+        <li>每次 Claude Code 要修改檔案之前，先檢查是不是你說不准動的檔案</li>
+        <li>每次 Git commit 之前，先跑測試</li>
+        <li>每次部署之前，先做安全檢查</li>
+        <li>它改完檔案就自動排版；它在等你回覆時，跳一個桌面通知</li>
+      </ul>
+      <p>打 <code>/hooks</code> 看已經設了哪些。</p>
+      <div class="analogy">
+        <strong>白話：</strong>Hook 就像你在工地門口貼的告示牌：「進門前先戴安全帽」。不管誰進來，都會先做那件事。
+      </div>
 
-    <ul>
-      <li>首頁的 header 跑版了</li>
-      <li>結帳頁面的按鈕消失了</li>
-      <li>手機版的選單打不開了</li>
-    </ul>
+      <h3>Plugin／Skill：可安裝的擴充包</h3>
+      <p>你可以幫 Claude Code 安裝各種「技能包」，讓它會做更多事情。例如：</p>
+      <ul>
+        <li><strong>Skill</strong>：一套預先寫好的指令和規範，是一個資料夾，主檔叫 <code>SKILL.md</code>。平時只掛一行說明，用到才把內容讀進來；打 <code>/技能名</code> 叫它，或它判斷用得上時自己拿出來用。例如「程式碼審查 Skill」會讓 Claude Code 用特定的標準幫你檢查程式碼品質。同一套交代你已經貼了第三次，就該寫成 Skill</li>
+        <li><strong>Plugin</strong>：外掛模組，把 Skill、Subagent、Hook、MCP 打包成一包，一次裝好，可以擴充 Claude Code 的能力。例如 Discord Plugin 讓它可以讀寫 Discord 訊息。打 <code>/plugin</code> 從清單挑</li>
+      </ul>
+      <p>就像買一整組別人配好的工具箱，不用一件一件挑。</p>
 
-    <p>為什麼？因為這些功能全部擠在同一個檔案裡，共用同一段 CSS，牽一髮動全身。</p>
+      <div class="table-wrapper">
+        <table class="cli-stack">
+          <thead>
+            <tr>
+              <th>名稱</th>
+              <th>一句話</th>
+              <th>什麼時候用</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>CLAUDE.md</td>
+              <td data-label="一句話">員工守則，每次開工先讀</td>
+              <td data-label="什麼時候用">專案的技術、規矩、不准碰的地方</td>
+            </tr>
+            <tr>
+              <td>Skill（技能）</td>
+              <td data-label="一句話">某件事的作業手冊</td>
+              <td data-label="什麼時候用">同一套交代貼到第三次，或 CLAUDE.md 某一段長成一整套流程</td>
+            </tr>
+            <tr>
+              <td>Subagent（子代理）</td>
+              <td data-label="一句話">臨時找來分頭做事的助手</td>
+              <td data-label="什麼時候用">要翻一大堆檔案或資料，你只要結論</td>
+            </tr>
+            <tr>
+              <td>Hook（觸發規則）</td>
+              <td data-label="一句話">工地門口「進門先戴安全帽」的告示</td>
+              <td data-label="什麼時候用">某件事一定要做、某類指令一律先擋</td>
+            </tr>
+            <tr>
+              <td>Plugin（外掛包）</td>
+              <td data-label="一句話">整套別人配好的工具箱</td>
+              <td data-label="什麼時候用">別人已經整理好一整套，你想直接拿來用</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-    <div class="compare">
-      <div class="compare-bad">
-        <div class="compare-label">高耦合 — 所有東西攪在一起</div>
-        <div class="code-block">
-<span style="color: var(--red);">一個 app.js 檔案裡面塞了：</span><br>
-- 登入邏輯<br>
-- 商品列表<br>
-- 購物車計算<br>
-- 寄信功能<br>
-- 金流串接<br>
-<br>
-改登入 → 購物車壞了<br>
-改金流 → 寄信功能掛了<br>
-<span style="color: var(--red);">全部糾纏在一起，無法單獨維護</span>
+      <!-- ========== E. MD 檔的重要性 ========== -->
+      <h2>MD 檔的重要性</h2>
+
+      <h3>Markdown 是什麼？</h3>
+      <p>Markdown（簡稱 MD）是一種用<strong>純文字寫格式</strong>的方法。你可以把它想成「簡化版的 Word」。</p>
+      <p>在 Word 裡面，你要粗體就用滑鼠選取文字然後點 B。在 Markdown 裡面，你只要打：</p>
+      <div class="code-block">
+**這段文字會變粗體**<br><br>
+# 這是大標題<br>
+## 這是次標題<br><br>
+- 這是項目符號<br>
+- 第二點<br><br>
+`這是程式碼`
+      </div>
+      <p>就這麼簡單。不需要任何特殊軟體，用記事本就能寫。CLAUDE.md、SKILL.md 都是這種格式。</p>
+
+      <h3>為什麼 Claude Code 生態都用 MD？</h3>
+      <p>有三個關鍵原因：</p>
+      <ol>
+        <li><strong>省 Token</strong>：純文字檔案不含格式代碼，同樣的內容，MD 檔通常比 Word 檔小很多。檔案越小，AI 讀得越快、花的 Token 越少</li>
+        <li><strong>好讀</strong>：不管是人還是 AI，讀純文字都很直接。不像 Word 或 PDF，裡面一堆格式代碼會干擾 AI 的理解</li>
+        <li><strong>Git 友好</strong>：Git 版控系統是用「逐行比較」來追蹤變更。純文字的 MD 檔可以精準看出哪一行被改了；Word 檔是二進位格式，Git 存得下來，但看不出改了哪一行</li>
+      </ol>
+
+      <h3>常見的 MD 檔案</h3>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>檔名</th>
+              <th>功能</th>
+              <th>白話</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>CLAUDE.md</code></td>
+              <td>Claude Code 讀的規範檔，交代它的行為規矩</td>
+              <td>員工的 SOP 手冊，每天上班先讀一次</td>
+            </tr>
+            <tr>
+              <td><code>README.md</code></td>
+              <td>專案的說明書。打開 GitHub 倉庫時，首頁顯示的就是這個檔案</td>
+              <td>產品外包裝上的使用說明</td>
+            </tr>
+            <tr>
+              <td><code>CHANGELOG.md</code></td>
+              <td>紀錄每次更新改了什麼。方便追溯歷史</td>
+              <td>產品的「更新日誌」，像手機系統更新說明</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">常見誤解</div>
+        很多人以為用 Word 寫文件比較「正式」。但在程式開發的世界裡，MD 才是標準格式。用 Word 寫 CLAUDE.md？那就像穿西裝去工地：不是不行，但真的沒必要，而且會礙手礙腳。
+      </div>
+
+      <!-- ========== MCP ========== -->
+      <h2 id="cli-mcp">MCP：Claude Code 的「手臂」</h2>
+
+      <h3>MCP 是什麼？</h3>
+      <p><strong><a class="cli-link" href="/glossary/#t-mcp">MCP</a>（Model Context Protocol）</strong>是一種通訊協議，讓 Claude Code 可以接上外部服務。你可以想像成：Claude Code 本身是一個人，MCP 就是它多伸出去的手臂，每一隻手臂握住一個外部服務。有些介面把它叫「連接器」（Connectors），是同一種東西。</p>
+
+      <p>沒有 MCP 的 Claude Code：讀寫你電腦上的檔案、跑終端機指令、上網查資料。</p>
+      <p>有了 MCP 的 Claude Code：還能直接連上資料庫、GitHub、瀏覽器、信箱、行事曆這些外部服務，幫你查、幫你改。</p>
+
+      <div class="analogy">
+        <strong>比喻：手機本身 vs 手機上的 App。</strong><br><br>
+        手機出廠只能打電話、傳簡訊。但你裝了 LINE 就能聊天、裝了 Uber 就能叫車、裝了 Google Maps 就能導航。<br><br>
+        MCP 就像 Claude Code 的 App。每接一個 MCP，Claude Code 就多一隻手，能伸進一個外部服務去查、去改。
+      </div>
+
+      <h3>常用 MCP 列表</h3>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>MCP</th>
+              <th>能做什麼</th>
+              <th>你可以這樣說</th>
+              <th>有沒有官方 CLI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Supabase</strong></td>
+              <td>操作資料庫、讀寫資料表</td>
+              <td>「幫我查所有 VIP 客戶」（幫你開抽屜、找資料）</td>
+              <td>有：<code>supabase</code></td>
+            </tr>
+            <tr>
+              <td><strong>GitHub</strong></td>
+              <td>管理原始碼、發 PR、查 Issue</td>
+              <td>「幫我開一個 PR」「合併這個分支」</td>
+              <td>有：<code>gh</code></td>
+            </tr>
+            <tr>
+              <td><strong>Cloudflare</strong></td>
+              <td>部署網站、管理 DNS</td>
+              <td>「幫我把這個網站上線」</td>
+              <td>有：<code>wrangler</code></td>
+            </tr>
+            <tr>
+              <td><strong>Google Cloud</strong></td>
+              <td>管理雲端服務</td>
+              <td>「幫我開一台 VM」「查一下 log」</td>
+              <td>有：<code>gcloud</code></td>
+            </tr>
+            <tr>
+              <td><strong>Chrome DevTools</strong></td>
+              <td>操控瀏覽器、讀網頁的錯誤訊息</td>
+              <td>「幫我打開這個網頁，看看有沒有 bug」</td>
+              <td>沒有，用 MCP（下面<a class="cli-link" href="#cli-devtools">實戰組合</a>那一節細講）</td>
+            </tr>
+            <tr>
+              <td><strong>Gmail</strong></td>
+              <td>找信、讀信、寫草稿</td>
+              <td>「幫我找最近客戶寄來的信」</td>
+              <td>沒有，用 MCP</td>
+            </tr>
+            <tr>
+              <td><strong>Google 行事曆</strong></td>
+              <td>讀寫行事曆</td>
+              <td>「幫我查下週二有什麼會議」</td>
+              <td>沒有，用 MCP</td>
+            </tr>
+            <tr>
+              <td><strong>Brave Search</strong></td>
+              <td>換一家搜尋引擎</td>
+              <td>Claude Code 本身就會上網搜尋，「幫我查這個技術的最新文件」直接說就行。想改用 Brave 的搜尋結果才需要裝，而且要先申請 Brave 的 API key</td>
+              <td>平常用不到</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">不用一次全裝</div>
+        MCP 是「需要什麼裝什麼」。剛開始一個都不裝也行：GitHub、部署這些有官方 CLI 的，先用 CLI 就好（看下一個框）。等到要接信箱、行事曆這類服務，再一個一個加。
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">先看有沒有 CLI，再裝 MCP</div>
+        表裡前四個服務本來就有自己的官方 CLI：Supabase 是 <code>supabase</code>、GitHub 是 <code>gh</code>、Cloudflare 是 <code>wrangler</code>、Google Cloud 是 <code>gcloud</code>。Claude Code 本來就會打指令，裝好 CLI、登入一次，不裝 MCP 也能開 PR、部署網站、改資料庫。這幾個 CLI 的用法和為什麼比較划算，在<a class="cli-link" href="/chapter11/#cli-token">第十一章</a>。<br><br>
+        所以我的順序是：<strong>有官方 CLI 的先用 CLI</strong>；沒有 CLI 才裝 MCP（連接器），像信箱、行事曆；要操作網頁，交給瀏覽器工具；都不行，才用 Computer Use（讓它看著螢幕動滑鼠，下一節）。<br><br>
+        跟 Claude 這樣說就好：「這件事有官方 CLI 的話用 CLI 做，沒有再用 MCP。」
+      </div>
+
+      <div class="box box-info">
+        <div class="box-label">Gmail、Google 行事曆怎麼接</div>
+        這兩個不用在電腦上裝東西。到 claude.ai 的「連接器」（Connectors）設定頁把 Gmail、Google Calendar 連起來、完成授權；之後只要 Claude Code 是用同一個 claude.ai 訂閱帳號登入的（不是用 API key），它們就會自動出現。在 Claude Code 裡打 <code>/mcp</code> 可以看到目前接了哪些。
+      </div>
+
+      <p>接任何 MCP 之前，先確認來源可信。會去外面抓內容的 MCP，抓回來的文字可能夾帶想騙 AI 的指令，官方文件也特別提醒這一點。</p>
+
+      <!-- ========== 操作畫面 ========== -->
+      <h2 id="cli-screen">延伸：讓 Claude 操作畫面</h2>
+
+      <p>CLI 很省 Token，那讓 Claude 直接操作畫面就不能用嗎？不是，它有適合的場景。只是指令和 MCP 都碰不到的，才輪到它看著畫面操作。現在有三種做法，由輕到重：</p>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>做法</th>
+              <th>Claude 操作的是</th>
+              <th>怎麼開</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong><a class="cli-link" href="/glossary/#t-claude-in-chrome">Claude in Chrome</a></strong></td>
+              <td>你自己的 Chrome 或 Edge（其他 Chromium 系的瀏覽器也行），沿用你已經登入的網站</td>
+              <td>裝同名的瀏覽器擴充功能，再用 <code>claude --chrome</code> 啟動。要付費方案，而且 Claude Code 要用 claude.ai 帳號登入</td>
+            </tr>
+            <tr>
+              <td><strong>桌面 App 的 Browser 面板</strong></td>
+              <td>App 內建的瀏覽器，跟你平常的瀏覽器分開，沒有你存的登入</td>
+              <td>在桌面 App 的對話標題列點 Browser</td>
+            </tr>
+            <tr>
+              <td><strong><a class="cli-link" href="/glossary/#t-computer-use">Computer Use</a></strong></td>
+              <td>整個桌面：開軟體、移滑鼠、點擊、打字</td>
+              <td>預設關閉。桌面 App 到設定裡打開（macOS、Windows）；CLI 只有 macOS，在 <code>/mcp</code> 裡把 computer-use 打開</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Computer Use 還在研究預覽階段，只開放 Pro、Max、Ultra 個人方案，每個軟體第一次要用時都要你當場同意。它適合的是沒有 CLI、也沒有網頁版的桌面軟體。<strong>瀏覽器它只能看、不能點</strong>，網頁上的操作要交給 Claude in Chrome。</p>
+
+      <p>能用指令或連接器做的，Claude 就不看畫面。Computer Use 排最後，官方文件直說它是幾種做法裡涵蓋最廣、也最慢的一種。</p>
+
+      <div class="compare">
+        <div class="compare-good">
+          <div class="compare-label">適合操作畫面</div>
+          <div class="code-block">
+- 沒有 CLI、沒有 API 的網站<br>
+  （某些政府網站、廠商後台）<br>
+- 只做一次的帳號設定、填表單<br>
+- 看一眼網頁有沒有跑版<br>
+- 把操作過程錄成 GIF 當教學
+          </div>
+        </div>
+        <div class="compare-bad">
+          <div class="compare-label">不適合操作畫面</div>
+          <div class="code-block">
+- 每天重複的操作<br>
+  （用 CLI 取代）<br>
+- 大量資料處理<br>
+  （用 API 取代）<br>
+- 部署和版控<br>
+  （用 wrangler、gh 取代）
+          </div>
         </div>
       </div>
-      <div class="compare-good">
-        <div class="compare-label">低耦合 — 功能模組各自獨立</div>
-        <div class="code-block">
-<span style="color: var(--green);">每個功能獨立一個模組：</span><br>
-- auth/login.js　　→ 只管登入<br>
-- products/list.js → 只管商品<br>
-- cart/calculate.js → 只管購物車<br>
-- email/send.js　　→ 只管寄信<br>
-- payment/stripe.js → 只管金流<br>
-<br>
-改登入 → 其他功能不受影響<br>
-改金流 → 寄信功能照樣運作<br>
-<span style="color: var(--green);">各模組獨立，改一個不會壞另一個</span>
+
+      <div class="box box-danger">
+        <div class="box-label">它用的是你的身分</div>
+        Claude in Chrome 沿用你已經登入的帳號，網頁上的文字也可能夾帶想騙 Claude 的指令，官方說明也寫明這項功能仍有風險。碰到登入頁或「我不是機器人」驗證，它會停下來請你自己處理。付款、轉帳、刪資料這類不能反悔的動作，自己動手。
+      </div>
+
+      <div class="box box-tip">
+        <div class="box-label">總結</div>
+        有官方 CLI 的先用 CLI（省 Token、快、穩定）。沒有 CLI 才裝 MCP（連接器）。要操作網頁，交給瀏覽器工具。都不行才用 Computer Use。
+      </div>
+
+      <!-- ========== F. Chrome DevTools + Claude ========== -->
+      <h2 id="cli-devtools">實戰組合：Chrome DevTools + Claude Code</h2>
+
+      <p>Chrome DevTools 就是在 Chrome 按 F12 打開的「開發者工具」，可以看 DOM（網頁結構）和 JS（JavaScript）程式跑得怎樣。Chrome 開發者工具團隊出了一個 Chrome DevTools MCP，讓 Claude 直接讀這些資料。這比你手動從開發者工具複製訊息給 AI 快很多。</p>
+
+      <div class="box box-info">
+        <div class="box-label">什麼是 JS？</div>
+        JS（JavaScript）是讓網頁「會動」的程式語言。按鈕點了會跑出東西、表單可以送出、動畫會播放，這些都是 JS 在背後做的事。
+      </div>
+
+      <p>Claude 搭配 DevTools MCP 可以直接讀取：</p>
+      <ul>
+        <li><strong>Console 錯誤訊息</strong>：不用你複製貼上，Claude 自己去看</li>
+        <li><strong>Network 請求</strong>：API 有沒有回應、回了什麼資料</li>
+        <li><strong>DOM 結構</strong>：元素的 class、id、屬性，全部一覽無遺</li>
+      </ul>
+
+      <div class="compare">
+        <div class="compare-bad">
+          <div class="compare-label">手動方式（慢又容易漏）</div>
+          <div class="code-block">
+1. 你打開 F12 開發者工具<br>
+2. 看到紅色錯誤訊息<br>
+3. 截圖或複製錯誤訊息<br>
+4. 貼給 Claude<br>
+5. Claude 問你更多問題<br>
+6. 你再去 F12 查更多資料<br>
+7. 來回好幾次才找到問題<br><br>
+<span style="color: var(--red);">你變成 AI 和瀏覽器之間的「傳話人」</span>
+          </div>
+        </div>
+        <div class="compare-good">
+          <div class="compare-label">DevTools MCP（快又完整）</div>
+          <div class="code-block">
+1. Claude 直接讀 Console 錯誤<br>
+2. Claude 直接看 Network 請求<br>
+3. Claude 直接分析 DOM 結構<br>
+4. 一次找到問題根源<br>
+5. 直接修改程式碼<br><br>
+<span style="color: var(--green);">Claude 自己去看、自己去查、自己修</span>
+          </div>
         </div>
       </div>
+
+      <div class="box box-info">
+        <div class="box-label">官方也有自己的 Chrome 整合</div>
+        除了 DevTools MCP，Claude Code 現在可以搭配上一節講的 Claude in Chrome：它在你的 Chrome 裡開分頁，直接讀 Console 錯誤和 DOM 狀態，再回頭改程式。它用的是你瀏覽器現有的登入狀態；碰到登入頁或 CAPTCHA（「我不是機器人」驗證）會停下來，請你自己處理。
+      </div>
+
+      <p>補充一點：有時候 Headless Browser（無頭瀏覽器，就是沒有畫面的自動化瀏覽器，像 Playwright）會遇到問題，通常是因為取得的資訊不夠完整，或是 DOM 沒有全部渲染完。在做 E2E 測試（End-to-End，從頭到尾的完整流程測試）的問題排除時，DevTools 加 Claude 是很快的組合。</p>
+
+      <div class="box box-info">
+        <div class="box-label">補充術語</div>
+        <ul style="margin-bottom: 0;">
+          <li><strong>TDD（Test-Driven Development，測試驅動開發）</strong>：先寫測試，再寫功能。確保每個功能都有測試保護。</li>
+          <li><strong>E2E（End-to-End Testing，端對端測試）</strong>：模擬真實使用者操作整個流程（打開網頁 → 點按鈕 → 填表單 → 送出），確認一切正常。</li>
+          <li>這些概念在你的專案變大的時候會越來越重要。現在先知道名字就好。</li>
+        </ul>
+      </div>
+
+      <!-- ========== 懶人包 ========== -->
+      <h2 id="cli-quickstart">Claude Code Quickstart 懶人包</h2>
+
+      <p>如果你覺得上面這些東西要一個一個設定太麻煩，我另外整理過一個懶人包，讓 Claude 照著一份設定說明，把常用的 MCP 和技能包一次裝好。</p>
+
+      <div class="analogy">
+        <strong><a href="https://github.com/lgscvb/claude-code-quickstart" target="_blank" rel="noopener" style="color: var(--accent-light);">github.com/lgscvb/claude-code-quickstart</a></strong><br><br>
+        這個 Quickstart 懶人包包含：<br><br>
+        - 幾個常用 MCP 的設定範本（Chrome DevTools、Supabase、Google Cloud、Cloudflare、GitHub、Remotion）<br>
+        - 一組精選的 Skills（讓 Claude Code 照固定做法做事的技能包）<br>
+        - CLAUDE.md 是什麼、模式怎麼切的白話說明<br>
+        - 適合完全新手的安裝流程，從 VS Code 開始，不用碰終端機<br><br>
+        <strong>流程是：裝 VS Code 和 Claude Code 擴充功能 → 開一個工作資料夾 → 把 README 裡那段話貼給 Claude，它照設定說明自己裝。</strong>
+      </div>
+
+      <p>如果你身邊有朋友想開始用 Claude Code，把這個連結丟給他就好。不用解釋太多，照著 README 走一次就能開始用。</p>
+
+      <div class="box box-tip">
+        <div class="box-label">安裝步驟（極簡版）</div>
+        1. 裝好 VS Code，在擴充功能裡搜尋 Claude Code，裝 Anthropic 官方那一個，登入你的帳號<br>
+        2. 在桌面開一個新資料夾（取英文名字），拖進 VS Code<br>
+        3. 打開 Claude Code 的對話面板，把 README「第四關」那一整段話複製貼上，按 Enter<br>
+        4. 它要你同意權限時看一下在做什麼；瀏覽器跳出登入頁時，自己登入、按同意<br>
+        5. 跑完打 <code>/mcp</code>，確認接上了哪些
+      </div>
+
+      <div class="box box-warning">
+        <div class="box-label">用之前知道兩件事</div>
+        <ul style="margin-bottom: 0;">
+          <li>裡面的 MCP 設定是範本。照這章的順序挑需要的開：有官方 CLI 的先用 CLI，不用全裝</li>
+          <li>README 裡教的「跳過所有權限詢問」那個設定（Allow Dangerously Skip Permissions）先不要開，理由跟上面「不要照抄的指令」一樣</li>
+        </ul>
+      </div>
+
+      <!-- ========== 章末 ========== -->
+      <h2>這章帶走什麼</h2>
+      <ul class="cli-takeaway">
+        <li>Claude Code 是會動手的 AI。電腦上的工作，幾乎都能交給它做；做到哪裡為止、哪裡不准碰，你定。</li>
+        <li>給它目標和「怎樣算做完」，不是一步一步的指示。重要的停止點寫在指令裡。</li>
+        <li>權限模式決定它問不問你。終端機裡預設是 Auto，會攔高風險動作，但寄信、付款這類要你自己先講。第一次用，先在副本上做、先叫它只看不改。</li>
+        <li>CLAUDE.md 和記憶是交代，權限規則和 Hook 才是鎖。</li>
+        <li>工具先後：官方 CLI → MCP → 瀏覽器工具 → Computer Use。MCP 需要什麼裝什麼。</li>
+      </ul>
+
+      <p>這章的邊界畫在「它能動你電腦上的什麼」。下一章往外一層：你要它做出來的東西，用什麼材料蓋，才改得動、修得了。</p>
+
+      <h2>跟 Claude 怎麼說</h2>
+      <div class="code-block">
+「先不要改任何東西，看完這個資料夾，跟我說你打算怎麼做。」<br><br>
+「做完告訴我改了哪些檔案、各改了什麼。總數要跟原本一樣。」<br><br>
+「寄出、付款、刪除、上線之前，一律先停下來等我說好。」<br><br>
+「這件事有官方 CLI 的話用 CLI 做，沒有再用 MCP。」<br><br>
+「把『上線前先給我看』這條加進 CLAUDE.md。」<br><br>
+「剛剛那一行指令在做什麼？會動到哪些檔案？講清楚再跑。」
+      </div>
+
+      <!-- Chapter Navigation -->
+      <div class="chapter-nav">
+        <a href="/chapter9/" class="prev">
+          <span class="nav-label">上一章</span>
+          <span class="nav-title">資料庫</span>
+        </a>
+        <a href="/chapter11/" class="next">
+          <span class="nav-label">下一章</span>
+          <span class="nav-title">技術棧</span>
+        </a>
+      </div>
+
     </div>
-
-    <h3>怎麼降低耦合</h3>
-
-    <div class="analogy">
-      <strong>比喻：部門之間用公文往來。</strong><br><br>
-      公司裡，業務部需要工程部做一個功能。正確做法是寫一張需求單（API），工程部按照需求單來做。<br><br>
-      錯誤做法是業務部的人直接跑去工程部的桌上翻資料、改程式碼。這樣工程部根本不知道什麼被改了，下次部署直接爆炸。<br><br>
-      <strong>模組之間的溝通，應該透過明確定義的介面（API），而不是直接互相觸碰內部邏輯。</strong>
-    </div>
-
-    <p>降低耦合的三個基本原則：</p>
-
-    <ol>
-      <li><strong>功能拆成獨立模組</strong>：每個檔案只做一件事。登入歸登入、購物車歸購物車。</li>
-      <li><strong>模組之間用 API 溝通</strong>：A 模組需要 B 模組的資料？透過 B 暴露的 function 來拿，不要直接去改 B 的內部變數。</li>
-      <li><strong>不要共用全域變數</strong>：就像不要讓所有部門共用一張桌子。每個模組管好自己的資料。</li>
-    </ol>
-
-    <div class="box box-tip">
-      <div class="box-label">跟 Claude 怎麼說</div>
-      「這個功能跟其他模組耦合太高了，幫我拆成獨立的 module」<br>
-      「我不想改 A 的時候影響到 B，幫我用 interface 把它們解耦」<br>
-      「這個檔案太大了，幫我按功能拆分」
-    </div>
-
-    <!-- ===== D. 前後端邏輯歸屬 ===== -->
-    <h2>前端 vs 後端：什麼計算該放哪裡</h2>
-
-    <p>這是很多新手搞不清楚的問題：某段邏輯到底該寫在前端還是後端？</p>
-
-    <div class="analogy">
-      <strong>比喻：餐廳的菜單 vs 收銀台。</strong><br><br>
-      菜單上可以印「參考價格」，讓客人大概知道要花多少錢。但<strong>結帳金額一定要收銀台算</strong>。<br><br>
-      為什麼？因為菜單在客人手上，客人可以塗改。但收銀台在店裡面，客人碰不到。<br><br>
-      前端 = 菜單（在使用者的電腦上，使用者看得到、改得到）<br>
-      後端 = 收銀台（在伺服器上，使用者碰不到）
-    </div>
-
-    <h3>判斷原則：誰能被竄改？</h3>
-
-    <p>前端的程式碼跑在使用者的瀏覽器裡。任何懂一點技術的人，都可以打開瀏覽器的開發者工具，修改前端的 JavaScript。所以——</p>
-
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>類型</th>
-            <th>放前端</th>
-            <th>放後端</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>日期格式化</td>
-            <td style="color: var(--green);">可以。純展示，沒安全問題</td>
-            <td>不需要</td>
-          </tr>
-          <tr>
-            <td>表單欄位驗證</td>
-            <td style="color: var(--yellow);">可以做，提升使用者體驗</td>
-            <td style="color: var(--green);">一定要！前端驗證可以被繞過</td>
-          </tr>
-          <tr>
-            <td>訂單金額計算</td>
-            <td style="color: var(--yellow);">可以顯示「預估金額」</td>
-            <td style="color: var(--green);">一定要！最終金額只能後端算</td>
-          </tr>
-          <tr>
-            <td>使用者權限判斷</td>
-            <td style="color: var(--red);">不行！使用者可以改前端</td>
-            <td style="color: var(--green);">一定要！權限只能後端決定</td>
-          </tr>
-          <tr>
-            <td>密碼加密</td>
-            <td style="color: var(--red);">不行！密碼不能在前端處理</td>
-            <td style="color: var(--green);">一定要！</td>
-          </tr>
-          <tr>
-            <td>搜尋結果排序</td>
-            <td style="color: var(--green);">可以做客戶端排序</td>
-            <td style="color: var(--green);">資料量大時要在後端排序</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="box box-danger">
-      <div class="box-label">關鍵原則</div>
-      <strong>涉及「錢」、「權限」、「安全」的邏輯，一定要放後端。</strong><br><br>
-      前端可以做「預覽」和「使用者體驗優化」，但最終的計算和判斷，必須在伺服器上完成。<br><br>
-      記住：<strong>前端是給使用者看的，後端是給你自己用的。</strong>使用者看得到的東西，都有可能被竄改。
-    </div>
-
-    <h3>一個真實的災難案例</h3>
-
-    <p>某購物網站把折扣計算寫在前端 JavaScript 裡。結果有人用瀏覽器的開發者工具，把折扣從「打九折」改成「打一折」，然後送出訂單。後端沒有重新驗算，直接按前端傳來的金額扣款。</p>
-
-    <p>一台原價三萬的筆電，用三千塊就買走了。</p>
-
-    <div class="box box-tip">
-      <div class="box-label">跟 Claude 怎麼說</div>
-      「這個折扣計算要放在後端做，前端只顯示結果」<br>
-      「幫我確認所有跟金額有關的邏輯都在 server side」<br>
-      「前端的權限檢查只是 UX，後端的 middleware 才是真正的守門員」
-    </div>
-
-    <!-- Chapter Nav -->
-    <div class="chapter-nav">
-      <a href="/chapter9/" class="prev">
-        <span class="nav-label">上一章</span>
-        <span class="nav-title">術語快速理解</span>
-      </a>
-      <a href="/chapter11/" class="next">
-        <span class="nav-label">下一章</span>
-        <span class="nav-title">工具生態</span>
-      </a>
-    </div>
-
   </section>
 </main>
 
@@ -423,5 +1445,28 @@ const data = await fetch('/api/product');<br>
 </footer>
 
 <script src="/main.js"></script>
+<script>
+  // 第十章自用：權限詢問的互動示意（class 前綴 cli-）
+  (function () {
+    var demo = document.querySelector('.cli-demo');
+    if (!demo) return;
+    var opts = demo.querySelectorAll('.cli-perm-opt');
+    var answers = demo.querySelectorAll('.cli-perm-answer');
+    var hint = demo.querySelector('.cli-perm-hint');
+    demo.classList.add('cli-js');
+    opts.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var key = btn.getAttribute('data-cli-opt');
+        opts.forEach(function (b) {
+          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+        });
+        answers.forEach(function (a) {
+          a.classList.toggle('cli-on', a.getAttribute('data-cli-answer') === key);
+        });
+        if (hint) hint.style.display = 'none';
+      });
+    });
+  })();
+</script>
 </body>
 </html>
